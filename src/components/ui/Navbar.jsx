@@ -1,23 +1,33 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import React, { useState } from 'react'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 
+/**
+ * 🧭 NAVBAR COMPONENT
+ * 📍 Barra de navegación principal para usuarios autenticados
+ */
 export default function Navbar() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
+  /**
+   * 🚪 Manejar cierre de sesión
+   */
   const handleLogout = async () => {
     try {
-      await logout();
-      navigate('/');
+      await logout()
+      navigate('/')
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      console.error('Error al cerrar sesión:', error)
     }
-  };
+  }
 
-  const isActive = (path) => location.pathname === path;
+  /**
+   * ✅ Verificar si la ruta está activa
+   */
+  const isActive = (path) => location.pathname === path
 
   return (
     <nav className="bg-blue-600 text-white shadow-lg">
@@ -43,7 +53,7 @@ export default function Navbar() {
                   : 'text-blue-100 hover:bg-blue-500'
               }`}
             >
-              Inicio
+              📊 Inicio
             </Link>
             <Link 
               to="/projects" 
@@ -53,7 +63,7 @@ export default function Navbar() {
                   : 'text-blue-100 hover:bg-blue-500'
               }`}
             >
-              Mis Proyectos
+              📁 Mis Proyectos
             </Link>
             <Link 
               to="/projects/new" 
@@ -63,7 +73,7 @@ export default function Navbar() {
                   : 'text-blue-100 hover:bg-blue-500'
               }`}
             >
-              Nuevo Proyecto
+              ➕ Nuevo Proyecto
             </Link>
             <Link 
               to="/news" 
@@ -73,20 +83,20 @@ export default function Navbar() {
                   : 'text-blue-100 hover:bg-blue-500'
               }`}
             >
-              Novedades
+              📰 Novedades
             </Link>
           </div>
 
           {/* User menu desktop */}
           <div className="hidden md:flex items-center space-x-4">
             <span className="text-blue-100">
-              Hola, {user?.displayName || 'Usuario'}
+              👋 Hola, {user?.displayName || 'Usuario'}
             </span>
             <button
               onClick={handleLogout}
               className="bg-blue-500 hover:bg-blue-400 px-4 py-2 rounded-md text-sm font-medium transition-colors"
             >
-              Cerrar Sesión
+              🚪 Cerrar Sesión
             </button>
           </div>
 
@@ -113,43 +123,43 @@ export default function Navbar() {
               className="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-blue-500"
               onClick={() => setIsMenuOpen(false)}
             >
-              Inicio
+              📊 Inicio
             </Link>
             <Link 
               to="/projects" 
               className="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-blue-500"
               onClick={() => setIsMenuOpen(false)}
             >
-              Mis Proyectos
+              📁 Mis Proyectos
             </Link>
             <Link 
               to="/projects/new" 
               className="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-blue-500"
               onClick={() => setIsMenuOpen(false)}
             >
-              Nuevo Proyecto
+              ➕ Nuevo Proyecto
             </Link>
             <Link 
               to="/news" 
               className="block px-3 py-2 rounded-md text-base font-medium text-blue-100 hover:bg-blue-500"
               onClick={() => setIsMenuOpen(false)}
             >
-              Novedades
+              📰 Novedades
             </Link>
             <div className="border-t border-blue-500 pt-2">
               <span className="block px-3 py-2 text-blue-200">
-                {user?.displayName || 'Usuario'}
+                👋 {user?.displayName || 'Usuario'}
               </span>
               <button
                 onClick={handleLogout}
                 className="block w-full text-left px-3 py-2 text-blue-100 hover:bg-blue-500 rounded-md"
               >
-                Cerrar Sesión
+                🚪 Cerrar Sesión
               </button>
             </div>
           </div>
         </div>
       )}
     </nav>
-  );
+  )
 }

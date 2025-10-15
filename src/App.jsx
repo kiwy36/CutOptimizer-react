@@ -14,7 +14,16 @@ import Register from './components/auth/Register'
 import LoadingSpinner from './components/ui/LoadingSpinner'
 import './App.css'
 
-// Componente para rutas protegidas
+// =============================================================================
+// COMPONENTES DE RUTAS PROTEGIDAS
+// =============================================================================
+
+/**
+ * 🔒 ProtectedRoute - Componente para rutas que requieren autenticación
+ * ✅ Función: Verifica si el usuario está logueado antes de mostrar el contenido
+ * 🚫 Si no está logueado: Redirige a la página principal
+ * ⏳ Muestra spinner mientras verifica el estado de autenticación
+ */
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
   
@@ -25,7 +34,12 @@ const ProtectedRoute = ({ children }) => {
   return user ? children : <Navigate to="/" replace />
 }
 
-// Componente para rutas de autenticación (solo para no logueados)
+/**
+ * 🔐 AuthRoute - Componente para rutas de autenticación (solo usuarios NO logueados)
+ * ✅ Función: Previene que usuarios logueados accedan a login/register
+ * 🚫 Si está logueado: Redirige al dashboard
+ * ⏳ Muestra spinner mientras verifica el estado de autenticación
+ */
 const AuthRoute = ({ children }) => {
   const { user, loading } = useAuth()
   
@@ -36,18 +50,31 @@ const AuthRoute = ({ children }) => {
   return !user ? children : <Navigate to="/dashboard" replace />
 }
 
+// =============================================================================
+// COMPONENTE PRINCIPAL DE CONTENIDO
+// =============================================================================
+
+/**
+ * 🎯 AppContent - Componente que define todas las rutas de la aplicación
+ * 📍 Se envuelve con AuthProvider para tener acceso al contexto de autenticación
+ * 🎨 Usa diferentes layouts según el tipo de ruta (auth vs main)
+ */
 function AppContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Routes>
-        {/* Rutas públicas */}
+        {/* ==================== RUTAS PÚBLICAS ==================== */}
+        
+        {/* 🏠 Ruta principal - Página de inicio pública */}
         <Route path="/" element={
           <AuthLayout>
             <Home />
           </AuthLayout>
         } />
         
-        {/* Rutas de autenticación (solo para no logueados) */}
+        {/* ========== RUTAS DE AUTENTICACIÓN (solo NO logueados) ========== */}
+        
+        {/* 🔑 Login - Solo accesible si NO estás logueado */}
         <Route path="/login" element={
           <AuthRoute>
             <AuthLayout>
@@ -56,6 +83,7 @@ function AppContent() {
           </AuthRoute>
         } />
         
+        {/* 📝 Registro - Solo accesible si NO estás logueado */}
         <Route path="/register" element={
           <AuthRoute>
             <AuthLayout>
@@ -64,7 +92,9 @@ function AppContent() {
           </AuthRoute>
         } />
         
-        {/* Rutas protegidas */}
+        {/* ==================== RUTAS PROTEGIDAS ==================== */}
+        
+        {/* 📊 Dashboard - Principal después del login */}
         <Route path="/dashboard" element={
           <ProtectedRoute>
             <MainLayout>
@@ -73,6 +103,7 @@ function AppContent() {
           </ProtectedRoute>
         } />
         
+        {/* 📁 Lista de proyectos del usuario */}
         <Route path="/projects" element={
           <ProtectedRoute>
             <MainLayout>
@@ -81,6 +112,7 @@ function AppContent() {
           </ProtectedRoute>
         } />
         
+        {/* ➕ Crear nuevo proyecto */}
         <Route path="/projects/new" element={
           <ProtectedRoute>
             <MainLayout>
@@ -89,6 +121,7 @@ function AppContent() {
           </ProtectedRoute>
         } />
         
+        {/* ✏️ Editar proyecto existente */}
         <Route path="/projects/edit/:projectId" element={
           <ProtectedRoute>
             <MainLayout>
@@ -97,6 +130,7 @@ function AppContent() {
           </ProtectedRoute>
         } />
         
+        {/* 📰 Noticias y actualizaciones de la app */}
         <Route path="/news" element={
           <ProtectedRoute>
             <MainLayout>
@@ -105,13 +139,24 @@ function AppContent() {
           </ProtectedRoute>
         } />
         
-        {/* Ruta por defecto */}
+        {/* 🔀 Ruta por defecto - Redirige a la página principal */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   )
 }
 
+// =============================================================================
+// COMPONENTE APP PRINCIPAL
+// =============================================================================
+
+/**
+ * 🚀 App - Componente raíz de la aplicación
+ * 📦 Provee:
+ *   - Router para navegación
+ *   - AuthProvider para gestión de autenticación
+ *   - Estructura completa de rutas
+ */
 function App() {
   return (
     <Router>

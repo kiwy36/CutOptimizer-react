@@ -1,48 +1,65 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import { 
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   updateProfile
-} from 'firebase/auth';
-import { auth } from '../services/firebase';
+} from 'firebase/auth'
+import { auth } from '../services/firebase'
 
-const AuthContext = createContext();
+/**
+ * 🔐 CONTEXTO DE AUTENTICACIÓN
+ * 📍 Provee estado y funciones de autenticación a toda la app
+ */
+const AuthContext = createContext()
 
+// Hook personalizado para usar el contexto
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth debe usarse dentro de AuthProvider')
+  }
+  return context
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  // Registrar nuevo usuario
+  /**
+   * 📝 Registrar nuevo usuario
+   */
   const register = async (email, password, displayName) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(userCredential.user, { displayName });
-    return userCredential;
-  };
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+    await updateProfile(userCredential.user, { displayName })
+    return userCredential
+  }
 
-  // Iniciar sesión
+  /**
+   * 🔑 Iniciar sesión
+   */
   const login = (email, password) => {
-    return signInWithEmailAndPassword(auth, email, password);
-  };
+    return signInWithEmailAndPassword(auth, email, password)
+  }
 
-  // Cerrar sesión
+  /**
+   * 🚪 Cerrar sesión
+   */
   const logout = () => {
-    return signOut(auth);
-  };
+    return signOut(auth)
+  }
 
+  // Escuchar cambios de autenticación
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
+      setUser(user)
+      setLoading(false)
+    })
 
-    return unsubscribe;
-  }, []);
+    return unsubscribe
+  }, [])
 
   const value = {
     user,
@@ -50,11 +67,11 @@ export function AuthProvider({ children }) {
     login,
     logout,
     loading
-  };
+  }
 
   return (
     <AuthContext.Provider value={value}>
       {!loading && children}
     </AuthContext.Provider>
-  );
+  )
 }

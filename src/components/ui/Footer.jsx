@@ -1,5 +1,9 @@
-import React from 'react';
+import React from 'react'
 
+/**
+ * 🦶 FOOTER COMPONENT
+ * 📍 Pie de página con información y enlaces
+ */
 export default function Footer() {
   return (
     <footer className="bg-gray-800 text-white py-8">
@@ -22,7 +26,7 @@ export default function Footer() {
               rel="noopener noreferrer"
               className="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors"
             >
-              Visita mi portfolio
+              🌐 Visita mi portfolio
               <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
@@ -37,5 +41,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  );
+  )
 }
