@@ -1,18 +1,52 @@
-# React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+src/
+├── components/                 # Componentes reutilizables
+│   ├── auth/                  # Componentes de autenticación
+│   │   ├── Login.jsx          # Formulario de login
+│   │   ├── Register.jsx       # Formulario de registro
+│   │   └── AuthForm.jsx       # Componente base para auth
+│   ├── layout/                # Componentes de layout
+│   │   ├── Navbar.jsx         # Barra de navegación
+│   │   ├── Footer.jsx         # Pie de página
+│   │   └── Layout.jsx         # Layout principal
+│   ├── projects/              # Componentes de proyectos
+│   │   ├── ProjectCard.jsx    # Tarjeta de proyecto en grid
+│   │   ├── ProjectForm.jsx    # Formulario de proyecto
+│   │   └── ProjectList.jsx    # Lista/grid de proyectos
+│   ├── optimizer/             # Componentes del optimizador (de la versión anterior)
+│   │   ├── InputPanel.jsx     # Panel de entrada de datos
+│   │   ├── ResultsPanel.jsx   # Panel de resultados
+│   │   └── PieceManager.jsx   # Gestor de piezas
+│   └── ui/                    # Componentes UI básicos
+│       ├── Button.jsx
+│       ├── Card.jsx
+│       └── Modal.jsx
+├── pages/                     # Páginas principales
+│   ├── Home.jsx              # Página de inicio (con auth)
+│   ├── Projects.jsx          # Lista de proyectos del usuario
+│   ├── ProjectDetail.jsx     # Edición de proyecto específico
+│   ├── NewProject.jsx        # Crear nuevo proyecto
+│   └── News.jsx              # Noticias de la app
+├── hooks/                     # Custom hooks
+│   ├── useAuth.js            # Manejo de autenticación
+│   ├── useProjects.js        # CRUD de proyectos
+│   └── useOptimizer.js       # Lógica del optimizador
+├── services/                  # Servicios y conexiones
+│   ├── firebase/             # Configuración Firebase
+│   │   ├── config.js         # Tu configuración
+│   │   ├── auth.js           # Servicios de auth
+│   │   └── firestore.js      # Servicios de base de datos
+│   └── optimizer/            # Servicios del optimizador
+│       ├── algorithms.js     # Algoritmos de optimización
+│       └── calculations.js   # Cálculos y utilidades
+├── context/                  # Contexts de React
+│   ├── AuthContext.jsx       # Context de autenticación
+│   └── ProjectContext.jsx    # Context de proyectos
+├── utils/                    # Utilidades
+│   ├── constants.js          # Constantes de la app
+│   └── helpers.js            # Funciones helper
+├── styles/                   # Estilos (puedes migrar los CSS existentes)
+│   ├── globals.css
+│   ├── components/
+│   └── pages/
+├── App.jsx                   # Componente principal
+└── main.jsx                  # Punto de entrada
