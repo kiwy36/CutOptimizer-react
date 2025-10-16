@@ -54,6 +54,7 @@ export function useProjects() {
   // Cargar proyectos cuando el usuario cambie
   useEffect(() => {
     loadProjects()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   return {
