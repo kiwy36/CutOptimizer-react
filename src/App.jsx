@@ -1,18 +1,41 @@
+/**
+ * 🚀 APP - COMPONENTE RAÍZ DE LA APLICACIÓN
+ * 📦 PROVEE:
+ * - Router para navegación entre páginas
+ * - AuthProvider para gestión de autenticación global
+ * - Estructura completa de rutas públicas y protegidas
+ * - Manejo de estado de autenticación en toda la app
+ * 🎯 FUNCIONALIDAD:
+ * - Define todas las rutas de la aplicación
+ * - Protege rutas que requieren autenticación
+ * - Redirige automáticamente según estado de login
+ * - Maneja layouts diferentes para auth vs contenido principal
+ */
+
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
+
+// Context Providers
+import { AuthProvider } from './context/AuthContext'
+
+// Components
+import LoadingSpinner from './components/ui/LoadingSpinner'
+
+// AÑADIR ESTE IMPORT EN LA PARTE SUPERIOR:
+import { useAuth } from './hooks/useAuth'
+// Pages
+import Home from './pages/Home'
+import Projects from './pages/Projects'
+import ProjectDetail from './pages/ProjectDetail'
+import NewProject from './pages/NewProject'
+import News from './pages/News'
+
+// Layouts
 import MainLayout from './components/layout/MainLayout'
 import AuthLayout from './components/layout/AuthLayout'
-import Home from './pages/Home'
-import Dashboard from './pages/Dashboard'
-import Projects from './pages/Projects'
-import NewProject from './pages/NewProject'
-import EditProject from './pages/EditProject'
-import News from './pages/News'
-import Login from './components/auth/Login'
-import Register from './components/auth/Register'
-import LoadingSpinner from './components/ui/LoadingSpinner'
-import './App.css'
+
+// Importar estilos específicos de App
+import './styles/App.css'
 
 // =============================================================================
 // COMPONENTES DE RUTAS PROTEGIDAS
@@ -20,34 +43,38 @@ import './App.css'
 
 /**
  * 🔒 ProtectedRoute - Componente para rutas que requieren autenticación
- * ✅ Función: Verifica si el usuario está logueado antes de mostrar el contenido
- * 🚫 Si no está logueado: Redirige a la página principal
- * ⏳ Muestra spinner mientras verifica el estado de autenticación
+ * ✅ FUNCIÓN:
+ * - Verifica si el usuario está logueado antes de mostrar el contenido
+ * - Usa el contexto de autenticación para determinar estado del usuario
+ * 🚫 COMPORTAMIENTO SI NO AUTENTICADO:
+ * - Redirige a la página principal (Home)
+ * ⏳ ESTADOS:
+ * - loading: Muestra spinner mientras verifica autenticación
+ * - authenticated: Muestra el contenido protegido
+ * - not authenticated: Redirige al home
+ * 
+ * @param {Object} children - Componentes hijos a renderizar si está autenticado
  */
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth()
-  
-  if (loading) {
-    return <LoadingSpinner />
-  }
-  
-  return user ? children : <Navigate to="/" replace />
-}
 
-/**
- * 🔐 AuthRoute - Componente para rutas de autenticación (solo usuarios NO logueados)
- * ✅ Función: Previene que usuarios logueados accedan a login/register
- * 🚫 Si está logueado: Redirige al dashboard
- * ⏳ Muestra spinner mientras verifica el estado de autenticación
- */
-const AuthRoute = ({ children }) => {
-  const { user, loading } = useAuth()
-  
+  // Mostrar spinner mientras verifica autenticación
   if (loading) {
-    return <LoadingSpinner />
+    return (
+      <div className="loading-container">
+        <LoadingSpinner size="large" />
+        <p>Verificando autenticación...</p>
+      </div>
+    )
   }
-  
-  return !user ? children : <Navigate to="/dashboard" replace />
+
+  // Redirigir al home si no está autenticado
+  if (!user) {
+    return <Navigate to="/" replace />
+  }
+
+  // Renderizar contenido protegido si está autenticado
+  return children
 }
 
 // =============================================================================
@@ -56,93 +83,67 @@ const AuthRoute = ({ children }) => {
 
 /**
  * 🎯 AppContent - Componente que define todas las rutas de la aplicación
- * 📍 Se envuelve con AuthProvider para tener acceso al contexto de autenticación
- * 🎨 Usa diferentes layouts según el tipo de ruta (auth vs main)
+ * 📍 CARACTERÍSTICAS:
+ * - Se envuelve con AuthProvider para acceso al contexto de autenticación
+ * - Define rutas públicas y protegidas
+ * - Usa diferentes layouts según tipo de ruta (auth vs main)
+ * - Maneja redirecciones automáticas
+ * 🏗️ ESTRUCTURA DE RUTAS:
+ * - Rutas de autenticación: Solo accesibles para usuarios NO logueados
+ * - Rutas públicas: Accesibles para todos
+ * - Rutas protegidas: Requieren autenticación
  */
-function AppContent() {
+const AppContent = () => {
+  const { user, loading } = useAuth()
+
+  // Mostrar spinner global mientras carga la autenticación
+  if (loading) {
+    return (
+      <div className="app-loading">
+        <LoadingSpinner size="xlarge" />
+        <h2>Cargando Cut Optimizer...</h2>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <Router>
       <Routes>
-        {/* ==================== RUTAS PÚBLICAS ==================== */}
-        
-        {/* 🏠 Ruta principal - Página de inicio pública */}
-        <Route path="/" element={
-          <AuthLayout>
-            <Home />
-          </AuthLayout>
-        } />
-        
         {/* ========== RUTAS DE AUTENTICACIÓN (solo NO logueados) ========== */}
-        
-        {/* 🔑 Login - Solo accesible si NO estás logueado */}
-        <Route path="/login" element={
-          <AuthRoute>
-            <AuthLayout>
-              <Login />
-            </AuthLayout>
-          </AuthRoute>
-        } />
-        
-        {/* 📝 Registro - Solo accesible si NO estás logueado */}
-        <Route path="/register" element={
-          <AuthRoute>
-            <AuthLayout>
-              <Register />
-            </AuthLayout>
-          </AuthRoute>
-        } />
-        
+        {/* Estas rutas solo son accesibles cuando el usuario NO está logueado */}
+        {!user && (
+          <Route path="/" element={<AuthLayout />}>
+            <Route index element={<Home />} />
+            {/* Redirigir cualquier ruta no autenticada al home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        )}
+
+        {/* ==================== RUTAS PÚBLICAS ==================== */}
+        {/* Rutas accesibles para todos los usuarios */}
+        {/* (Por ahora no tenemos rutas públicas excepto el home) */}
+
         {/* ==================== RUTAS PROTEGIDAS ==================== */}
-        
-        {/* 📊 Dashboard - Principal después del login */}
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Dashboard />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        
-        {/* 📁 Lista de proyectos del usuario */}
-        <Route path="/projects" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <Projects />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        
-        {/* ➕ Crear nuevo proyecto */}
-        <Route path="/projects/new" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <NewProject />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        
-        {/* ✏️ Editar proyecto existente */}
-        <Route path="/projects/edit/:projectId" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <EditProject />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        
-        {/* 📰 Noticias y actualizaciones de la app */}
-        <Route path="/news" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <News />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        
-        {/* 🔀 Ruta por defecto - Redirige a la página principal */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Estas rutas requieren que el usuario esté autenticado */}
+        {user && (
+          <Route path="/" element={<MainLayout />}>
+            {/* Ruta principal para usuarios autenticados */}
+            <Route index element={<Home />} />
+            
+            {/* Rutas de gestión de proyectos */}
+            <Route path="projects" element={<Projects />} />
+            <Route path="projects/new" element={<NewProject />} />
+            <Route path="projects/:projectId" element={<ProjectDetail />} />
+            
+            {/* Otras rutas protegidas */}
+            <Route path="news" element={<News />} />
+            
+            {/* Redirigir rutas desconocidas a la página principal */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        )}
       </Routes>
-    </div>
+    </Router>
   )
 }
 
@@ -152,18 +153,23 @@ function AppContent() {
 
 /**
  * 🚀 App - Componente raíz de la aplicación
- * 📦 Provee:
- *   - Router para navegación
- *   - AuthProvider para gestión de autenticación
- *   - Estructura completa de rutas
+ * 
+ * 📦 PROVEE:
+ * - Router para navegación
+ * - AuthProvider para gestión de autenticación
+ * - Estructura completa de rutas
+ * 
+ * 🔧 CONFIGURACIÓN:
+ * - Envuelve toda la app con providers necesarios
+ * - Define el punto de partida del routing
  */
 function App() {
   return (
-    <Router>
+    <div className="app">
       <AuthProvider>
         <AppContent />
       </AuthProvider>
-    </Router>
+    </div>
   )
 }
 

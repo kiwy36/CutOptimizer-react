@@ -1,77 +1,158 @@
-/* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useEffect, useState } from 'react'
+/**
+ * 🔐 AUTH CONTEXT - Contexto de autenticación global
+ * 
+ * 📦 PROVEE:
+ * - Estado global del usuario autenticado
+ * - Funciones para login, registro y logout
+ * - Estado de loading durante operaciones de auth
+ * - Manejo de errores de autenticación
+ * 
+ * 🎯 FUNCIONALIDAD:
+ * - Centraliza toda la lógica de autenticación
+ * - Persiste el estado del usuario entre recargas
+ * - Sincroniza con Firebase Auth
+ * - Provee el contexto a toda la aplicación
+ */
+
+import React, { createContext, useState, useEffect } from 'react'
 import { 
-  signInWithEmailAndPassword,
+  signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   signOut,
-  onAuthStateChanged,
-  updateProfile
+  onAuthStateChanged
 } from 'firebase/auth'
-import { auth } from '../services/firebase'
+import { auth } from '../services/firebase/config'
 
-/**
- * 🔐 CONTEXTO DE AUTENTICACIÓN
- * 📍 Provee estado y funciones de autenticación a toda la app
- */
+// Crear contexto de autenticación - NO lo exportamos aquí
 const AuthContext = createContext()
 
-// Hook personalizado para usar el contexto
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth debe usarse dentro de AuthProvider')
-  }
-  return context
-}
-
-export function AuthProvider({ children }) {
+/**
+ * 🎯 AuthProvider - Proveedor del contexto de autenticación
+ * 
+ * 📍 FUNCIÓN:
+ * - Envuelve la aplicación para proveer acceso al contexto de auth
+ * - Maneja el estado global del usuario y loading
+ * - Proporciona funciones para autenticación
+ * 
+ * @param {Object} children - Componentes hijos que tendrán acceso al contexto
+ */
+const AuthProvider = ({ children }) => {
+  // Estado del usuario autenticado (null = no logueado, object = usuario)
   const [user, setUser] = useState(null)
+  
+  // Estado de loading durante operaciones de autenticación
   const [loading, setLoading] = useState(true)
+  
+  // Estado para manejar errores de autenticación
+  const [error, setError] = useState(null)
 
   /**
-   * 📝 Registrar nuevo usuario
+   * 🔑 login - Inicia sesión con email y password
+   * 
+   * @param {string} email - Email del usuario
+   * @param {string} password - Password del usuario
+   * @returns {Promise} Promesa con el resultado del login
    */
-  const register = async (email, password, displayName) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-    await updateProfile(userCredential.user, { displayName })
-    return userCredential
+  const login = async (email, password) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      setUser(userCredential.user)
+      return userCredential
+    } catch (error) {
+      setError(error.message)
+      throw error
+    } finally {
+      setLoading(false)
+    }
   }
 
   /**
-   * 🔑 Iniciar sesión
+   * 📝 register - Registra un nuevo usuario con email y password
+   * 
+   * @param {string} email - Email del nuevo usuario
+   * @param {string} password - Password del nuevo usuario
+   * @returns {Promise} Promesa con el resultado del registro
    */
-  const login = (email, password) => {
-    return signInWithEmailAndPassword(auth, email, password)
+  const register = async (email, password) => {
+    try {
+      setLoading(true)
+      setError(null)
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      setUser(userCredential.user)
+      return userCredential
+    } catch (error) {
+      setError(error.message)
+      throw error
+    } finally {
+      setLoading(false)
+    }
   }
 
   /**
-   * 🚪 Cerrar sesión
+   * 🚪 logout - Cierra la sesión del usuario actual
+   * 
+   * @returns {Promise} Promesa con el resultado del logout
    */
-  const logout = () => {
-    return signOut(auth)
+  const logout = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      await signOut(auth)
+      setUser(null)
+    } catch (error) {
+      setError(error.message)
+      throw error
+    } finally {
+      setLoading(false)
+    }
   }
 
-  // Escuchar cambios de autenticación
+  /**
+   * 🗑️ clearError - Limpia el mensaje de error actual
+   */
+  const clearError = () => {
+    setError(null)
+  }
+
+  // Efecto para escuchar cambios en el estado de autenticación
   useEffect(() => {
+    /**
+     * 👂 Observador de estado de autenticación de Firebase
+     * 
+     * 📍 FUNCIÓN:
+     * - Se ejecuta cuando el estado de autenticación cambia
+     * - Actualiza el estado del usuario en el contexto
+     * - Marca el loading como false cuando termina la verificación inicial
+     */
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user)
       setLoading(false)
     })
 
+    // Cleanup: desuscribir el observador cuando el componente se desmonte
     return unsubscribe
   }, [])
 
+  // Valor que se proveerá a través del contexto
   const value = {
     user,
-    register,
+    loading,
+    error,
     login,
+    register,
     logout,
-    loading
+    clearError,
+    isAuthenticated: !!user // Boolean que indica si está autenticado
   }
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   )
 }
+
+// Exportamos SOLO el componente AuthProvider (sin exportar AuthContext)
+export default AuthProvider
