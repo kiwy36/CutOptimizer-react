@@ -1,75 +1,124 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import Header from '../components/ui/Header';
+/**
+ * 🏠 HOME - Página de inicio de la aplicación
+ * 
+ * 📍 FUNCIÓN:
+ * - Página principal que muestra contenido diferente según autenticación
+ * - Para usuarios NO autenticados: Muestra componentes de Login/Register
+ * - Para usuarios autenticados: Muestra dashboard con resumen y News
+ * - Sirve como punto de entrada para ambos estados de usuario
+ * 
+ * 🎯 COMPORTAMIENTO:
+ * - Condicional: Si user está autenticado → Dashboard
+ * - Condicional: Si user NO está autenticado → Auth components
+ * - Redirecciones automáticas manejadas por App.jsx
+ */
 
-export default function Home() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-700">
-      <Header />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            Optimiza tus cortes
-            <br />
-            <span className="text-blue-200">Maximiza tu eficiencia</span>
-          </h1>
-          
-          <p className="text-xl text-blue-100 mb-12 max-w-3xl mx-auto">
-            Cut Optimizer es la herramienta definitiva para carpinteros y metalmecánicos. 
-            Optimiza el uso de materiales, reduce desperdicios y ahorra tiempo en tus proyectos.
+import React from 'react'
+import { useAuth } from '../hooks/useAuth'
+import Login from '../components/auth/Login'
+import Register from '../components/auth/Register'
+import News from './News'
+import './Home.css'
+
+const Home = () => {
+  const { user } = useAuth()
+
+  /**
+   * 🎯 Renderizado condicional basado en autenticación
+   * - Si el usuario está autenticado: Muestra dashboard
+   * - Si el usuario NO está autenticado: Muestra opciones de auth
+   */
+  if (user) {
+    // Usuario AUTENTICADO - Dashboard principal
+    return (
+      <div className="home-authenticated">
+        {/* Header de bienvenida */}
+        <div className="welcome-section">
+          <h1>Bienvenido a Cut Optimizer</h1>
+          <p className="welcome-subtitle">
+            Hola, {user.email}! Estás listo para optimizar tus proyectos de corte.
           </p>
+        </div>
+
+        {/* Estadísticas rápidas o acciones */}
+        <div className="quick-actions">
+          <div className="action-card">
+            <div className="action-icon">📁</div>
+            <h3>Mis Proyectos</h3>
+            <p>Gestiona y revisa tus proyectos guardados</p>
+            <a href="/projects" className="action-link">Ver proyectos</a>
+          </div>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              to="/register"
-              className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-50 transition-colors shadow-lg"
-            >
-              Comenzar Gratis
-            </Link>
-            
-            <Link
-              to="/login"
-              className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-blue-600 transition-colors"
-            >
-              Iniciar Sesión
-            </Link>
+          <div className="action-card">
+            <div className="action-icon">➕</div>
+            <h3>Nuevo Proyecto</h3>
+            <p>Crea un nuevo proyecto de optimización</p>
+            <a href="/projects/new" className="action-link">Crear proyecto</a>
+          </div>
+          
+          <div className="action-card">
+            <div className="action-icon">📊</div>
+            <h3>Estadísticas</h3>
+            <p>Revisa tu historial y eficiencia</p>
+            <button className="action-link" disabled>Próximamente</button>
           </div>
         </div>
-        
-        {/* Características */}
-        <div className="mt-20 grid md:grid-cols-3 gap-8">
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-white">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-2xl">📐</span>
-            </div>
-            <h3 className="text-xl font-bold mb-2">Precisión Total</h3>
-            <p className="text-blue-100">
-              Algoritmos avanzados que maximizan el uso de cada placa de material
-            </p>
+
+        {/* Componente de Noticias integrado */}
+        <div className="news-section">
+          <News />
+        </div>
+      </div>
+    )
+  }
+
+  // Usuario NO autenticado - Página de autenticación
+  return (
+    <div className="home-unauthenticated">
+      {/* Contenedor de autenticación con tabs */}
+      <div className="auth-container">
+        <div className="auth-tabs">
+          <div className="auth-tab active" data-tab="login">
+            <h2>Iniciar Sesión</h2>
+            <Login />
           </div>
           
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-white">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-2xl">💾</span>
-            </div>
-            <h3 className="text-xl font-bold mb-2">Guarda tus Proyectos</h3>
-            <p className="text-blue-100">
-              Accede a tus trabajos desde cualquier dispositivo con almacenamiento en la nube
-            </p>
+          <div className="auth-tab" data-tab="register">
+            <h2>Crear Cuenta</h2>
+            <Register />
           </div>
-          
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-white">
-            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mb-4">
-              <span className="text-2xl">🚀</span>
+        </div>
+
+        {/* Información adicional para nuevos usuarios */}
+        <div className="auth-info">
+          <h3>¿Qué es Cut Optimizer?</h3>
+          <p>
+            Cut Optimizer es una herramienta inteligente para optimizar el corte de materiales 
+            en proyectos de carpintería, metalmecánica y más. Maximiza el aprovechamiento de 
+            tus placas y minimiza el desperdicio.
+          </p>
+          <div className="features-list">
+            <div className="feature">
+              <span className="feature-icon">📐</span>
+              <span>Optimización automática de cortes</span>
             </div>
-            <h3 className="text-xl font-bold mb-2">Resultados Instantáneos</h3>
-            <p className="text-blue-100">
-              Optimización en tiempo real con visualización clara de los resultados
-            </p>
+            <div className="feature">
+              <span className="feature-icon">💾</span>
+              <span>Guardado de proyectos en la nube</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">📊</span>
+              <span>Estadísticas de eficiencia</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">🎨</span>
+              <span>Visualización interactiva de resultados</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
+
+export default Home

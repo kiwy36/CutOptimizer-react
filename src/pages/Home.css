@@ -1,0 +1,257 @@
+/**
+ * 🎨 ESTILOS DEL HOME - Página de inicio
+ * 
+ * 📍 PROPOSITO:
+ * - Estilos para la página principal condicional
+ * - Diseños diferentes para usuarios autenticados vs no autenticados
+ * - Componentes de autenticación y dashboard integrados
+ * - Responsive para todos los dispositivos
+ */
+
+/* ========================================================================== */
+/* HOME PARA USUARIOS AUTENTICADOS */
+/* ========================================================================== */
+
+.home-authenticated {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-6) 0;
+}
+
+/* Sección de bienvenida */
+.welcome-section {
+  text-align: center;
+  margin-bottom: var(--spacing-8);
+  padding: 0 var(--spacing-4);
+}
+
+.welcome-section h1 {
+  font-size: var(--spacing-8);
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-2);
+}
+
+.welcome-subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-gray-600);
+  margin: 0;
+}
+
+/* Acciones rápidas */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-6);
+  margin-bottom: var(--spacing-8);
+  padding: 0 var(--spacing-4);
+}
+
+.action-card {
+  background: white;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-6);
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary);
+}
+
+.action-icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-4);
+}
+
+.action-card h3 {
+  font-size: var(--font-size-xl);
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-2);
+}
+
+.action-card p {
+  color: var(--color-gray-600);
+  margin-bottom: var(--spacing-4);
+  line-height: 1.5;
+}
+
+.action-link {
+  display: inline-block;
+  background: var(--color-primary);
+  color: white;
+  padding: var(--spacing-2) var(--spacing-4);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.action-link:hover {
+  background: var(--color-primary-hover);
+}
+
+.action-link:disabled {
+  background: var(--color-gray-400);
+  cursor: not-allowed;
+}
+
+/* Sección de noticias */
+.news-section {
+  padding: 0 var(--spacing-4);
+}
+
+/* ========================================================================== */
+/* HOME PARA USUARIOS NO AUTENTICADOS */
+/* ========================================================================== */
+
+.home-unauthenticated {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--spacing-8) var(--spacing-4);
+}
+
+.auth-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-8);
+  align-items: start;
+}
+
+/* Tabs de autenticación */
+.auth-tabs {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-6);
+}
+
+.auth-tab h2 {
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-4);
+  text-align: center;
+}
+
+/* Información de características */
+.auth-info {
+  background: var(--color-primary-light);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-6);
+  border-left: 4px solid var(--color-primary);
+}
+
+.auth-info h3 {
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-3);
+}
+
+.auth-info p {
+  color: var(--color-gray-700);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-4);
+}
+
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.feature-icon {
+  font-size: var(--font-size-lg);
+}
+
+.feature span:last-child {
+  color: var(--color-gray-700);
+  font-size: var(--font-size-sm);
+}
+
+/* ========================================================================== */
+/* RESPONSIVE - HOME */
+/* ========================================================================== */
+
+@media (max-width: 768px) {
+  .home-authenticated {
+    padding: var(--spacing-4) 0;
+  }
+  
+  .welcome-section {
+    margin-bottom: var(--spacing-6);
+  }
+  
+  .welcome-section h1 {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .quick-actions {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-6);
+  }
+  
+  .action-card {
+    padding: var(--spacing-4);
+  }
+  
+  .home-unauthenticated {
+    padding: var(--spacing-4);
+  }
+  
+  .auth-container {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-6);
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-section h1 {
+    font-size: var(--font-size-xl);
+  }
+  
+  .welcome-subtitle {
+    font-size: var(--font-size-base);
+  }
+  
+  .quick-actions,
+  .welcome-section,
+  .news-section {
+    padding: 0 var(--spacing-2);
+  }
+  
+  .auth-tabs,
+  .auth-info {
+    padding: var(--spacing-4);
+  }
+}
+
+/* ========================================================================== */
+/* ANIMACIONES Y TRANSICIONES */
+/* ========================================================================== */
+
+.action-card {
+  transition: all 0.3s ease;
+}
+
+.auth-tab {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

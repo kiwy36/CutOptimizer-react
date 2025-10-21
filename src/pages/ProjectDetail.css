@@ -1,0 +1,9 @@
+/**
+ * 🎨 ESTILOS DE PROJECT DETAIL - Página de detalle de proyecto (placeholder)
+ */
+
+.project-detail-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-6) var(--spacing-4);
+}

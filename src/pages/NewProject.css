@@ -1,0 +1,16 @@
+/**
+ * 🎨 ESTILOS DE NEW PROJECT - Página de nuevo proyecto (placeholder)
+ */
+
+.new-project-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-6) var(--spacing-4);
+}
+
+.project-content {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  min-height: 400px;
+}

@@ -1,0 +1,64 @@
+/**
+ * 🎨 ESTILOS DE PROJECTS - Página de proyectos (placeholder)
+ */
+
+.projects-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-6) var(--spacing-4);
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: var(--spacing-8);
+}
+
+.page-header h1 {
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-2);
+}
+
+.page-header p {
+  color: var(--color-gray-600);
+  font-size: var(--font-size-lg);
+  margin: 0;
+}
+
+.placeholder-message {
+  text-align: center;
+  padding: var(--spacing-12);
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 2px dashed var(--color-gray-300);
+}
+
+.placeholder-icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-4);
+}
+
+.placeholder-message h2 {
+  color: var(--color-gray-700);
+  margin-bottom: var(--spacing-3);
+}
+
+.placeholder-message p {
+  color: var(--color-gray-600);
+  margin-bottom: var(--spacing-3);
+}
+
+.create-project-btn {
+  display: inline-block;
+  background: var(--color-primary);
+  color: white;
+  padding: var(--spacing-3) var(--spacing-6);
+  border-radius: var(--border-radius);
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.create-project-btn:hover {
+  background: var(--color-primary-hover);
+}
