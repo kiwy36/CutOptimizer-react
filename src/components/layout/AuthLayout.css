@@ -1,0 +1,181 @@
+/**
+ * 🎨 ESTILOS DEL AUTH LAYOUT - Layout de autenticación
+ * 
+ * 📍 PROPOSITO:
+ * - Estilos para el layout de páginas de autenticación
+ * - Diseño centrado con fondo atractivo
+ * - Experiencia de usuario optimizada para login/register
+ */
+
+/* ========================================================================== */
+/* LAYOUT PRINCIPAL */
+/* ========================================================================== */
+
+.auth-layout {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: var(--spacing-4);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #764ba2 100%);
+}
+
+/* ========================================================================== */
+/* FONDO DECORATIVO */
+/* ========================================================================== */
+
+.auth-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  z-index: 1;
+}
+
+.auth-background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* ========================================================================== */
+/* CONTENEDOR DE AUTENTICACIÓN */
+/* ========================================================================== */
+
+.auth-container {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 440px;
+}
+
+.auth-card {
+  background: white;
+  border-radius: var(--border-radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-8);
+  width: 100%;
+}
+
+/* ========================================================================== */
+/* HEADER DE AUTENTICACIÓN */
+/* ========================================================================== */
+
+.auth-header {
+  text-align: center;
+  margin-bottom: var(--spacing-6);
+}
+
+.auth-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.logo-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--color-primary);
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: var(--font-size-xl);
+}
+
+.logo-text h1 {
+  font-size: var(--font-size-2xl);
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-1);
+}
+
+.logo-text p {
+  color: var(--color-gray-600);
+  font-size: var(--font-size-sm);
+}
+
+/* ========================================================================== */
+/* CONTENIDO DE AUTENTICACIÓN */
+/* ========================================================================== */
+
+.auth-content {
+  margin-bottom: var(--spacing-6);
+}
+
+/* ========================================================================== */
+/* FOOTER DE AUTENTICACIÓN */
+/* ========================================================================== */
+
+.auth-footer {
+  text-align: center;
+  border-top: 1px solid var(--color-gray-200);
+  padding-top: var(--spacing-4);
+}
+
+.auth-info {
+  color: var(--color-gray-600);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+/* ========================================================================== */
+/* RESPONSIVE - AUTH LAYOUT */
+/* ========================================================================== */
+
+@media (max-width: 768px) {
+  .auth-layout {
+    padding: var(--spacing-2);
+  }
+  
+  .auth-card {
+    padding: var(--spacing-6);
+  }
+  
+  .logo-icon {
+    width: 50px;
+    height: 50px;
+    font-size: var(--font-size-lg);
+  }
+  
+  .logo-text h1 {
+    font-size: var(--font-size-xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: var(--spacing-4);
+  }
+  
+  .auth-header {
+    margin-bottom: var(--spacing-4);
+  }
+}
+
+/* ========================================================================== */
+/* ANIMACIONES */
+/* ========================================================================== */
+
+.auth-card {
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

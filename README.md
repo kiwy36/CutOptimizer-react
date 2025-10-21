@@ -4,10 +4,15 @@ src/
 │   │   ├── Login.jsx          # Formulario de login
 │   │   ├── Register.jsx       # Formulario de registro
 │   │   └── AuthForm.jsx       # Componente base para auth
-│   ├── layout/                # Componentes de layout
-│   │   ├── Navbar.jsx         # Barra de navegación
-│   │   ├── Footer.jsx         # Pie de página
-│   │   └── Layout.jsx         # Layout principal
+│   ├── layout/                # Componentes de layout ACTUALIZADO
+│   │   ├── Header.jsx         # ✅ CREADO (cabecera con navegación integrada)
+│   │   ├── Header.css         # 🔄 FALTANTE
+│   │   ├── Footer.jsx         # 🔄 FALTANTE  
+│   │   ├── Footer.css         # 🔄 FALTANTE
+│   │   ├── MainLayout.jsx     # ✅ CREADO (layout para usuarios autenticados)
+│   │   ├── MainLayout.css     # ✅ CREADO
+│   │   ├── AuthLayout.jsx     # ✅ CREADO (layout para login/register)
+│   │   └── AuthLayout.css     # ✅ CREADO
 │   ├── projects/              # Componentes de proyectos
 │   │   ├── ProjectCard.jsx    # Tarjeta de proyecto en grid
 │   │   ├── ProjectForm.jsx    # Formulario de proyecto

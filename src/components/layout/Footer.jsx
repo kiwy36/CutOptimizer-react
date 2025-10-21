@@ -1,45 +1,81 @@
-import React from 'react'
-
 /**
- * 🦶 FOOTER COMPONENT
- * 📍 Pie de página con información y enlaces
+ * 🦶 FOOTER - Pie de página de la aplicación
+ * 
+ * 📍 FUNCIÓN:
+ * - Muestra información de copyright y enlaces legales
+ * - Proporciona enlaces de navegación secundarios
+ * - Información de contacto y soporte
+ * - Versión de la aplicación
+ * 
+ * 🎯 CARACTERÍSTICAS:
+ * - Diseño limpio y minimalista
+ * - Responsive para todos los dispositivos
+ * - Información relevante sin distracciones
+ * - Enlaces útiles para el usuario
  */
-export default function Footer() {
+
+import React from 'react'
+import './Footer.css'
+
+const Footer = () => {
+  const currentYear = new Date().getFullYear()
+  const appVersion = '1.0.0' // Puedes hacer esto dinámico si quieres
+
   return (
-    <footer className="bg-gray-800 text-white py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="mb-4 md:mb-0">
-            <h3 className="text-lg font-bold">Cut Optimizer</h3>
-            <p className="text-gray-400 text-sm">
-              Optimizador de cortes para carpintería y metalmecánica
-            </p>
+    <footer className="footer">
+      <div className="footer-container">
+        {/* Información principal */}
+        <div className="footer-main">
+          <div className="footer-brand">
+            <div className="footer-logo">
+              <span>CO</span>
+            </div>
+            <div className="footer-text">
+              <h3>Cut Optimizer</h3>
+              <p>Optimizador de cortes inteligente para carpintería y metalmecánica</p>
+            </div>
           </div>
           
-          <div className="text-center md:text-right">
-            <p className="text-gray-400 text-sm mb-2">
-              Desarrollado con ❤️ por Kevin
-            </p>
-            <a 
-              href="https://port-kw.vercel.app/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              🌐 Visita mi portfolio
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
+          {/* Enlaces rápidos */}
+          <div className="footer-links">
+            <h4>Enlaces Rápidos</h4>
+            <ul>
+              <li><a href="/">Inicio</a></li>
+              <li><a href="/projects">Proyectos</a></li>
+              <li><a href="/projects/new">Nuevo Proyecto</a></li>
+              <li><a href="/news">Noticias</a></li>
+            </ul>
+          </div>
+          
+          {/* Soporte */}
+          <div className="footer-support">
+            <h4>Soporte</h4>
+            <ul>
+              <li><a href="/help">Centro de ayuda</a></li>
+              <li><a href="/contact">Contacto</a></li>
+              <li><a href="/privacy">Privacidad</a></li>
+              <li><a href="/terms">Términos</a></li>
+            </ul>
           </div>
         </div>
         
-        <div className="border-t border-gray-700 mt-6 pt-6 text-center">
-          <p className="text-gray-400 text-sm">
-            © {new Date().getFullYear()} Cut Optimizer. Todos los derechos reservados.
-          </p>
+        {/* Línea separadora */}
+        <div className="footer-divider"></div>
+        
+        {/* Información secundaria */}
+        <div className="footer-secondary">
+          <div className="footer-copyright">
+            <p>&copy; {currentYear} Cut Optimizer. Todos los derechos reservados.</p>
+            <p className="version">v{appVersion}</p>
+          </div>
+          
+          <div className="footer-credits">
+            <p>Hecho con ❤️ para optimizar tus proyectos</p>
+          </div>
         </div>
       </div>
     </footer>
   )
 }
+
+export default Footer

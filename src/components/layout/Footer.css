@@ -1,0 +1,207 @@
+/**
+ * 🎨 ESTILOS DEL FOOTER - Pie de página
+ * 
+ * 📍 PROPOSITO:
+ * - Estilos para el pie de página de la aplicación
+ * - Diseño limpio con información organizada
+ * - Responsive para móviles y desktop
+ * - Enlaces y información legal
+ */
+
+/* ========================================================================== */
+/* FOOTER PRINCIPAL */
+/* ========================================================================== */
+
+.footer {
+  background: var(--color-gray-900);
+  color: var(--color-gray-300);
+  margin-top: auto;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-8) var(--spacing-4) var(--spacing-4);
+}
+
+/* ========================================================================== */
+/* CONTENIDO PRINCIPAL DEL FOOTER */
+/* ========================================================================== */
+
+.footer-main {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: var(--spacing-8);
+  margin-bottom: var(--spacing-8);
+}
+
+/* Marca del footer */
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.footer-logo {
+  width: 50px;
+  height: 50px;
+  background: var(--color-primary);
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: var(--font-size-lg);
+}
+
+.footer-text h3 {
+  color: white;
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-2);
+}
+
+.footer-text p {
+  color: var(--color-gray-400);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Grupos de enlaces */
+.footer-links h4,
+.footer-support h4 {
+  color: white;
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-4);
+  font-weight: 600;
+}
+
+.footer-links ul,
+.footer-support ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-links li,
+.footer-support li {
+  margin-bottom: var(--spacing-2);
+}
+
+.footer-links a,
+.footer-support a {
+  color: var(--color-gray-400);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-size: var(--font-size-sm);
+}
+
+.footer-links a:hover,
+.footer-support a:hover {
+  color: white;
+}
+
+/* ========================================================================== */
+/* DIVISOR */
+/* ========================================================================== */
+
+.footer-divider {
+  height: 1px;
+  background: var(--color-gray-700);
+  margin-bottom: var(--spacing-6);
+}
+
+/* ========================================================================== */
+/* CONTENIDO SECUNDARIO */
+/* ========================================================================== */
+
+.footer-secondary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-copyright {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.footer-copyright p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+}
+
+.version {
+  font-size: var(--font-size-xs) !important;
+  color: var(--color-gray-600) !important;
+}
+
+.footer-credits p {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+  text-align: right;
+}
+
+/* ========================================================================== */
+/* RESPONSIVE - FOOTER */
+/* ========================================================================== */
+
+@media (max-width: 768px) {
+  .footer-container {
+    padding: var(--spacing-6) var(--spacing-3) var(--spacing-3);
+  }
+  
+  .footer-main {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-6);
+    margin-bottom: var(--spacing-6);
+  }
+  
+  .footer-brand {
+    text-align: center;
+    align-items: center;
+  }
+  
+  .footer-links,
+  .footer-support {
+    text-align: center;
+  }
+  
+  .footer-secondary {
+    flex-direction: column;
+    gap: var(--spacing-4);
+    text-align: center;
+  }
+  
+  .footer-credits p {
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-container {
+    padding: var(--spacing-4) var(--spacing-2) var(--spacing-2);
+  }
+  
+  .footer-main {
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+  }
+}
+
+/* ========================================================================== */
+/* ESTADOS ESPECIALES */
+/* ========================================================================== */
+
+/* Footer en páginas de autenticación (oculto) */
+.auth-layout + .footer {
+  display: none;
+}
+
+/* Transiciones suaves */
+.footer a {
+  transition: color 0.2s ease;
+}
