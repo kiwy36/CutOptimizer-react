@@ -1,0 +1,65 @@
+/**
+ * 🎨 ESTILOS DE CARD - Componente de tarjeta reutilizable
+ */
+
+.card {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  transition: all 0.3s ease;
+}
+
+/* Variantes */
+.card-default {
+  border: 1px solid var(--color-gray-200);
+}
+
+.card-outlined {
+  border: 2px solid var(--color-gray-300);
+}
+
+.card-elevated {
+  border: 1px solid var(--color-gray-200);
+  box-shadow: var(--shadow-md);
+}
+
+.card-elevated:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Espaciados */
+.card-padding-none {
+  padding: 0;
+}
+
+.card-padding-small {
+  padding: var(--spacing-4);
+}
+
+.card-padding-medium {
+  padding: var(--spacing-6);
+}
+
+.card-padding-large {
+  padding: var(--spacing-8);
+}
+
+/* Partes de la card */
+.card-header {
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--color-gray-200);
+  margin-bottom: var(--spacing-4);
+}
+
+.card-header:empty {
+  display: none;
+}
+
+.card-footer {
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--color-gray-200);
+  margin-top: var(--spacing-4);
+}
+
+.card-footer:empty {
+  display: none;
+}

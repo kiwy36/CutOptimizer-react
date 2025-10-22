@@ -35,7 +35,7 @@ import MainLayout from './components/layout/MainLayout'
 import AuthLayout from './components/layout/AuthLayout'
 
 // Importar estilos específicos de App
-import './styles/App.css'
+import './App.css'
 
 // =============================================================================
 // COMPONENTES DE RUTAS PROTEGIDAS

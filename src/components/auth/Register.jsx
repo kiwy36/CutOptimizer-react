@@ -1,174 +1,99 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
-import ErrorMessage from '../ui/ErrorMessage'
-
 /**
- * 📝 REGISTER COMPONENT
- * 📍 Formulario de registro de nuevos usuarios
+ * 📝 REGISTER - Componente de registro de nuevos usuarios
+ * 
+ * 📍 FUNCIÓN:
+ * - Formulario específico para registro de nuevos usuarios
+ * - Utiliza AuthForm como base con configuración específica
+ * - Valida coincidencia de contraseñas
+ * - Se integra con el contexto de autenticación
+ * - Maneja redirección automática después del registro
+ * 
+ * 🎯 CARACTERÍSTICAS:
+ * - Campos: email, password y confirmPassword
+ * - Validación de coincidencia de contraseñas
+ * - Integración con Firebase Auth
+ * - Creación de nuevo usuario en el sistema
+ * - Login automático después del registro
  */
-export default function Register() {
-  const [formData, setFormData] = useState({
-    displayName: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  })
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  
-  const { register } = useAuth()
-  const navigate = useNavigate()
+
+import React, { useState } from 'react'
+import { useAuth } from '../../hooks/useAuth'
+import AuthForm from './AuthForm'
+import './Register.css'
+
+const Register = () => {
+  const { register, loading, error, clearError } = useAuth()
+  const [displayName, setDisplayName] = useState('')
 
   /**
-   * 🔄 Manejar cambios en los campos
+   * 🚀 Maneja el envío del formulario de registro
+   * @param {Object} userData - Datos del nuevo usuario
+   * @param {string} userData.email - Email del nuevo usuario
+   * @param {string} userData.password - Password del nuevo usuario
    */
-  const handleChange = (e) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }))
-  }
-
-  /**
-   * 📤 Manejar envío del formulario
-   */
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const handleRegister = async (userData) => {
+    // Limpiar errores previos
+    clearError()
     
-    // Validaciones
-    if (!formData.displayName || !formData.email || !formData.password) {
-      setError('Por favor completa todos los campos')
-      return
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden')
-      return
-    }
-
-    if (formData.password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres')
-      return
-    }
-
-    setLoading(true)
-    setError('')
-
     try {
-      await register(formData.email, formData.password, formData.displayName)
-      navigate('/dashboard')
+      await register(userData.email, userData.password)
+      // El usuario es redirigido automáticamente después del registro exitoso
+      // En el futuro podríamos guardar el displayName en Firestore
     } catch (error) {
-      setError('Error al crear la cuenta: ' + error.message)
-    } finally {
-      setLoading(false)
+      // El error se maneja en el contexto de autenticación
+      console.error('Error en Register:', error)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Crear Cuenta
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            O{' '}
-            <Link
-              to="/login"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              inicia sesión en tu cuenta
-            </Link>
-          </p>
+    <div className="register-component">
+      {/* Header del formulario de registro */}
+      <div className="register-header">
+        <h2>Crear Cuenta</h2>
+        <p>Únete a Cut Optimizer y optimiza tus proyectos</p>
+      </div>
+
+      {/* Campo adicional para nombre (opcional) */}
+      <div className="form-group">
+        <label htmlFor="displayName" className="form-label">
+          Nombre (Opcional)
+        </label>
+        <input
+          type="text"
+          id="displayName"
+          name="displayName"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          className="form-input"
+          placeholder="Tu nombre"
+          disabled={loading}
+        />
+        <small className="form-help">
+          Este nombre se usará para personalizar tu experiencia
+        </small>
+      </div>
+
+      {/* Formulario de registro usando AuthForm */}
+      <AuthForm
+        type="register"
+        onSubmit={handleRegister}
+        loading={loading}
+        error={error}
+      />
+      
+      {/* Información adicional específica de registro */}
+      <div className="register-extra">
+        <div className="security-info">
+          <h4>Seguridad de tu cuenta</h4>
+          <ul>
+            <li>Tu contraseña está encriptada y segura</li>
+            <li>No compartimos tu información con terceros</li>
+            <li>Puedes eliminar tu cuenta en cualquier momento</li>
+          </ul>
         </div>
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* Mensaje de error */}
-          {error && <ErrorMessage message={error} />}
-
-          {/* Campos del formulario */}
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="displayName" className="sr-only">Nombre</label>
-              <input
-                id="displayName"
-                name="displayName"
-                type="text"
-                required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Nombre completo"
-                value={formData.displayName}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="sr-only">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">Contraseña</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Contraseña"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="confirmPassword" className="sr-only">Confirmar Contraseña</label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Confirmar Contraseña"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          {/* Botón de envío */}
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
-            </button>
-          </div>
-
-          {/* Enlace de login */}
-          <div className="text-center">
-            <Link
-              to="/"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              ← Volver al inicio
-            </Link>
-          </div>
-        </form>
       </div>
     </div>
   )
 }
+
+export default Register

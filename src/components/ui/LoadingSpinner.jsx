@@ -6,7 +6,7 @@
  * - Es reutilizable en toda la aplicación
  * - Soporta diferentes tamaños y variantes
  * 
- * 🎨 VARIANTES:
+ * 🎯 VARIANTES:
  * - small: Spinner pequeño para botones o elementos pequeños
  * - medium: Spinner estándar para secciones
  * - large: Spinner grande para páginas completas
@@ -14,6 +14,7 @@
  * 
  * @param {string} size - Tamaño del spinner (small, medium, large, xlarge)
  * @param {string} className - Clases CSS adicionales
+ * @param {string} text - Texto opcional a mostrar debajo del spinner
  */
 
 import React from 'react'

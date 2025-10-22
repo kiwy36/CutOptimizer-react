@@ -1,0 +1,66 @@
+/**
+ * 🎨 ESTILOS ADICIONALES DE LOGIN - Componente específico de login
+ */
+
+.login-component {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: var(--spacing-2);
+}
+
+.login-header h2 {
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-2);
+  font-size: var(--font-size-2xl);
+}
+
+.login-header p {
+  color: var(--color-gray-600);
+  margin: 0;
+}
+
+.login-extra {
+  margin-top: var(--spacing-4);
+}
+
+.demo-credentials {
+  background: var(--color-primary-light);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-4);
+  text-align: center;
+}
+
+.demo-credentials h4 {
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-2);
+  font-size: var(--font-size-sm);
+}
+
+.demo-credentials p {
+  color: var(--color-gray-700);
+  margin-bottom: var(--spacing-2);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}
+
+.demo-credentials small {
+  color: var(--color-gray-600);
+  font-size: var(--font-size-xs);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .login-component {
+    gap: var(--spacing-4);
+  }
+  
+  .demo-credentials {
+    padding: var(--spacing-3);
+  }
+}

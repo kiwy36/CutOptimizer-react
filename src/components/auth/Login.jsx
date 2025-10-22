@@ -1,122 +1,78 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
-import ErrorMessage from '../ui/ErrorMessage'
-
 /**
- * 🔑 LOGIN COMPONENT
- * 📍 Formulario de inicio de sesión
+ * 🔑 LOGIN - Componente de inicio de sesión
+ * 
+ * 📍 FUNCIÓN:
+ * - Formulario específico para inicio de sesión de usuarios
+ * - Utiliza AuthForm como base con configuración específica
+ * - Se integra con el contexto de autenticación
+ * - Maneja redirección automática después del login
+ * 
+ * 🎯 CARACTERÍSTICAS:
+ * - Campos: email y password
+ * - Validaciones específicas para login
+ * - Integración con Firebase Auth
+ * - Manejo de errores de autenticación
+ * - Estado de loading durante el proceso
  */
-export default function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  
-  const { login } = useAuth()
-  const navigate = useNavigate()
+
+import React from 'react'
+import { useAuth } from '../../hooks/useAuth'
+import AuthForm from './AuthForm'
+import './Login.css'
+
+const Login = () => {
+  const { login, loading, error, clearError } = useAuth()
 
   /**
-   * 📝 Manejar envío del formulario
+   * 🚀 Maneja el envío del formulario de login
+   * @param {Object} credentials - Credenciales del usuario
+   * @param {string} credentials.email - Email del usuario
+   * @param {string} credentials.password - Password del usuario
    */
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const handleLogin = async (credentials) => {
+    // Limpiar errores previos
+    clearError()
     
-    if (!email || !password) {
-      setError('Por favor completa todos los campos')
-      return
-    }
-
-    setLoading(true)
-    setError('')
-
     try {
-      await login(email, password)
-      navigate('/dashboard')
+      await login(credentials.email, credentials.password)
+      // La redirección se maneja automáticamente en App.jsx
     } catch (error) {
-      setError('Error al iniciar sesión: ' + error.message)
-    } finally {
-      setLoading(false)
+      // El error se maneja en el contexto de autenticación
+      console.error('Error en Login:', error)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Iniciar Sesión
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            O{' '}
-            <Link
-              to="/register"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              crea una cuenta nueva
-            </Link>
+    <div className="login-component">
+      {/* Header del formulario de login */}
+      <div className="login-header">
+        <h2>Iniciar Sesión</h2>
+        <p>Ingresa a tu cuenta de Cut Optimizer</p>
+      </div>
+
+      {/* Formulario de login usando AuthForm */}
+      <AuthForm
+        type="login"
+        onSubmit={handleLogin}
+        loading={loading}
+        error={error}
+      />
+      
+      {/* Información adicional específica de login */}
+      <div className="login-extra">
+        <div className="demo-credentials">
+          <h4>Credenciales de Demo</h4>
+          <p>
+            <strong>Email:</strong> demo@cutoptimizer.com<br />
+            <strong>Password:</strong> demodemo
           </p>
+          <small>
+            * Estas credenciales son de ejemplo para testing
+          </small>
         </div>
-
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* Mensaje de error */}
-          {error && <ErrorMessage message={error} />}
-
-          {/* Campos del formulario */}
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">Contraseña</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Botón de envío */}
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
-            </button>
-          </div>
-
-          {/* Enlace de registro */}
-          <div className="text-center">
-            <Link
-              to="/"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              ← Volver al inicio
-            </Link>
-          </div>
-        </form>
       </div>
     </div>
   )
 }
+
+export default Login

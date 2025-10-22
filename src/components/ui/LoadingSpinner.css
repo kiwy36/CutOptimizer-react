@@ -1,15 +1,6 @@
 /**
  * 🎨 ESTILOS DEL LOADING SPINNER
- * 
- * 📍 PROPÓSITO:
- * - Estilos para el componente LoadingSpinner
- * - Animaciones y variantes de tamaño
- * - Colores y transiciones
  */
-
-/* ========================================================================== */
-/* CONTENEDOR PRINCIPAL */
-/* ========================================================================== */
 
 .loading-spinner {
   display: flex;
@@ -19,10 +10,6 @@
   gap: var(--spacing-3);
 }
 
-/* ========================================================================== */
-/* SPINNER ANIMADO */
-/* ========================================================================== */
-
 .spinner {
   border: 3px solid var(--color-gray-200);
   border-top: 3px solid var(--color-primary);
@@ -30,42 +17,32 @@
   animation: spin 1s linear infinite;
 }
 
-/* ========================================================================== */
-/* TAMAÑOS DEL SPINNER */
-/* ========================================================================== */
-
-/* Spinner pequeño (para botones, elementos pequeños) */
+/* Tamaños del spinner */
 .loading-spinner.small .spinner {
   width: 20px;
   height: 20px;
   border-width: 2px;
 }
 
-/* Spinner medio (estándar para secciones) */
 .loading-spinner.medium .spinner {
   width: 40px;
   height: 40px;
   border-width: 3px;
 }
 
-/* Spinner grande (para páginas, modales) */
 .loading-spinner.large .spinner {
   width: 60px;
   height: 60px;
   border-width: 4px;
 }
 
-/* Spinner extra grande (para carga inicial de app) */
 .loading-spinner.xlarge .spinner {
   width: 80px;
   height: 80px;
   border-width: 5px;
 }
 
-/* ========================================================================== */
-/* TEXTO DEL SPINNER */
-/* ========================================================================== */
-
+/* Texto del spinner */
 .spinner-text {
   font-size: var(--font-size-sm);
   color: var(--color-gray-600);
@@ -81,19 +58,13 @@
   font-size: var(--font-size-base);
 }
 
-/* ========================================================================== */
-/* ANIMACIÓN DE ROTACIÓN */
-/* ========================================================================== */
-
+/* Animación de rotación */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-/* ========================================================================== */
-/* VARIANTES DE COLOR (futuras implementaciones) */
-/* ========================================================================== */
-
+/* Variantes de color */
 .loading-spinner.primary .spinner {
   border-top-color: var(--color-primary);
 }
