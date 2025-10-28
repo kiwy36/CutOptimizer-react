@@ -17,7 +17,7 @@
  */
 
 import React from 'react'
-import { useAuth } from '../../hooks/useAuth'
+import useAuth from '../../hooks/useAuth'
 import Header from './Header'
 import Footer from './Footer'
 import './MainLayout.css'

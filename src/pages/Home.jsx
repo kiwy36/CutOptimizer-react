@@ -14,7 +14,7 @@
  */
 
 import React from 'react'
-import { useAuth } from '../hooks/useAuth'
+import useAuth from '../hooks/useAuth'
 import Login from '../components/auth/Login'
 import Register from '../components/auth/Register'
 import News from './News'

@@ -16,13 +16,13 @@ import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 
 // Context Providers
-import { AuthProvider } from './context/AuthContext'
+import AuthProvider from './context/AuthContext'
 
 // Components
 import LoadingSpinner from './components/ui/LoadingSpinner'
 
 // AÑADIR ESTE IMPORT EN LA PARTE SUPERIOR:
-import { useAuth } from './hooks/useAuth'
+import useAuth from './hooks/useAuth'
 // Pages
 import Home from './pages/Home'
 import Projects from './pages/Projects'

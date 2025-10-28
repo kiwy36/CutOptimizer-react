@@ -17,7 +17,7 @@
  */
 
 import React, { useState } from 'react'
-import { useAuth } from '../../hooks/useAuth'
+import useAuth from '../../hooks/useAuth'
 import AuthForm from './AuthForm'
 import './Register.css'
 

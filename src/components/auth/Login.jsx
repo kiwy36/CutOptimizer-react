@@ -16,7 +16,7 @@
  */
 
 import React from 'react'
-import { useAuth } from '../../hooks/useAuth'
+import useAuth from '../../hooks/useAuth'
 import AuthForm from './AuthForm'
 import './Login.css'
 
