@@ -1,131 +1,234 @@
-import React, { useState } from 'react'
-import PieceManager from './PieceManager'
-
 /**
- * 📥 INPUT PANEL COMPONENT
- * 📍 Panel de entrada para configurar placa y piezas
+ * 📋 INPUT PANEL - Panel de entrada para gestionar piezas
+ * 
+ * 📍 FUNCIÓN:
+ * - Interfaz para agregar, editar y eliminar piezas
+ * - Configuración del tamaño de la placa
+ * - Migrado de piece-manager.js con mejoras React
+ * 
+ * 🎯 CARACTERÍSTICAS:
+ * - Formulario para agregar piezas con validación
+ * - Lista de piezas actuales con opciones de edición
+ * - Configuración de parámetros de optimización
+ * - Integración con useOptimizer hook
  */
-export default function InputPanel({ onOptimize, isOptimizing }) {
-  const [sheetConfig, setSheetConfig] = useState({
+
+import React from 'react'
+import useOptimizer from '../../hooks/useOptimizer'
+import './InputPanel.css'
+
+const InputPanel = () => {
+  const {
+    pieces,
+    addPiece,
+    removePiece,
+    config,
+    updateConfig
+  } = useOptimizer()
+
+  const [sheetConfig, setSheetConfig] = React.useState({
     width: 2440,
     height: 1220
   })
 
-  const [pieces, setPieces] = useState([])
+  const [newPiece, setNewPiece] = React.useState({
+    width: 300,
+    height: 200,
+    quantity: 1,
+    color: '#3b82f6'
+  })
 
   /**
-   * 🔧 Actualizar configuración de placa
+   * ➕ Maneja la adición de una nueva pieza
+   */
+  const handleAddPiece = () => {
+    if (newPiece.width > 0 && newPiece.height > 0 && newPiece.quantity > 0) {
+      addPiece(newPiece)
+      // Resetear formulario
+      setNewPiece({
+        width: 300,
+        height: 200,
+        quantity: 1,
+        color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+      })
+    }
+  }
+
+  /**
+   * 🔄 Maneja cambios en la configuración de la placa
    */
   const handleSheetConfigChange = (field, value) => {
-    const numValue = parseInt(value) || 0
     setSheetConfig(prev => ({
       ...prev,
-      [field]: numValue
+      [field]: parseInt(value) || 0
     }))
   }
 
   /**
-   * 📋 Actualizar lista de piezas
+   * 🔄 Maneja cambios en la nueva pieza
    */
-  const handlePiecesUpdate = (newPieces) => {
-    setPieces(newPieces)
-  }
-
-  /**
-   * 🚀 Ejecutar optimización
-   */
-  const handleOptimizeClick = () => {
-    if (pieces.length === 0) {
-      alert('Agrega al menos una pieza para optimizar')
-      return
-    }
-
-    // Validar que ninguna pieza sea más grande que la placa
-    const oversizedPieces = pieces.filter(piece => 
-      piece.width > sheetConfig.width || piece.height > sheetConfig.height
-    )
-
-    if (oversizedPieces.length > 0) {
-      alert(`Algunas piezas son más grandes que la placa. Verifica las dimensiones.`)
-      return
-    }
-
-    onOptimize(sheetConfig, pieces)
+  const handleNewPieceChange = (field, value) => {
+    setNewPiece(prev => ({
+      ...prev,
+      [field]: field === 'color' ? value : parseInt(value) || 0
+    }))
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <h2 className="text-xl font-semibold mb-4">Configuración</h2>
-      
-      {/* Configuración de placa */}
-      <div className="mb-6">
-        <label className="block text-gray-700 mb-2 font-medium">
-          Tamaño de la placa (mm)
-        </label>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
+    <div className="input-panel">
+      {/* Configuración de la Placa */}
+      <div className="sheet-config-section">
+        <h3>Configuración de la Placa</h3>
+        <div className="sheet-config">
+          <div className="config-group">
+            <label>Ancho (mm)</label>
             <input
               type="number"
               value={sheetConfig.width}
               onChange={(e) => handleSheetConfigChange('width', e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               min="100"
               max="10000"
-              placeholder="Ancho"
             />
-            <span className="text-sm text-gray-500 mt-1 block">Ancho</span>
           </div>
-          <div>
+          <div className="config-group">
+            <label>Alto (mm)</label>
             <input
               type="number"
               value={sheetConfig.height}
               onChange={(e) => handleSheetConfigChange('height', e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               min="100"
               max="10000"
-              placeholder="Alto"
             />
-            <span className="text-sm text-gray-500 mt-1 block">Alto</span>
           </div>
         </div>
-        
-        {/* Información de placa estándar */}
-        <div className="mt-2 text-xs text-gray-500">
-          💡 Estándar: 2440x1220mm (8x4 pies)
+      </div>
+
+      {/* Configuración del Algoritmo */}
+      <div className="algorithm-config-section">
+        <h3>Configuración del Algoritmo</h3>
+        <div className="algorithm-config">
+          <div className="config-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={config.allowRotation}
+                onChange={(e) => updateConfig({ allowRotation: e.target.checked })}
+              />
+              Permitir rotación de piezas
+            </label>
+          </div>
+          <div className="config-group">
+            <label>Método de ordenamiento</label>
+            <select
+              value={config.sortingMethod}
+              onChange={(e) => updateConfig({ sortingMethod: e.target.value })}
+            >
+              <option value="max-side-desc">Lado más largo (desc)</option>
+              <option value="area-desc">Área (desc)</option>
+              <option value="width-desc">Ancho (desc)</option>
+              <option value="height-desc">Alto (desc)</option>
+            </select>
+          </div>
+          <div className="config-group">
+            <label>Algoritmo</label>
+            <select
+              value={config.algorithm}
+              onChange={(e) => updateConfig({ algorithm: e.target.value })}
+            >
+              <option value="shelf">Shelf Algorithm</option>
+              <option value="guillotine">Guillotine Algorithm</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Gestor de piezas */}
-      <div className="flex-1">
-        <PieceManager onPiecesUpdate={handlePiecesUpdate} />
+      {/* Agregar Nueva Pieza */}
+      <div className="add-piece-section">
+        <h3>Agregar Nueva Pieza</h3>
+        <div className="add-piece-form">
+          <div className="form-group">
+            <label>Ancho (mm)</label>
+            <input
+              type="number"
+              value={newPiece.width}
+              onChange={(e) => handleNewPieceChange('width', e.target.value)}
+              min="1"
+            />
+          </div>
+          <div className="form-group">
+            <label>Alto (mm)</label>
+            <input
+              type="number"
+              value={newPiece.height}
+              onChange={(e) => handleNewPieceChange('height', e.target.value)}
+              min="1"
+            />
+          </div>
+          <div className="form-group">
+            <label>Cantidad</label>
+            <input
+              type="number"
+              value={newPiece.quantity}
+              onChange={(e) => handleNewPieceChange('quantity', e.target.value)}
+              min="1"
+              max="100"
+            />
+          </div>
+          <div className="form-group">
+            <label>Color</label>
+            <input
+              type="color"
+              value={newPiece.color}
+              onChange={(e) => handleNewPieceChange('color', e.target.value)}
+            />
+          </div>
+          <button 
+            className="add-piece-btn"
+            onClick={handleAddPiece}
+          >
+            + Agregar Pieza
+          </button>
+        </div>
       </div>
 
-      {/* Botón de optimización */}
-      <div className="mt-6 pt-4 border-t">
-        <button
-          onClick={handleOptimizeClick}
-          disabled={isOptimizing || pieces.length === 0}
-          className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-        >
-          {isOptimizing ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-              Optimizando...
-            </>
-          ) : (
-            '🚀 Optimizar Cortes'
-          )}
-        </button>
-        
-        {/* Información del estado */}
-        <div className="mt-2 text-center text-sm text-gray-500">
-          {pieces.length > 0 ? (
-            `✅ Listo para optimizar ${pieces.length} piezas`
-          ) : (
-            '📝 Agrega piezas para comenzar'
-          )}
-        </div>
+      {/* Lista de Piezas Actuales */}
+      <div className="pieces-list-section">
+        <h3>Piezas a Optimizar ({pieces.length})</h3>
+        {pieces.length === 0 ? (
+          <div className="empty-state">
+            <p>No hay piezas agregadas</p>
+            <small>Agrega piezas usando el formulario de arriba</small>
+          </div>
+        ) : (
+          <div className="pieces-list">
+            {pieces.map((piece) => (
+              <div key={piece.id} className="piece-item">
+                <div 
+                  className="piece-color"
+                  style={{ backgroundColor: piece.color }}
+                ></div>
+                <div className="piece-info">
+                  <span className="piece-dimensions">
+                    {piece.width} × {piece.height} mm
+                  </span>
+                  <span className="piece-quantity">
+                    {piece.quantity} unidad{piece.quantity !== 1 ? 'es' : ''}
+                  </span>
+                </div>
+                <button
+                  className="remove-piece-btn"
+                  onClick={() => removePiece(piece.id)}
+                  title="Eliminar pieza"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
 }
+
+export default InputPanel
