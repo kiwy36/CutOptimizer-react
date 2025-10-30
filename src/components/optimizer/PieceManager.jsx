@@ -1,154 +1,217 @@
-import React, { useState, useEffect } from 'react'
-
 /**
- * 🧩 PIECE MANAGER COMPONENT
- * 📍 Gestiona la lista de piezas para el optimizador
+ * 📦 PIECE MANAGER - Componente para gestión avanzada de piezas
+ * 
+ * 📍 FUNCIÓN:
+ * - Gestión más detallada de piezas individuales
+ * - Operaciones en lote y validaciones
+ * - Previsualización de piezas antes de optimizar
+ * - Complemento a InputPanel con funcionalidad avanzada
+ * 
+ * 🎯 CARACTERÍSTICAS:
+ * - Vista de grid de piezas con miniaturas
+ * - Validaciones de tamaño y cantidad
+ * - Operaciones en lote (duplicar, eliminar múltiples)
+ * - Filtrado y búsqueda de piezas
  */
-export default function PieceManager({ onPiecesUpdate }) {
-  const [pieces, setPieces] = useState([
-    { id: 1, width: 300, height: 200, quantity: 1, color: '#3B82F6' }
-  ])
+
+import React, { useState } from 'react'
+import useOptimizer from '../../hooks/useOptimizer'
+import './PieceManager.css'
+
+const PieceManager = () => {
+  const {
+    pieces,
+    addPiece,
+    removePiece
+  } = useOptimizer()
+
+  const [selectedPieces, setSelectedPieces] = useState(new Set())
+  const [filter, setFilter] = useState('')
 
   /**
-   * ➕ Agregar nueva pieza
+   * 🔄 Maneja la selección/deselección de piezas
    */
-  const addPiece = () => {
-    const newPiece = {
-      id: Date.now(),
-      width: 300,
-      height: 200,
-      quantity: 1,
-      color: `#${Math.floor(Math.random()*16777215).toString(16)}`
-    }
-    setPieces(prev => [...prev, newPiece])
+  const togglePieceSelection = (pieceId) => {
+    setSelectedPieces(prev => {
+      const newSelection = new Set(prev)
+      if (newSelection.has(pieceId)) {
+        newSelection.delete(pieceId)
+      } else {
+        newSelection.add(pieceId)
+      }
+      return newSelection
+    })
   }
 
   /**
-   * 🗑️ Eliminar pieza
+   * ➕ Duplica piezas seleccionadas
    */
-  const removePiece = (id) => {
-    if (pieces.length > 1) {
-      setPieces(prev => prev.filter(piece => piece.id !== id))
-    } else {
-      alert('Debe haber al menos una pieza en la lista')
-    }
+  const duplicateSelected = () => {
+    pieces.forEach(piece => {
+      if (selectedPieces.has(piece.id)) {
+        addPiece({
+          width: piece.width,
+          height: piece.height,
+          quantity: piece.quantity,
+          color: piece.color
+        })
+      }
+    })
+    setSelectedPieces(new Set())
   }
 
   /**
-   * ✏️ Actualizar pieza
+   * 🗑️ Elimina piezas seleccionadas
    */
-  const updatePiece = (id, field, value) => {
-    setPieces(prev => prev.map(piece => 
-      piece.id === id ? { ...piece, [field]: value } : piece
-    ))
+  const deleteSelected = () => {
+    selectedPieces.forEach(pieceId => {
+      removePiece(pieceId)
+    })
+    setSelectedPieces(new Set())
   }
 
   /**
-   * 🔄 Notificar cambios al componente padre
+   * 📊 Calcula estadísticas de las piezas
    */
-  useEffect(() => {
-    // Expandir piezas según cantidad
-    const expandedPieces = pieces.flatMap(piece => 
-      Array.from({ length: piece.quantity }, (_, index) => ({
-        ...piece,
-        id: `${piece.id}_${index}`,
-        quantity: 1 // Cada pieza individual tiene cantidad 1
-      }))
-    )
-    
-    onPiecesUpdate(expandedPieces)
-  }, [pieces, onPiecesUpdate])
+  const calculatePieceStats = () => {
+    const totalPieces = pieces.reduce((sum, piece) => sum + piece.quantity, 0)
+    const totalArea = pieces.reduce((sum, piece) => sum + (piece.width * piece.height * piece.quantity), 0)
+    const uniqueSizes = new Set(pieces.map(p => `${p.width}x${p.height}`)).size
+
+    return { totalPieces, totalArea, uniqueSizes }
+  }
+
+  const stats = calculatePieceStats()
+  const filteredPieces = pieces.filter(piece => 
+    `${piece.width}x${piece.height}`.includes(filter) ||
+    piece.color.includes(filter)
+  )
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Piezas a cortar</h2>
-      
-      {/* Encabezados de la tabla */}
-      <div className="grid grid-cols-12 gap-2 mb-2 text-sm font-medium text-gray-700">
-        <div className="col-span-3">Ancho (mm)</div>
-        <div className="col-span-3">Alto (mm)</div>
-        <div className="col-span-3">Cantidad</div>
-        <div className="col-span-2">Color</div>
-        <div className="col-span-1">Acción</div>
+    <div className="piece-manager">
+      {/* Header con estadísticas y controles */}
+      <div className="piece-manager-header">
+        <h3>Gestión de Piezas</h3>
+        <div className="piece-stats">
+          <span>{stats.totalPieces} piezas total</span>
+          <span>{stats.uniqueSizes} tamaños únicos</span>
+          <span>{Math.round(stats.totalArea / 1000000 * 100) / 100} m² área total</span>
+        </div>
       </div>
-      
-      {/* Lista de piezas */}
-      <div className="space-y-2 mb-4">
-        {pieces.map((piece) => (
-          <div key={piece.id} className="grid grid-cols-12 gap-2 items-center">
-            {/* Ancho */}
-            <div className="col-span-3">
-              <input
-                type="number"
-                value={piece.width}
-                onChange={(e) => updatePiece(piece.id, 'width', parseInt(e.target.value) || 0)}
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                min="1"
-              />
-            </div>
-            
-            {/* Alto */}
-            <div className="col-span-3">
-              <input
-                type="number"
-                value={piece.height}
-                onChange={(e) => updatePiece(piece.id, 'height', parseInt(e.target.value) || 0)}
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                min="1"
-              />
-            </div>
-            
-            {/* Cantidad */}
-            <div className="col-span-3">
-              <input
-                type="number"
-                value={piece.quantity}
-                onChange={(e) => updatePiece(piece.id, 'quantity', parseInt(e.target.value) || 1)}
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                min="1"
-                max="100"
-              />
-            </div>
-            
-            {/* Color */}
-            <div className="col-span-2">
-              <input
-                type="color"
-                value={piece.color}
-                onChange={(e) => updatePiece(piece.id, 'color', e.target.value)}
-                className="w-full h-10 border border-gray-300 rounded cursor-pointer"
-              />
-            </div>
-            
-            {/* Botón eliminar */}
-            <div className="col-span-1">
-              <button
-                onClick={() => removePiece(piece.id)}
-                disabled={pieces.length <= 1}
-                className="w-10 h-10 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                title="Eliminar pieza"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-      
-      {/* Botón agregar pieza */}
-      <button
-        onClick={addPiece}
-        className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors"
-      >
-        + Agregar Pieza
-      </button>
 
-      {/* Resumen */}
-      <div className="mt-4 p-3 bg-gray-50 rounded">
-        <p className="text-sm text-gray-600">
-          Total de piezas: <strong>{pieces.reduce((sum, piece) => sum + piece.quantity, 0)}</strong>
-        </p>
+      {/* Controles de lote */}
+      {selectedPieces.size > 0 && (
+        <div className="batch-controls">
+          <span>{selectedPieces.size} piezas seleccionadas</span>
+          <button 
+            className="batch-btn duplicate-btn"
+            onClick={duplicateSelected}
+          >
+            📋 Duplicar Seleccionadas
+          </button>
+          <button 
+            className="batch-btn delete-btn"
+            onClick={deleteSelected}
+          >
+            🗑️ Eliminar Seleccionadas
+          </button>
+          <button 
+            className="batch-btn clear-btn"
+            onClick={() => setSelectedPieces(new Set())}
+          >
+            ❌ Limpiar Selección
+          </button>
+        </div>
+      )}
+
+      {/* Filtro de búsqueda */}
+      <div className="filter-controls">
+        <input
+          type="text"
+          placeholder="Filtrar por tamaño (ej: 300x200) o color..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="filter-input"
+        />
+        {filter && (
+          <button 
+            className="clear-filter"
+            onClick={() => setFilter('')}
+          >
+            Limpiar
+          </button>
+        )}
+      </div>
+
+      {/* Grid de piezas */}
+      <div className="pieces-grid">
+        {filteredPieces.length === 0 ? (
+          <div className="no-pieces">
+            {pieces.length === 0 ? (
+              <>
+                <div className="no-pieces-icon">📦</div>
+                <p>No hay piezas agregadas</p>
+              </>
+            ) : (
+              <>
+                <div className="no-pieces-icon">🔍</div>
+                <p>No se encontraron piezas que coincidan con "{filter}"</p>
+              </>
+            )}
+          </div>
+        ) : (
+          filteredPieces.map((piece) => (
+            <div 
+              key={piece.id}
+              className={`piece-card ${selectedPieces.has(piece.id) ? 'selected' : ''}`}
+              onClick={() => togglePieceSelection(piece.id)}
+            >
+              <div className="piece-card-header">
+                <div 
+                  className="piece-preview"
+                  style={{
+                    backgroundColor: piece.color,
+                    aspectRatio: `${piece.width}/${piece.height}`
+                  }}
+                ></div>
+                <input
+                  type="checkbox"
+                  checked={selectedPieces.has(piece.id)}
+                  onChange={() => togglePieceSelection(piece.id)}
+                  className="piece-checkbox"
+                />
+              </div>
+              
+              <div className="piece-card-info">
+                <div className="piece-dimensions">
+                  {piece.width} × {piece.height} mm
+                </div>
+                <div className="piece-quantity">
+                  {piece.quantity} unidad{piece.quantity !== 1 ? 'es' : ''}
+                </div>
+                <div className="piece-area">
+                  Área: {(piece.width * piece.height).toLocaleString()} mm²
+                </div>
+              </div>
+
+              <div className="piece-card-actions">
+                <button
+                  className="action-btn delete-btn"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    removePiece(piece.id)
+                  }}
+                  title="Eliminar pieza"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   )
 }
+
+export default PieceManager

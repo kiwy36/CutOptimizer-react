@@ -1,112 +1,112 @@
-import React from 'react'
-
 /**
- * 📐 SHEET VISUALIZATION COMPONENT
- * 📍 Visualiza una placa con las piezas colocadas
+ * 🎨 SHEET VISUALIZATION - Componente para visualizar una placa con piezas
+ * 
+ * 📍 FUNCIÓN:
+ * - Renderiza una placa con las piezas organizadas visualmente
+ * - Muestra dimensiones y información de cada pieza
+ * - Soporta diferentes escalas para visualización
+ * - Colores y etiquetas para mejor legibilidad
+ * 
+ * 🎯 CARACTERÍSTICAS:
+ * - Representación escalada de la placa y piezas
+ * - Tooltips con información detallada
+ * - Colores diferenciados para cada pieza
+ * - Texto adaptable al tamaño de la pieza
  */
-export default function SheetVisualization({ sheet, index }) {
-  const scale = 400 / sheet.width // Escala para visualización
-  const displayHeight = sheet.height * scale
 
+import React from 'react'
+import './SheetVisualization.css'
+
+const SheetVisualization = ({ sheet, scale = 0.2 }) => {
   /**
-   * 🎨 Obtener estilo para una pieza
-   */
-  const getPieceStyle = (piece) => {
-    const scaledWidth = piece.placedWidth * scale
-    const scaledHeight = piece.placedHeight * scale
-    const scaledX = piece.x * scale
-    const scaledY = piece.y * scale
-
-    return {
-      width: `${scaledWidth}px`,
-      height: `${scaledHeight}px`,
-      left: `${scaledX}px`,
-      top: `${scaledY}px`,
-      backgroundColor: piece.color,
-      border: '1px solid #000',
-      position: 'absolute',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: `${Math.max(8, scaledWidth * 0.08)}px`,
-      fontWeight: 'bold',
-      color: getContrastColor(piece.color),
-      opacity: piece.rotated ? 0.9 : 1,
-      transform: piece.rotated ? 'rotate(90deg)' : 'none'
-    }
-  }
-
-  /**
-   * ⚫⚪ Obtener color de contraste para texto
+   * 🎨 Calcula el color de contraste para texto
    */
   const getContrastColor = (hexColor) => {
-    // Convertir hex a RGB
     const r = parseInt(hexColor.substr(1, 2), 16)
     const g = parseInt(hexColor.substr(3, 2), 16)
     const b = parseInt(hexColor.substr(5, 2), 16)
     
-    // Calcular luminosidad
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
     return luminance > 0.5 ? 'black' : 'white'
   }
 
-  return (
-    <div className="bg-white border border-gray-300 rounded-lg p-4">
-      {/* Header de la placa */}
-      <div className="flex justify-between items-center mb-3">
-        <h4 className="font-semibold text-gray-800">
-          Placa {index + 1}
-        </h4>
-        <div className="text-sm text-gray-600">
-          Eficiencia: <span className="font-semibold">{sheet.efficiency.toFixed(1)}%</span>
-        </div>
-      </div>
+  /**
+   * 📏 Calcula el tamaño de fuente apropiado para la pieza
+   */
+  const getFontSize = (scaledWidth, scaledHeight) => {
+    const minDimension = Math.min(scaledWidth, scaledHeight)
+    return Math.max(8, minDimension * 0.15)
+  }
 
-      {/* Visualización de la placa */}
+  const scaledWidth = sheet.width * scale
+  const scaledHeight = sheet.height * scale
+
+  return (
+    <div className="sheet-visualization">
       <div 
-        className="relative mx-auto border-2 border-gray-400 bg-gradient-to-br from-gray-50 to-gray-100"
-        style={{ 
-          width: `${400}px`, 
-          height: `${displayHeight}px`,
-          maxWidth: '100%'
+        className="sheet-container"
+        style={{
+          width: `${scaledWidth}px`,
+          height: `${scaledHeight}px`
         }}
       >
-        {/* Piezas */}
-        {sheet.pieces.map((piece, pieceIndex) => (
-          <div
-            key={pieceIndex}
-            style={getPieceStyle(piece)}
-            title={`${piece.width}x${piece.height}mm ${piece.rotated ? '(Rotada)' : ''}`}
-            className="transition-all duration-200 hover:z-10 hover:shadow-lg"
-          >
-            {piece.placedWidth * scale > 40 && piece.placedHeight * scale > 20 && (
-              <div className="transform -rotate-90">
-                {piece.width}×{piece.height}
-              </div>
-            )}
-          </div>
-        ))}
+        {/* Fondo de la placa con patrón de grid */}
+        <div className="sheet-background"></div>
+        
+        {/* Piezas colocadas en la placa */}
+        {sheet.pieces.map((piece, index) => {
+          const scaledPieceWidth = piece.placedWidth * scale
+          const scaledPieceHeight = piece.placedHeight * scale
+          const scaledX = piece.x * scale
+          const scaledY = piece.y * scale
+          const fontSize = getFontSize(scaledPieceWidth, scaledPieceHeight)
+          const textColor = getContrastColor(piece.color)
 
-        {/* Información de dimensiones */}
-        <div className="absolute bottom-2 left-2 text-xs text-gray-500 bg-white bg-opacity-80 px-2 py-1 rounded">
-          {sheet.width}×{sheet.height}mm
-        </div>
+          return (
+            <div
+              key={index}
+              className="piece"
+              style={{
+                width: `${scaledPieceWidth}px`,
+                height: `${scaledPieceHeight}px`,
+                left: `${scaledX}px`,
+                top: `${scaledY}px`,
+                backgroundColor: piece.color,
+                borderColor: textColor
+              }}
+              title={`${piece.width} × ${piece.height} mm${piece.rotated ? ' (Rotada)' : ''}`}
+            >
+              {/* Texto solo si la pieza es lo suficientemente grande */}
+              {scaledPieceWidth > 30 && scaledPieceHeight > 20 && (
+                <div 
+                  className="piece-label"
+                  style={{
+                    fontSize: `${fontSize}px`,
+                    color: textColor
+                  }}
+                >
+                  {piece.width}×{piece.height}
+                  {piece.rotated && ' ↻'}
+                </div>
+              )}
+              
+              {/* Indicador de rotación */}
+              {piece.rotated && scaledPieceWidth > 40 && (
+                <div className="rotation-indicator" title="Pieza rotada">
+                  ↻
+                </div>
+              )}
+            </div>
+          )
+        })}
 
-        {/* Contador de piezas */}
-        <div className="absolute top-2 right-2 text-xs text-gray-500 bg-white bg-opacity-80 px-2 py-1 rounded">
-          {sheet.pieces.length} piezas
-        </div>
-      </div>
-
-      {/* Información adicional */}
-      <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-gray-600">
-        <div>
-          <strong>Área usada:</strong> {(sheet.usedArea / 1000000).toFixed(2)} m²
-        </div>
-        <div>
-          <strong>Piezas rotadas:</strong> {sheet.pieces.filter(p => p.rotated).length}
+        {/* Información de dimensiones de la placa */}
+        <div className="sheet-dimensions">
+          {sheet.width} × {sheet.height} mm
         </div>
       </div>
     </div>
   )
 }
+
+export default SheetVisualization
