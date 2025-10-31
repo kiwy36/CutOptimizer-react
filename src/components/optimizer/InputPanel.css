@@ -1,0 +1,270 @@
+/**
+ * 🎨 ESTILOS DEL INPUT PANEL - Panel de entrada de piezas
+ * 
+ * 📍 PROPOSITO:
+ * - Estilos para el panel de configuración y gestión de piezas
+ * - Formularios responsivos y listas de piezas
+ * - Diseño consistente con la aplicación
+ */
+
+/* ========================================================================== */
+/* PANEL PRINCIPAL */
+/* ========================================================================== */
+
+.input-panel {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-6);
+  height: fit-content;
+}
+
+/* ========================================================================== */
+/* SECCIONES DEL PANEL */
+/* ========================================================================== */
+
+.input-panel h3 {
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-lg);
+  border-bottom: 2px solid var(--color-primary);
+  padding-bottom: var(--spacing-2);
+}
+
+.sheet-config-section,
+.algorithm-config-section,
+.add-piece-section,
+.pieces-list-section {
+  margin-bottom: var(--spacing-8);
+}
+
+/* ========================================================================== */
+/* CONFIGURACIÓN DE PLACA */
+/* ========================================================================== */
+
+.sheet-config {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4);
+}
+
+.config-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.config-group label {
+  font-weight: 500;
+  color: var(--color-gray-700);
+  font-size: var(--font-size-sm);
+}
+
+.config-group input,
+.config-group select {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+}
+
+.config-group input:focus,
+.config-group select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Checkbox en configuración de algoritmo */
+.config-group label input[type="checkbox"] {
+  margin-right: var(--spacing-2);
+  transform: scale(1.2);
+}
+
+/* ========================================================================== */
+/* FORMULARIO DE AGREGAR PIEZAS */
+/* ========================================================================== */
+
+.add-piece-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-4);
+  align-items: end;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.form-group label {
+  font-weight: 500;
+  color: var(--color-gray-700);
+  font-size: var(--font-size-sm);
+}
+
+.form-group input {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Input de color especial */
+.form-group input[type="color"] {
+  height: 40px;
+  padding: var(--spacing-1);
+  cursor: pointer;
+}
+
+.add-piece-btn {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-2) var(--spacing-4);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  height: fit-content;
+}
+
+.add-piece-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+/* ========================================================================== */
+/* LISTA DE PIEZAS */
+/* ========================================================================== */
+
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--color-gray-500);
+  background: var(--color-gray-50);
+  border-radius: var(--border-radius);
+  border: 2px dashed var(--color-gray-300);
+}
+
+.empty-state p {
+  margin-bottom: var(--spacing-2);
+  font-weight: 500;
+}
+
+.empty-state small {
+  font-size: var(--font-size-sm);
+}
+
+.pieces-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.piece-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  background: var(--color-gray-50);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-gray-200);
+  transition: all 0.2s ease;
+}
+
+.piece-item:hover {
+  background: var(--color-gray-100);
+  transform: translateX(2px);
+}
+
+.piece-color {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--border-radius-sm);
+  border: 2px solid var(--color-gray-300);
+  flex-shrink: 0;
+}
+
+.piece-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.piece-dimensions {
+  font-weight: 600;
+  color: var(--color-gray-900);
+  font-size: var(--font-size-sm);
+}
+
+.piece-quantity {
+  color: var(--color-gray-600);
+  font-size: var(--font-size-xs);
+}
+
+.remove-piece-btn {
+  background: var(--color-error);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.remove-piece-btn:hover {
+  background: var(--color-error-hover);
+}
+
+/* ========================================================================== */
+/* RESPONSIVE */
+/* ========================================================================== */
+
+@media (max-width: 768px) {
+  .input-panel {
+    padding: var(--spacing-4);
+  }
+  
+  .sheet-config {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+  }
+  
+  .add-piece-form {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3);
+  }
+  
+  .pieces-list {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .input-panel {
+    padding: var(--spacing-3);
+  }
+  
+  .sheet-config-section,
+  .algorithm-config-section,
+  .add-piece-section,
+  .pieces-list-section {
+    margin-bottom: var(--spacing-6);
+  }
+}
