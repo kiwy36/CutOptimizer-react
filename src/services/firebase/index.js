@@ -12,5 +12,7 @@ export { auth, db, storage } from './config'
 
 // Servicios específicos
 export { default as projectService } from './projectService'
+
+export { default as userService } from './userService' // ✅ NUEVO
 // Exportar otros servicios futuros aquí
 // export { default as userService } from './userService'

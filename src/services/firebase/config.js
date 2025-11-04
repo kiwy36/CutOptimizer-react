@@ -44,24 +44,16 @@ const app = initializeApp(firebaseConfig)
 
 /**
  * 🔐 Servicio de Autenticación
- * - Manejo de usuarios: login, registro, logout
- * - Persistencia de sesión
- * - Verificación de estado de autenticación
  */
 export const auth = getAuth(app)
 
 /**
  * 🗄️ Servicio de Firestore (Base de datos)
- * - Almacenamiento de proyectos de usuarios
- * - Colecciones: projects, users, etc.
- * - Operaciones CRUD en tiempo real
  */
 export const db = getFirestore(app)
 
 /**
  * 💾 Servicio de Storage (Almacenamiento de archivos)
- * - Futura implementación para imágenes o archivos
- * - Backup de proyectos
  */
 export const storage = getStorage(app)
 
@@ -71,8 +63,6 @@ export const storage = getStorage(app)
 
 /**
  * 📊 Analytics (Opcional - Comentado por ahora)
- * - Seguimiento de uso de la aplicación
- * - Métricas y estadísticas
  */
 // export const analytics = getAnalytics(app)
 
@@ -82,7 +72,5 @@ export const storage = getStorage(app)
 
 /**
  * 📦 Exportación por defecto de la aplicación Firebase
- * - Útil para casos donde se necesita la instancia completa
- * - La mayoría de casos usarán los servicios individuales (auth, db, storage)
  */
 export default app

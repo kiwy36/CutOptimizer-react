@@ -1,25 +1,17 @@
 /**
- * 🎯 USE AUTH - Hook personalizado para acceso al contexto de autenticación
+ * 🎯 USE AUTH - Hook personalizado para acceso al contexto de autenticación MEJORADO
  * 
  * 📍 FUNCIONALIDAD:
- * - Provee acceso fácil al contexto de autenticación
- * - Evita tener que usar useContext(AuthContext) en cada componente
- * - Lanza error si se usa fuera del AuthProvider
+ * - Provee acceso al contexto de autenticación con perfil extendido
+ * - Incluye funciones para gestión de perfil y estadísticas
+ * - Maneja usuario básico y perfil extendido de Firestore
  * 
  * 🔄 USO:
  * import useAuth from '../hooks/useAuth'
  * 
- * const { user, login, logout } = useAuth()
+ * const { user, userProfile, login, register, updateProfile } = useAuth()
  * 
- * @returns {Object} Contexto de autenticación con:
- *   - user: Usuario actual o null
- *   - loading: Estado de carga
- *   - error: Mensaje de error
- *   - login: Función para iniciar sesión
- *   - register: Función para registrar usuario
- *   - logout: Función para cerrar sesión
- *   - clearError: Función para limpiar errores
- *   - isAuthenticated: Boolean que indica si está autenticado
+ * @returns {Object} Contexto de autenticación mejorado
  */
 
 import { useContext } from 'react'

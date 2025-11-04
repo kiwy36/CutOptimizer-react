@@ -3,13 +3,13 @@
  * 
  * 📍 FUNCIÓN:
  * - Página principal que muestra contenido diferente según autenticación
- * - Para usuarios NO autenticados: Muestra componentes de Login/Register
+ * - Para usuarios NO autenticados: Muestra componentes de Login/Register + zona de pruebas
  * - Para usuarios autenticados: Muestra dashboard con resumen y News
  * - Sirve como punto de entrada para ambos estados de usuario
  * 
  * 🎯 COMPORTAMIENTO:
  * - Condicional: Si user está autenticado → Dashboard
- * - Condicional: Si user NO está autenticado → Auth components
+ * - Condicional: Si user NO está autenticado → Auth components + botones de testing
  * - Redirecciones automáticas manejadas por App.jsx
  */
 
@@ -21,7 +21,53 @@ import News from './News'
 import './Home.css'
 
 const Home = () => {
-  const { user } = useAuth()
+  const { user, register, login } = useAuth()
+
+  /**
+   * 🧪 FUNCIÓN TEMPORAL PARA PROBAR REGISTRO
+   * Crea un usuario de prueba automático para validar el flujo de alta en Firebase
+   */
+  const handleTestRegistration = async () => {
+    try {
+      const testEmail = `test${Date.now()}@cutoptimizer.com`
+      const testPassword = 'test123456'
+      
+      console.log('🧪 Intentando registrar usuario de prueba:', testEmail)
+      
+      const result = await register(testEmail, testPassword, {
+        displayName: `Usuario Prueba ${Date.now()}`
+      })
+      
+      console.log('✅ Usuario de prueba registrado exitosamente:', result)
+      alert(`✅ Usuario creado: ${testEmail}\nRevisa la consola y Firebase Console`)
+      
+    } catch (error) {
+      console.error('❌ Error creando usuario de prueba:', error)
+      alert(`❌ Error: ${error.message}`)
+    }
+  }
+
+  /**
+   * 🧪 FUNCIÓN TEMPORAL PARA PROBAR LOGIN
+   * Permite hacer login rápido con un usuario demo (preexistente)
+   */
+  const handleTestLogin = async () => {
+    try {
+      const testEmail = 'demo@cutoptimizer.com'
+      const testPassword = 'demodemo'
+      
+      console.log('🧪 Intentando login de prueba:', testEmail)
+      
+      const result = await login(testEmail, testPassword)
+      
+      console.log('✅ Login de prueba exitoso:', result)
+      alert(`✅ Login exitoso para: ${testEmail}`)
+      
+    } catch (error) {
+      console.error('❌ Error en login de prueba:', error)
+      alert(`❌ Error: ${error.message}\n\nPuedes crear un usuario primero con el botón "Crear Usuario Prueba"`)
+    }
+  }
 
   /**
    * 🎯 Renderizado condicional basado en autenticación
@@ -75,6 +121,29 @@ const Home = () => {
   // Usuario NO autenticado - Página de autenticación
   return (
     <div className="home-unauthenticated">
+      {/* 🧪 SECCIÓN TEMPORAL DE PRUEBAS - ELIMINAR EN PRODUCCIÓN */}
+      <div className="test-section">
+        <h3>🧪 Pruebas de Desarrollo</h3>
+        <p>Estos botones son solo para testing y se eliminarán en producción</p>
+        <div className="test-buttons">
+          <button 
+            onClick={handleTestRegistration}
+            className="test-btn register-test"
+          >
+            Crear Usuario Prueba
+          </button>
+          <button 
+            onClick={handleTestLogin}
+            className="test-btn login-test"
+          >
+            Login Demo
+          </button>
+        </div>
+        <small>
+          Revisa la consola del navegador y Firebase Console para ver los resultados
+        </small>
+      </div>
+
       {/* Contenedor de autenticación con tabs */}
       <div className="auth-container">
         <div className="auth-tabs">

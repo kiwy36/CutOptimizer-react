@@ -1,5 +1,5 @@
 /**
- * 🎨 ESTILOS ADICIONALES DE REGISTER - Componente específico de registro
+ * 🎨 ESTILOS ADICIONALES DE REGISTER MEJORADO
  */
 
 .register-component {
@@ -8,24 +8,7 @@
   gap: var(--spacing-6);
 }
 
-.register-header {
-  text-align: center;
-  margin-bottom: var(--spacing-2);
-}
-
-.register-header h2 {
-  color: var(--color-gray-900);
-  margin-bottom: var(--spacing-2);
-  font-size: var(--font-size-2xl);
-}
-
-.register-header p {
-  color: var(--color-gray-600);
-  margin: 0;
-}
-
-/* Campo de nombre adicional */
-.register-component .form-group {
+.additional-fields {
   margin-bottom: var(--spacing-4);
 }
 
@@ -33,7 +16,6 @@
   color: var(--color-gray-500);
   font-size: var(--font-size-xs);
   margin-top: var(--spacing-1);
-  display: block;
 }
 
 .register-extra {
@@ -51,6 +33,12 @@
   color: var(--color-success);
   margin-bottom: var(--spacing-3);
   font-size: var(--font-size-sm);
+}
+
+.security-info p {
+  color: var(--color-gray-700);
+  margin-bottom: var(--spacing-3);
+  font-weight: 500;
 }
 
 .security-info ul {
@@ -77,15 +65,4 @@
 
 .security-info li:last-child {
   margin-bottom: 0;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .register-component {
-    gap: var(--spacing-4);
-  }
-  
-  .security-info {
-    padding: var(--spacing-3);
-  }
 }
