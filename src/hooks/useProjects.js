@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { projectService } from '../services/projectService'
-import { useAuth } from './useAuth'
+import { projectService } from '../services/firebase'
+import useAuth from './useAuth'
 
 /**
  * 📁 HOOK PERSONALIZADO PARA PROYECTOS

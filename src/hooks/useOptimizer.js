@@ -83,7 +83,7 @@ const useOptimizer = () => {
   }, [])
 
   // =============================================================================
-  // ALGORITMOS DE OPTIMIZACIÓN (MIGRADOS DE optimizer.js)
+  // ALGORITMOS DE OPTIMIZACIÓN - FUNCIONES AUXILIARES
   // =============================================================================
 
   /**
@@ -118,7 +118,7 @@ const useOptimizer = () => {
    */
   const canPlacePiece = useCallback((piece, x, y, rowHeight, sheetWidth, sheetHeight, rotated = false) => {
     const pieceWidth = rotated ? piece.height : piece.width
-    const pieceHeight = rotated ? piece.height : piece.width
+    const pieceHeight = rotated ? piece.width : piece.height
     
     if (x + pieceWidth > sheetWidth) return false
     if (y + pieceHeight > sheetHeight) return false
@@ -157,6 +157,24 @@ const useOptimizer = () => {
     
     return placedPiece
   }, [])
+
+  /**
+   * 📝 Obtiene la razón por la que una pieza no pudo colocarse
+   */
+  const getUnplacedReason = useCallback((piece, sheetWidth, sheetHeight) => {
+    const fitsNormal = piece.width <= sheetWidth && piece.height <= sheetHeight
+    const fitsRotated = config.allowRotation && piece.height <= sheetWidth && piece.width <= sheetHeight
+    
+    if (!fitsNormal && !fitsRotated) {
+      return `Pieza demasiado grande (${piece.width}x${piece.height}mm) para la placa (${sheetWidth}x${sheetHeight}mm)`
+    } else {
+      return `No se encontró espacio disponible en las placas`
+    }
+  }, [config.allowRotation])
+
+  // =============================================================================
+  // ALGORITMOS DE OPTIMIZACIÓN - PRINCIPALES
+  // =============================================================================
 
   /**
    * 🎯 Shelf Algorithm Mejorado (con rotación)
@@ -228,14 +246,15 @@ const useOptimizer = () => {
       }
     }
     
-     // Reportar piezas no colocadas
+    // Reportar piezas no colocadas
     if (piecesToPlace.length > 0) {
       unplacedPieces = piecesToPlace.map(piece => ({
         ...piece,
-        reason: getUnplacedReason(piece, sheetWidth, sheetHeight) // ✅ Ahora está definida
+        reason: getUnplacedReason(piece, sheetWidth, sheetHeight)
       }))
     }
-      return { sheets, unplacedPieces }
+    
+    return { sheets, unplacedPieces }
   }, [
     sortPieces, 
     canPlacePiece, 
@@ -243,7 +262,7 @@ const useOptimizer = () => {
     placePiece, 
     config.allowRotation, 
     config.efficiencyThreshold,
-    getUnplacedReason // ✅ AGREGADA LA DEPENDENCIA FALTANTE
+    getUnplacedReason
   ])
 
   /**
@@ -306,20 +325,6 @@ const useOptimizer = () => {
     return { sheets, unplacedPieces: [] }
   }, [sortPieces, createNewSheet, placePiece])
 
-  /**
-   * 📝 Obtiene la razón por la que una pieza no pudo colocarse
-   */
-  const getUnplacedReason = useCallback((piece, sheetWidth, sheetHeight) => {
-    const fitsNormal = piece.width <= sheetWidth && piece.height <= sheetHeight
-    const fitsRotated = config.allowRotation && piece.height <= sheetWidth && piece.width <= sheetHeight
-    
-    if (!fitsNormal && !fitsRotated) {
-      return `Pieza demasiado grande (${piece.width}x${piece.height}mm) para la placa (${sheetWidth}x${sheetHeight}mm)`
-    } else {
-      return `No se encontró espacio disponible en las placas`
-    }
-  }, [config.allowRotation])
-
   // =============================================================================
   // FUNCIÓN PRINCIPAL DE OPTIMIZACIÓN
   // =============================================================================
@@ -346,6 +351,15 @@ const useOptimizer = () => {
       // Validar entradas
       if (isNaN(sheetWidth) || sheetWidth <= 0 || isNaN(sheetHeight) || sheetHeight <= 0) {
         throw new Error('❌ El tamaño de la placa debe ser un número positivo')
+      }
+
+      // Validar rango de tamaño razonable
+      if (sheetWidth < 100 || sheetHeight < 100) {
+        throw new Error('❌ El tamaño mínimo de placa es 100x100mm')
+      }
+
+      if (sheetWidth > 10000 || sheetHeight > 10000) {
+        throw new Error('❌ El tamaño máximo de placa es 10000x10000mm')
       }
 
       // Filtrar piezas que no caben ni rotadas
@@ -398,6 +412,10 @@ const useOptimizer = () => {
       setSheets(result.sheets)
       
       console.log(`✅ Optimización completada: ${result.sheets.length} placas utilizadas`)
+      if (result.unplacedPieces && result.unplacedPieces.length > 0) {
+        console.warn(`⚠️ ${result.unplacedPieces.length} piezas no pudieron colocarse`)
+      }
+      
       return result
 
     } catch (error) {
@@ -406,7 +424,14 @@ const useOptimizer = () => {
     } finally {
       setIsOptimizing(false)
     }
-  }, [pieces, isOptimizing, config.algorithm, config.allowRotation, shelfAlgorithm, guillotineAlgorithm])
+  }, [
+    pieces, 
+    isOptimizing, 
+    config.algorithm, 
+    config.allowRotation, 
+    shelfAlgorithm, 
+    guillotineAlgorithm
+  ])
 
   // =============================================================================
   // CÁLCULO DE ESTADÍSTICAS
@@ -465,6 +490,33 @@ const useOptimizer = () => {
     setConfig(prev => ({ ...prev, ...newConfig }))
   }, [])
 
+  /**
+   * 📦 Obtiene todas las piezas expandidas (según cantidad)
+   */
+  const getExpandedPieces = useCallback(() => {
+    const expanded = []
+    pieces.forEach(piece => {
+      for (let i = 0; i < piece.quantity; i++) {
+        expanded.push({
+          ...piece,
+          id: `${piece.id}_${i}`,
+          quantity: 1
+        })
+      }
+    })
+    return expanded
+  }, [pieces])
+
+  /**
+   * 📐 Valida si una pieza individual es válida
+   */
+  const isValidPiece = useCallback((piece) => {
+    return piece.width > 0 && 
+           piece.height > 0 && 
+           piece.quantity > 0 &&
+           piece.color
+  }, [])
+
   // =============================================================================
   // VALORES DE RETORNO DEL HOOK
   // =============================================================================
@@ -481,6 +533,8 @@ const useOptimizer = () => {
     addPiece,
     removePiece,
     updatePiece,
+    getExpandedPieces,
+    isValidPiece,
     
     // Optimización
     optimize,

@@ -4,42 +4,328 @@
  * 📍 FUNCIÓN:
  * - Muestra todos los proyectos guardados del usuario actual
  * - Grid de tarjetas de proyectos con información básica
- * - Funcionalidad de búsqueda y filtrado (futuro)
+ * - Funcionalidad de búsqueda y filtrado
  * - Acciones: Editar, eliminar, ver detalles
  * 
- * 🎯 ESTADO ACTUAL:
- * - Página placeholder para estructura de rutas
- * - Será implementada completamente en fases posteriores
- * 
- * 🔄 PLANEADO:
- * - Integración con Firestore para cargar proyectos
- * - Componente ProjectList con grid de ProjectCard
- * - Filtros y búsqueda
- * - Paginación si es necesario
+ * 🎯 CARACTERÍSTICAS:
+ * - Integración con useProjects hook
+ * - Grid responsivo de proyectos
+ * - Estados de carga y errores
+ * - Búsqueda en tiempo real
+ * - Proyectos ordenados por fecha de actualización
  */
 
-import React from 'react'
+import React, { useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
+import { useProjects } from '../hooks/useProjects'
+import LoadingSpinner from '../components/ui/LoadingSpinner'
+import ErrorMessage from '../components/ui/ErrorMessage'
+import Card from '../components/ui/Card'
 import './Projects.css'
 
 const Projects = () => {
+  const { projects, loading, error, refreshProjects } = useProjects()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [sortBy, setSortBy] = useState('updatedAt')
+
+  /**
+   * 🔍 Filtra y ordena los proyectos
+   */
+  const filteredAndSortedProjects = useMemo(() => {
+    let filtered = projects
+    
+    // Aplicar filtro de búsqueda
+    if (searchTerm) {
+      filtered = projects.filter(project =>
+        project.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.id?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+    
+    // Aplicar ordenamiento
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.name?.localeCompare(b.name)
+        case 'createdAt':
+          return new Date(b.createdAt) - new Date(a.createdAt)
+        case 'updatedAt':
+        default:
+          return new Date(b.updatedAt) - new Date(a.updatedAt)
+      }
+    })
+    
+    return filtered
+  }, [projects, searchTerm, sortBy])
+
+  /**
+   * 📊 Calcula estadísticas de los proyectos
+   */
+  const projectStats = useMemo(() => {
+    const totalProjects = projects.length
+    const totalSheets = projects.reduce((sum, project) => 
+      sum + (project.sheets?.length || 0), 0)
+    const totalPieces = projects.reduce((sum, project) => 
+      sum + (project.pieces?.length || 0), 0)
+    
+    return { totalProjects, totalSheets, totalPieces }
+  }, [projects])
+
+  /**
+   * 🗑️ Maneja la eliminación de un proyecto (placeholder)
+   */
+  const handleDeleteProject = async (projectId, projectName) => {
+    if (!window.confirm(`¿Estás seguro de que quieres eliminar el proyecto "${projectName}"?`)) {
+      return
+    }
+
+    try {
+      // TODO: Implementar eliminación en Firestore (Fase 6)
+      console.log('Eliminando proyecto:', projectId)
+      
+      // Simular eliminación
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // En una implementación real, esto actualizaría la lista automáticamente
+      // a través del hook useProjects
+      refreshProjects()
+      
+    } catch (error) {
+      console.error('Error al eliminar proyecto:', error)
+      alert('Error al eliminar el proyecto: ' + error.message)
+    }
+  }
+
+  /**
+   * 📅 Formatea la fecha para mostrar
+   */
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A'
+    
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = Math.abs(now - date)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays === 1) return 'Ayer'
+    if (diffDays < 7) return `Hace ${diffDays} días`
+    if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`
+    
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  /**
+   * 🎯 Obtiene la eficiencia promedio de un proyecto
+   */
+  const getProjectEfficiency = (project) => {
+    if (!project.sheets || project.sheets.length === 0) return 0
+    
+    const totalEfficiency = project.sheets.reduce((sum, sheet) => 
+      sum + (sheet.efficiency || 0), 0)
+    return totalEfficiency / project.sheets.length
+  }
+
+  /**
+   * 🎨 Obtiene la clase CSS para el indicador de eficiencia
+   */
+  const getEfficiencyClass = (efficiency) => {
+    if (efficiency >= 85) return 'efficiency-high'
+    if (efficiency >= 70) return 'efficiency-medium'
+    return 'efficiency-low'
+  }
+
   return (
     <div className="projects-page">
+      {/* Header de la página */}
       <div className="page-header">
-        <h1>Mis Proyectos</h1>
-        <p>Gestiona y revisa todos tus proyectos de optimización guardados</p>
+        <div className="header-content">
+          <h1>Mis Proyectos</h1>
+          <p>Gestiona y revisa todos tus proyectos de optimización guardados</p>
+        </div>
+        
+        <Link to="/projects/new" className="new-project-btn">
+          ➕ Nuevo Proyecto
+        </Link>
       </div>
 
-      <div className="projects-content">
-        <div className="placeholder-message">
-          <div className="placeholder-icon">📁</div>
-          <h2>Próximamente</h2>
-          <p>Esta página mostrará todos tus proyectos guardados.</p>
-          <p>Podrás editarlos, eliminarlos y ver sus detalles.</p>
-          <a href="/projects/new" className="create-project-btn">
-            Crear primer proyecto
-          </a>
+      {/* Estadísticas rápidas */}
+      <div className="projects-stats">
+        <Card className="stat-card">
+          <div className="stat-item">
+            <span className="stat-number">{projectStats.totalProjects}</span>
+            <span className="stat-label">Proyectos Totales</span>
+          </div>
+        </Card>
+        <Card className="stat-card">
+          <div className="stat-item">
+            <span className="stat-number">{projectStats.totalSheets}</span>
+            <span className="stat-label">Placas Optimizadas</span>
+          </div>
+        </Card>
+        <Card className="stat-card">
+          <div className="stat-item">
+            <span className="stat-number">{projectStats.totalPieces}</span>
+            <span className="stat-label">Piezas Totales</span>
+          </div>
+        </Card>
+      </div>
+
+      {/* Controles de filtrado y búsqueda */}
+      <div className="projects-controls">
+        <div className="search-container">
+          <input
+            type="text"
+            placeholder="Buscar proyectos por nombre o ID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+          {searchTerm && (
+            <button 
+              className="clear-search"
+              onClick={() => setSearchTerm('')}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        
+        <div className="sort-container">
+          <label>Ordenar por:</label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="sort-select"
+          >
+            <option value="updatedAt">Más recientes</option>
+            <option value="createdAt">Fecha de creación</option>
+            <option value="name">Nombre (A-Z)</option>
+          </select>
         </div>
       </div>
+
+      {/* Mensajes de error */}
+      {error && (
+        <ErrorMessage 
+          message={error}
+          type="error"
+          onClose={refreshProjects}
+        />
+      )}
+
+      {/* Estado de carga */}
+      {loading && (
+        <div className="loading-container">
+          <LoadingSpinner size="large" text="Cargando proyectos..." />
+        </div>
+      )}
+
+      {/* Grid de proyectos */}
+      {!loading && (
+        <div className="projects-content">
+          {filteredAndSortedProjects.length === 0 ? (
+            <Card className="empty-state">
+              <div className="empty-content">
+                <div className="empty-icon">📁</div>
+                <h3>
+                  {searchTerm ? 'No se encontraron proyectos' : 'No hay proyectos'}
+                </h3>
+                <p>
+                  {searchTerm 
+                    ? `No hay proyectos que coincidan con "${searchTerm}"`
+                    : 'Comienza creando tu primer proyecto de optimización'
+                  }
+                </p>
+                {!searchTerm && (
+                  <Link to="/projects/new" className="create-first-btn">
+                    Crear primer proyecto
+                  </Link>
+                )}
+                {searchTerm && (
+                  <button 
+                    onClick={() => setSearchTerm('')}
+                    className="clear-search-btn"
+                  >
+                    Limpiar búsqueda
+                  </button>
+                )}
+              </div>
+            </Card>
+          ) : (
+            <div className="projects-grid">
+              {filteredAndSortedProjects.map((project) => {
+                const efficiency = getProjectEfficiency(project)
+                
+                return (
+                  <Card key={project.id} className="project-card">
+                    <div className="project-card-header">
+                      <h3 className="project-name">{project.name || 'Proyecto sin nombre'}</h3>
+                      <span className={`efficiency-badge ${getEfficiencyClass(efficiency)}`}>
+                        {efficiency > 0 ? `${efficiency.toFixed(1)}%` : 'Sin optimizar'}
+                      </span>
+                    </div>
+                    
+                    <div className="project-info">
+                      <div className="info-row">
+                        <span className="info-label">ID:</span>
+                        <span className="info-value">{project.id}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">Piezas:</span>
+                        <span className="info-value">{project.pieces?.length || 0}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">Placas:</span>
+                        <span className="info-value">{project.sheets?.length || 0}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">Creado:</span>
+                        <span className="info-value">{formatDate(project.createdAt)}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">Actualizado:</span>
+                        <span className="info-value">{formatDate(project.updatedAt)}</span>
+                      </div>
+                    </div>
+                    
+                    <div className="project-actions">
+                      <Link 
+                        to={`/projects/${project.id}`}
+                        className="action-btn edit-btn"
+                      >
+                        ✏️ Editar
+                      </Link>
+                      
+                      <button
+                        onClick={() => handleDeleteProject(project.id, project.name)}
+                        className="action-btn delete-btn"
+                        title="Eliminar proyecto"
+                      >
+                        🗑️ Eliminar
+                      </button>
+                      
+                      <button
+                        onClick={() => {
+                          // TODO: Implementar duplicado (Fase 6)
+                          console.log('Duplicar proyecto:', project.id)
+                        }}
+                        className="action-btn duplicate-btn"
+                        title="Duplicar proyecto"
+                      >
+                        📋 Duplicar
+                      </button>
+                    </div>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

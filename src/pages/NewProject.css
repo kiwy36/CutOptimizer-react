@@ -1,16 +1,314 @@
 /**
- * 🎨 ESTILOS DE NEW PROJECT - Página de nuevo proyecto (placeholder)
+ * 🎨 ESTILOS DE NEW PROJECT - Página de nuevo proyecto funcional
+ * 
+ * 📍 PROPOSITO:
+ * - Estilos para la página de creación de proyectos
+ * - Layout de dos columnas responsivo
+ * - Controles y formularios específicos
  */
 
+/* ========================================================================== */
+/* PÁGINA PRINCIPAL */
+/* ========================================================================== */
+
 .new-project-page {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: var(--spacing-6) var(--spacing-4);
+  padding: var(--spacing-6);
 }
 
-.project-content {
-  background: white;
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-sm);
-  min-height: 400px;
+/* ========================================================================== */
+/* HEADER DEL PROYECTO */
+/* ========================================================================== */
+
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-6);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 2px solid var(--color-gray-200);
+}
+
+.header-content h1 {
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-2);
+  font-size: var(--font-size-3xl);
+}
+
+.header-content p {
+  color: var(--color-gray-600);
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.project-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-width: 300px;
+}
+
+.project-name-input {
+  padding: var(--spacing-3);
+  border: 2px solid var(--color-gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  transition: border-color 0.2s ease;
+}
+
+.project-name-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.project-name-input::placeholder {
+  color: var(--color-gray-400);
+}
+
+.control-buttons {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.optimize-btn,
+.save-btn,
+.reset-btn {
+  padding: var(--spacing-2) var(--spacing-4);
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: var(--font-size-sm);
+}
+
+.optimize-btn {
+  background: var(--color-success);
+  color: white;
+}
+
+.optimize-btn:hover:not(:disabled) {
+  background: var(--color-success-hover);
+  transform: translateY(-1px);
+}
+
+.save-btn {
+  background: var(--color-primary);
+  color: white;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.reset-btn {
+  background: var(--color-gray-200);
+  color: var(--color-gray-700);
+}
+
+.reset-btn:hover:not(:disabled) {
+  background: var(--color-gray-300);
+}
+
+.optimize-btn:disabled,
+.save-btn:disabled,
+.reset-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========================================================================== */
+/* CONFIGURACIÓN RÁPIDA DE PLACA */
+/* ========================================================================== */
+
+.quick-sheet-config {
+  background: var(--color-gray-50);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+  border: 1px solid var(--color-gray-200);
+}
+
+.quick-sheet-config h3 {
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-3);
+  font-size: var(--font-size-lg);
+}
+
+.config-fields {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+}
+
+.config-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.config-field label {
+  font-weight: 500;
+  color: var(--color-gray-700);
+  font-size: var(--font-size-sm);
+}
+
+.config-field input {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  width: 120px;
+}
+
+.config-field input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.config-presets {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-left: auto;
+}
+
+.config-presets span {
+  font-weight: 500;
+  color: var(--color-gray-700);
+  font-size: var(--font-size-sm);
+}
+
+.config-presets button {
+  background: var(--color-gray-200);
+  color: var(--color-gray-700);
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.config-presets button:hover:not(:disabled) {
+  background: var(--color-gray-300);
+}
+
+.config-presets button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ========================================================================== */
+/* LAYOUT DE DOS COLUMNAS */
+/* ========================================================================== */
+
+.optimizer-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-6);
+  align-items: start;
+}
+
+.input-column {
+  position: sticky;
+  top: var(--spacing-6);
+}
+
+.results-column {
+  min-height: 600px;
+}
+
+/* ========================================================================== */
+/* CARGA GLOBAL */
+/* ========================================================================== */
+
+.global-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.global-loading p {
+  margin-top: var(--spacing-4);
+  font-weight: 600;
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+}
+
+/* ========================================================================== */
+/* RESPONSIVE */
+/* ========================================================================== */
+
+@media (max-width: 1024px) {
+  .optimizer-layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+  }
+  
+  .input-column {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .new-project-page {
+    padding: var(--spacing-4);
+  }
+  
+  .project-header {
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+  
+  .project-controls {
+    min-width: 100%;
+  }
+  
+  .control-buttons {
+    justify-content: center;
+  }
+  
+  .config-fields {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .config-presets {
+    margin-left: 0;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .new-project-page {
+    padding: var(--spacing-3);
+  }
+  
+  .control-buttons {
+    flex-direction: column;
+  }
+  
+  .optimize-btn,
+  .save-btn,
+  .reset-btn {
+    width: 100%;
+  }
 }

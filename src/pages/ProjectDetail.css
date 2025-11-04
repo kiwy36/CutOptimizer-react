@@ -1,9 +1,386 @@
 /**
- * 🎨 ESTILOS DE PROJECT DETAIL - Página de detalle de proyecto (placeholder)
+ * 🎨 ESTILOS DE PROJECT DETAIL - Página de edición de proyectos
+ * 
+ * 📍 PROPOSITO:
+ * - Estilos específicos para la página de edición
+ * - Indicadores de cambios y estados de modificación
+ * - Diseño consistente con NewProject pero con elementos adicionales
  */
 
+/* ========================================================================== */
+/* PÁGINA PRINCIPAL */
+/* ========================================================================== */
+
 .project-detail-page {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: var(--spacing-6) var(--spacing-4);
+  padding: var(--spacing-6);
+}
+
+/* ========================================================================== */
+/* HEADER DEL PROYECTO */
+/* ========================================================================== */
+
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-6);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 2px solid var(--color-gray-200);
+}
+
+.header-content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-4);
+}
+
+.back-button {
+  background: var(--color-gray-200);
+  color: var(--color-gray-700);
+  border: none;
+  border-radius: var(--border-radius);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.back-button:hover {
+  background: var(--color-gray-300);
+  transform: translateX(-2px);
+}
+
+.header-text h1 {
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-1);
+  font-size: var(--font-size-3xl);
+}
+
+.header-text p {
+  color: var(--color-gray-500);
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-family: monospace;
+}
+
+.project-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-width: 300px;
+}
+
+.project-name-input {
+  padding: var(--spacing-3);
+  border: 2px solid var(--color-gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  transition: border-color 0.2s ease;
+}
+
+.project-name-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.control-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.optimize-btn,
+.save-btn {
+  padding: var(--spacing-2) var(--spacing-4);
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: var(--font-size-sm);
+}
+
+.optimize-btn {
+  background: var(--color-warning);
+  color: white;
+}
+
+.optimize-btn:hover:not(:disabled) {
+  background: var(--color-warning-hover);
+  transform: translateY(-1px);
+}
+
+.save-btn {
+  background: var(--color-primary);
+  color: white;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.optimize-btn:disabled,
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.changes-indicator {
+  color: var(--color-warning);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* ========================================================================== */
+/* INFORMACIÓN DEL PROYECTO */
+/* ========================================================================== */
+
+.project-info {
+  margin-bottom: var(--spacing-6);
+}
+
+.info-card {
+  background: var(--color-gray-50);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-4);
+  border: 1px solid var(--color-gray-200);
+}
+
+.info-card h3 {
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-3);
+  font-size: var(--font-size-lg);
+  border-bottom: 1px solid var(--color-gray-300);
+  padding-bottom: var(--spacing-2);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-3);
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-2);
+  background: white;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-gray-200);
+}
+
+.info-label {
+  font-weight: 500;
+  color: var(--color-gray-700);
+  font-size: var(--font-size-sm);
+}
+
+.info-value {
+  color: var(--color-gray-900);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+}
+
+/* ========================================================================== */
+/* CONFIGURACIÓN DE PLACA */
+/* ========================================================================== */
+
+.quick-sheet-config {
+  background: var(--color-gray-50);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+  border: 1px solid var(--color-gray-200);
+}
+
+.quick-sheet-config h3 {
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-3);
+  font-size: var(--font-size-lg);
+}
+
+.config-fields {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+}
+
+.config-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.config-field label {
+  font-weight: 500;
+  color: var(--color-gray-700);
+  font-size: var(--font-size-sm);
+}
+
+.config-field input {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  width: 120px;
+}
+
+.config-field input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ========================================================================== */
+/* LAYOUT DE DOS COLUMNAS */
+/* ========================================================================== */
+
+.optimizer-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-6);
+  align-items: start;
+}
+
+.input-column {
+  position: sticky;
+  top: var(--spacing-6);
+}
+
+.results-column {
+  min-height: 600px;
+}
+
+/* ========================================================================== */
+/* ESTADOS ESPECIALES */
+/* ========================================================================== */
+
+.loading-container,
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+}
+
+.back-btn {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-3) var(--spacing-6);
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: var(--spacing-4);
+  transition: background-color 0.2s ease;
+}
+
+.back-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+.global-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.global-loading p {
+  margin-top: var(--spacing-4);
+  font-weight: 600;
+  color: var(--color-primary);
+  font-size: var(--font-size-lg);
+}
+
+/* ========================================================================== */
+/* RESPONSIVE */
+/* ========================================================================== */
+
+@media (max-width: 1024px) {
+  .optimizer-layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+  }
+  
+  .input-column {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .project-detail-page {
+    padding: var(--spacing-4);
+  }
+  
+  .project-header {
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+  
+  .header-content {
+    width: 100%;
+  }
+  
+  .project-controls {
+    min-width: 100%;
+  }
+  
+  .control-buttons {
+    justify-content: center;
+  }
+  
+  .config-fields {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .project-detail-page {
+    padding: var(--spacing-3);
+  }
+  
+  .control-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .optimize-btn,
+  .save-btn {
+    width: 100%;
+  }
+  
+  .changes-indicator {
+    text-align: center;
+  }
 }
