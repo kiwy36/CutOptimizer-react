@@ -1,11 +1,83 @@
-/* 🎨 ESTILOS ESPECÍFICOS DEL COMPONENTE APP */
-.app-container {
-  min-height: 100vh;
+/* ======================================================
+   🌐 App.css - Estructura simplificada y responsiva
+   ------------------------------------------------------
+   - Aplica solo al layout general (App.jsx)
+   - Navbar y Footer visibles siempre
+   - Contenido central adaptable
+   ====================================================== */
+
+/* ========== RESET BÁSICO ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* Responsive helpers */
-@media (max-width: 768px) {
-  .mobile-stack {
-    flex-direction: column;
+/* ========== BASE GLOBAL ========== */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* ========== CONTENEDOR PRINCIPAL ========== */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== CONTENIDO PRINCIPAL ========== */
+.main-content {
+  flex: 1;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  transition: padding 0.3s ease;
+}
+
+/* ====== ADAPTABILIDAD RESPONSIVA ====== */
+@media (max-width: 992px) {
+  .main-content {
+    padding: 1rem;
+    max-width: 95%;
   }
+}
+
+@media (max-width: 600px) {
+  .main-content {
+    padding: 0.75rem;
+  }
+}
+
+/* ========== SPINNER DE CARGA ========== */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.loading-container p {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  color: #555;
+}
+
+/* ====== Animación sutil al spinner ====== */
+.loading-container p {
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }

@@ -21,9 +21,9 @@ import { useProjects } from '../hooks/useProjects'
 import LoadingSpinner from '../components/ui/LoadingSpinner'
 import ErrorMessage from '../components/ui/ErrorMessage'
 import Card from '../components/ui/Card'
-import './Projects.css'
+import './ProjectsGallery.css'
 
-const Projects = () => {
+const ProjectsGallery = () => {
   const { projects, loading, error, refreshProjects } = useProjects()
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('updatedAt')
@@ -330,4 +330,4 @@ const Projects = () => {
   )
 }
 
-export default Projects
+export default ProjectsGallery

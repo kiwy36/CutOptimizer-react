@@ -16,14 +16,14 @@
 import React from 'react'
 import './News.css'
 
-const News = () => {
+const Noticias = () => {
   // Datos de ejemplo para noticias (pueden venir de una API en el futuro)
   const newsItems = [
     {
       id: 1,
       title: '🎉 Cut Optimizer ya está en línea',
       date: '2024-01-15',
-      content: 'La primera versión de Cut Optimizer está disponible. Comienza a optimizar tus proyectos de corte hoy mismo.',
+      content: 'La primera vrsión de Cut Optimizer está disponible. Comienza a optimizar tus proyectos de corte hoy mismo.',
       type: 'announcement'
     },
     {
@@ -120,4 +120,4 @@ const News = () => {
   )
 }
 
-export default News
+export default Noticias
