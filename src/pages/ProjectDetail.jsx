@@ -20,8 +20,8 @@ import useAuth  from '../hooks/useAuth'
 import useOptimizer from '../hooks/useOptimizer'
 import InputPanel from '../components/optimizer/InputPanel'
 import ResultsPanel from '../components/optimizer/ResultsPanel'
-import LoadingSpinner from '../components/ui/LoadingSpinner'
-import ErrorMessage from '../components/ui/ErrorMessage'
+import LoadingSpinner from '../components/shared/LoadingSpinner'
+import ErrorMessage from '../components/shared/ErrorMessage'
 import './ProjectDetail.css'
 
 const ProjectDetail = () => {

@@ -8,7 +8,7 @@
  */
 
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route , Navigate } from 'react-router-dom'
 
 // Context Providers
 import AuthProvider from './context/AuthContext'
@@ -16,7 +16,7 @@ import AuthProvider from './context/AuthContext'
 // Components
 import Navbar from './components/navigation/Navbar'
 import Footer from './components/navigation/Footer'
-import LoadingSpinner from './components/ui/LoadingSpinner'
+import LoadingSpinner from './components/shared/LoadingSpinner'
 
 // Pages
 import Home from './pages/Home'

@@ -18,9 +18,9 @@
 import React, { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useProjects } from '../hooks/useProjects'
-import LoadingSpinner from '../components/ui/LoadingSpinner'
-import ErrorMessage from '../components/ui/ErrorMessage'
-import Card from '../components/ui/Card'
+import LoadingSpinner from '../components/shared/LoadingSpinner'
+import ErrorMessage from '../components/shared/ErrorMessage'
+import Card from '../components/shared/Card'
 import './ProjectsGallery.css'
 
 const ProjectsGallery = () => {
