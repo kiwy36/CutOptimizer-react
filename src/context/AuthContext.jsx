@@ -6,13 +6,14 @@
  * - Crea automáticamente workspace al registrar usuario
  * - Gestiona estado global de usuario y perfil
  * - Sincroniza con Firestore para datos extendidos
+ * - MEJORADO: Manejo robusto de errores y estados de carga
  */
 
 import React, { createContext, useState, useEffect } from 'react'
 import { 
   signOut,
   onAuthStateChanged 
-} from 'firebase/auth' // ✅ REMOVIDOS los imports no usados
+} from 'firebase/auth'
 import { auth } from '../services/firebase/config'
 import { userService } from '../services/firebase'
 
@@ -27,14 +28,17 @@ const AuthProvider = ({ children }) => {
   const [userProfile, setUserProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [authLoading, setAuthLoading] = useState(false)
 
   /**
-   * 🔑 LOGIN MEJORADO - Con gestión de perfil
+   * 🔑 LOGIN MEJORADO - Con gestión de perfil y mejor manejo de errores
    */
   const login = async (email, password) => {
     try {
-      setLoading(true)
+      setAuthLoading(true)
       setError(null)
+      
+      console.log('🔄 Iniciando proceso de login...')
       
       // Login completo con perfil
       const result = await userService.completeUserLogin(email, password)
@@ -46,10 +50,11 @@ const AuthProvider = ({ children }) => {
       return result
 
     } catch (error) {
+      console.error('❌ Error en login:', error)
       setError(error.message)
       throw error
     } finally {
-      setLoading(false)
+      setAuthLoading(false)
     }
   }
 
@@ -58,8 +63,10 @@ const AuthProvider = ({ children }) => {
    */
   const register = async (email, password, userData = {}) => {
     try {
-      setLoading(true)
+      setAuthLoading(true)
       setError(null)
+      
+      console.log('🔄 Iniciando proceso de registro...')
       
       // Registro completo con perfil y workspace
       const result = await userService.completeUserRegistration(email, password, userData)
@@ -71,10 +78,38 @@ const AuthProvider = ({ children }) => {
       return result
 
     } catch (error) {
+      console.error('❌ Error en registro:', error)
       setError(error.message)
       throw error
     } finally {
-      setLoading(false)
+      setAuthLoading(false)
+    }
+  }
+
+  /**
+   * 🧪 CREAR USUARIO DEMO - Para testing
+   */
+  const createDemoUser = async () => {
+    try {
+      setAuthLoading(true)
+      setError(null)
+      
+      console.log('🔄 Creando usuario demo...')
+      
+      const result = await userService.createDemoUser()
+      
+      setUser(result.user)
+      setUserProfile(result.profile)
+      
+      console.log('✅ Usuario demo creado/autenticado:', result.user.uid)
+      return result
+
+    } catch (error) {
+      console.error('❌ Error al crear usuario demo:', error)
+      setError(error.message)
+      throw error
+    } finally {
+      setAuthLoading(false)
     }
   }
 
@@ -83,17 +118,18 @@ const AuthProvider = ({ children }) => {
    */
   const logout = async () => {
     try {
-      setLoading(true)
+      setAuthLoading(true)
       setError(null)
       await signOut(auth)
       setUser(null)
       setUserProfile(null)
       console.log('✅ Usuario deslogueado')
     } catch (error) {
+      console.error('❌ Error en logout:', error)
       setError(error.message)
       throw error
     } finally {
-      setLoading(false)
+      setAuthLoading(false)
     }
   }
 
@@ -113,6 +149,7 @@ const AuthProvider = ({ children }) => {
       return updatedProfile
 
     } catch (error) {
+      console.error('❌ Error al actualizar perfil:', error)
       setError(error.message)
       throw error
     }
@@ -144,7 +181,7 @@ const AuthProvider = ({ children }) => {
    * 👂 OBSERVADOR DE ESTADO DE AUTENTICACIÓN MEJORADO
    */
   useEffect(() => {
-    console.log('🚀 Inicializando conexión con Firebase...') // ✅ CONSOLE.LOG DE CONEXIÓN
+    console.log('🚀 Inicializando conexión con Firebase...')
     
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       console.log('📡 Estado de autenticación cambiado:', user ? `Usuario: ${user.uid}` : 'No autenticado')
@@ -179,6 +216,7 @@ const AuthProvider = ({ children }) => {
     user,
     userProfile,
     loading,
+    authLoading, // ✅ NUEVO: Estado de carga específico para auth
     error,
     
     // Autenticación
@@ -190,7 +228,10 @@ const AuthProvider = ({ children }) => {
     
     // Perfil extendido
     updateProfile,
-    updateUserStats
+    updateUserStats,
+    
+    // Utilidades
+    createDemoUser // ✅ NUEVO: Función para crear usuario demo
   }
 
   return (

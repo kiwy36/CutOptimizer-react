@@ -1,11 +1,12 @@
 /**
- * 👤 USER SERVICE - Servicio para gestión de usuarios en Firestore
+ * 👤 USER SERVICE - Servicio para gestión de usuarios en Firestore MEJORADO
  * 
  * 📍 FUNCIÓN:
  * - Maneja la creación y gestión de perfiles de usuario
  * - Crea espacios de trabajo automáticamente al registrar usuario
  * - Gestiona metadatos y preferencias de usuario
  * - Proporciona operaciones CRUD para usuarios
+ * - MEJORADO: Manejo robusto de errores y creación automática de perfiles
  */
 
 import { 
@@ -81,7 +82,7 @@ const WORKSPACE_SCHEMA = {
 // =============================================================================
 
 /**
- * ➕ CREAR PERFIL DE USUARIO
+ * ➕ CREAR PERFIL DE USUARIO - MEJORADO
  * 
  * @param {Object} user - Objeto usuario de Firebase Auth
  * @param {Object} additionalData - Datos adicionales del perfil
@@ -93,19 +94,27 @@ export const createUserProfile = async (user, additionalData = {}) => {
       throw new Error('Usuario no válido para crear perfil')
     }
 
+    console.log('🔄 Creando perfil para usuario:', user.uid)
+
     // Verificar si el usuario ya existe
     const userRef = doc(db, COLLECTIONS.USERS, user.uid)
     const userSnap = await getDoc(userRef)
 
     if (userSnap.exists()) {
       console.log('✅ Perfil de usuario ya existe:', user.uid)
+      const existingData = userSnap.data()
       return {
         id: user.uid,
-        ...userSnap.data()
+        ...existingData,
+        // Actualizar datos que puedan haber cambiado
+        email: user.email,
+        displayName: user.displayName || additionalData.displayName || existingData.displayName,
+        photoURL: user.photoURL || additionalData.photoURL || existingData.photoURL,
+        updatedAt: serverTimestamp()
       }
     }
 
-    // Crear perfil de usuario
+    // Crear perfil de usuario nuevo
     const userProfile = {
       ...USER_SCHEMA,
       email: user.email,
@@ -136,7 +145,7 @@ export const createUserProfile = async (user, additionalData = {}) => {
 }
 
 /**
- * 📥 OBTENER PERFIL DE USUARIO
+ * 📥 OBTENER PERFIL DE USUARIO - MEJORADO
  * 
  * @param {string} userId - ID del usuario
  * @returns {Promise<Object>} Perfil del usuario
@@ -156,6 +165,8 @@ export const getUserProfile = async (userId) => {
 
     const userData = userSnap.data()
     
+    console.log('✅ Perfil cargado para usuario:', userId)
+    
     return {
       id: userSnap.id,
       ...userData
@@ -169,10 +180,6 @@ export const getUserProfile = async (userId) => {
 
 /**
  * ✏️ ACTUALIZAR PERFIL DE USUARIO
- * 
- * @param {string} userId - ID del usuario
- * @param {Object} updates - Campos a actualizar
- * @returns {Promise<Object>} Perfil actualizado
  */
 export const updateUserProfile = async (userId, updates) => {
   try {
@@ -202,9 +209,6 @@ export const updateUserProfile = async (userId, updates) => {
 
 /**
  * 📊 ACTUALIZAR ESTADÍSTICAS DEL USUARIO
- * 
- * @param {string} userId - ID del usuario
- * @returns {Promise<void>}
  */
 export const updateUserStats = async (userId) => {
   try {
@@ -254,9 +258,6 @@ export const updateUserStats = async (userId) => {
 
 /**
  * 🏢 CREAR WORKSPACE POR DEFECTO
- * 
- * @param {string} userId - ID del usuario propietario
- * @returns {Promise<Object>} Workspace creado
  */
 export const createDefaultWorkspace = async (userId) => {
   try {
@@ -296,9 +297,6 @@ export const createDefaultWorkspace = async (userId) => {
 
 /**
  * 📁 OBTENER WORKSPACE DEL USUARIO
- * 
- * @param {string} userId - ID del usuario
- * @returns {Promise<Object>} Workspace del usuario
  */
 export const getUserWorkspace = async (userId) => {
   try {
@@ -333,7 +331,7 @@ export const getUserWorkspace = async (userId) => {
 // =============================================================================
 
 /**
- * 🔐 REGISTRO COMPLETO DE USUARIO
+ * 🔐 REGISTRO COMPLETO DE USUARIO - MEJORADO
  * 
  * @param {string} email - Email del usuario
  * @param {string} password - Password del usuario
@@ -345,9 +343,13 @@ export const completeUserRegistration = async (email, password, userData = {}) =
     const { createUserWithEmailAndPassword } = await import('firebase/auth')
     const { auth } = await import('./config')
 
+    console.log('🔄 Iniciando registro para:', email)
+
     // Crear usuario en Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email, password)
     const user = userCredential.user
+
+    console.log('✅ Usuario creado en Auth:', user.uid)
 
     // Crear perfil en Firestore
     const userProfile = await createUserProfile(user, userData)
@@ -361,12 +363,28 @@ export const completeUserRegistration = async (email, password, userData = {}) =
 
   } catch (error) {
     console.error('❌ Error en registro completo:', error)
-    throw new Error(`Error en el registro: ${error.message}`)
+    
+    // MEJOR MANEJO DE ERRORES
+    let errorMessage = 'Error en el registro'
+    
+    if (error.code === 'auth/email-already-in-use') {
+      errorMessage = 'Este email ya está registrado. ¿Quieres iniciar sesión?'
+    } else if (error.code === 'auth/invalid-email') {
+      errorMessage = 'El formato del email no es válido'
+    } else if (error.code === 'auth/weak-password') {
+      errorMessage = 'La contraseña es demasiado débil (mínimo 6 caracteres)'
+    } else if (error.code === 'auth/network-request-failed') {
+      errorMessage = 'Error de conexión. Verifica tu internet.'
+    } else {
+      errorMessage = `Error en el registro: ${error.message}`
+    }
+    
+    throw new Error(errorMessage)
   }
 }
 
 /**
- * 🔑 LOGIN COMPLETO DE USUARIO
+ * 🔑 LOGIN COMPLETO DE USUARIO - MEJORADO
  * 
  * @param {string} email - Email del usuario
  * @param {string} password - Password del usuario
@@ -377,18 +395,31 @@ export const completeUserLogin = async (email, password) => {
     const { signInWithEmailAndPassword } = await import('firebase/auth')
     const { auth } = await import('./config')
 
+    console.log('🔄 Iniciando login para:', email)
+
     // Login en Firebase Auth
     const userCredential = await signInWithEmailAndPassword(auth, email, password)
     const user = userCredential.user
+
+    console.log('✅ Login exitoso en Auth:', user.uid)
+
+    // ✅ MEJORA: Manejar caso donde el perfil no existe
+    let userProfile
+    try {
+      userProfile = await getUserProfile(user.uid)
+      console.log('✅ Perfil existente cargado:', user.uid)
+    } catch {
+      console.log('⚠️ Perfil no encontrado, creando uno automáticamente...')
+      userProfile = await createUserProfile(user, {
+        displayName: user.email.split('@')[0]
+      })
+    }
 
     // Actualizar último login
     const userRef = doc(db, COLLECTIONS.USERS, user.uid)
     await updateDoc(userRef, {
       lastLoginAt: serverTimestamp()
     })
-
-    // Obtener perfil completo
-    const userProfile = await getUserProfile(user.uid)
 
     console.log('✅ Login de usuario completado:', user.uid)
     
@@ -399,7 +430,69 @@ export const completeUserLogin = async (email, password) => {
 
   } catch (error) {
     console.error('❌ Error en login completo:', error)
-    throw new Error(`Error en el login: ${error.message}`)
+    
+    // ✅ MEJOR MANEJO DE ERRORES
+    let errorMessage = 'Error en el login'
+    
+    if (error.code === 'auth/invalid-credential') {
+      errorMessage = 'Email o contraseña incorrectos'
+    } else if (error.code === 'auth/user-not-found') {
+      errorMessage = 'Usuario no encontrado. Regístrate primero.'
+    } else if (error.code === 'auth/wrong-password') {
+      errorMessage = 'Contraseña incorrecta'
+    } else if (error.code === 'auth/invalid-email') {
+      errorMessage = 'El formato del email no es válido'
+    } else if (error.code === 'auth/network-request-failed') {
+      errorMessage = 'Error de conexión. Verifica tu internet.'
+    } else if (error.code === 'auth/too-many-requests') {
+      errorMessage = 'Demasiados intentos fallidos. Intenta más tarde.'
+    } else {
+      errorMessage = `Error en el login: ${error.message}`
+    }
+    
+    throw new Error(errorMessage)
+  }
+}
+
+// =============================================================================
+// FUNCIONES UTILITARIAS ADICIONALES
+// =============================================================================
+
+/**
+ * 🧪 CREAR USUARIO DEMO - Para testing
+ * @returns {Promise<Object>} Usuario demo creado
+ */
+export const createDemoUser = async () => {
+  try {
+    const demoEmail = 'demo@cutoptimizer.com'
+    const demoPassword = 'demodemo'
+    
+    console.log('🔄 Creando usuario demo...')
+    
+    const result = await completeUserRegistration(demoEmail, demoPassword, {
+      displayName: 'Usuario Demo',
+      preferences: {
+        language: 'es',
+        theme: 'light',
+        defaultSheetSize: { width: 2440, height: 1220 },
+        allowRotation: true,
+        algorithm: 'shelf'
+      }
+    })
+    
+    console.log('✅ Usuario demo creado exitosamente')
+    return result
+    
+  } catch (error) {
+    console.error('❌ Error al crear usuario demo:', error)
+    
+    // Si el usuario ya existe, intentar login
+    if (error.message.includes('ya está registrado')) {
+      console.log('🔄 Usuario demo ya existe, iniciando sesión...')
+      return await completeUserLogin('demo@cutoptimizer.com', 'demodemo')
+    }
+    
+    throw new Error(`No se pudo crear el usuario demo: ${error.message}`)
   }
 }
 
@@ -423,7 +516,10 @@ const userService = {
   
   // Autenticación mejorada
   completeUserRegistration,
-  completeUserLogin
+  completeUserLogin,
+  
+  // Utilidades
+  createDemoUser
 }
 
 export default userService
