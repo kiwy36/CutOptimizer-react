@@ -1,23 +1,12 @@
 /**
- * 📋 INPUT PANEL - Panel de entrada para gestionar piezas
- * 
- * 📍 FUNCIÓN:
- * - Interfaz para agregar, editar y eliminar piezas
- * - Configuración del tamaño de la placa
- * - Migrado de piece-manager.js con mejoras React
- * 
- * 🎯 CARACTERÍSTICAS:
- * - Formulario para agregar piezas con validación
- * - Lista de piezas actuales con opciones de edición
- * - Configuración de parámetros de optimización
- * - Integración con useOptimizer hook
+ * 📋 INPUT PANEL - MEJORADO con botones de acción rápida
  */
 
 import React from 'react'
 import useOptimizer from '../../hooks/useOptimizer'
 import './InputPanel.css'
 
-const InputPanel = () => {
+const InputPanel = ({ onAddSheet, onAddCut }) => {
   const {
     pieces,
     addPiece,
@@ -51,6 +40,11 @@ const InputPanel = () => {
         quantity: 1,
         color: `#${Math.floor(Math.random()*16777215).toString(16)}`
       })
+      
+      // Notificar que se agregó un corte
+      if (onAddCut) {
+        onAddCut()
+      }
     }
   }
 
@@ -58,10 +52,16 @@ const InputPanel = () => {
    * 🔄 Maneja cambios en la configuración de la placa
    */
   const handleSheetConfigChange = (field, value) => {
+    const numericValue = parseInt(value) || 0
     setSheetConfig(prev => ({
       ...prev,
-      [field]: parseInt(value) || 0
+      [field]: numericValue
     }))
+    
+    // Notificar cambio de configuración de plancha
+    if (onAddSheet && (field === 'width' || field === 'height')) {
+      onAddSheet()
+    }
   }
 
   /**
@@ -74,9 +74,62 @@ const InputPanel = () => {
     }))
   }
 
+  /**
+   * 📦 Agregar cortes predefinidos rápidos
+   */
+  const handleQuickCuts = (type) => {
+    const quickCuts = {
+      furniture: [
+        { width: 600, height: 400, quantity: 2, color: '#3b82f6' },
+        { width: 300, height: 200, quantity: 4, color: '#ef4444' },
+        { width: 450, height: 300, quantity: 3, color: '#10b981' }
+      ],
+      cabinet: [
+        { width: 500, height: 350, quantity: 6, color: '#8b5cf6' },
+        { width: 200, height: 150, quantity: 8, color: '#f59e0b' }
+      ]
+    }
+    
+    const cuts = quickCuts[type] || []
+    cuts.forEach(cut => addPiece(cut))
+    
+    // Notificar múltiples cortes agregados
+    if (onAddCut && cuts.length > 0) {
+      cuts.forEach(() => onAddCut())
+    }
+  }
+
   return (
     <div className="input-panel">
-      {/* Configuración de la Placa */}
+      {/* Botones de Acción Rápida */}
+      <div className="quick-actions-section">
+        <h3>Acciones Rápidas</h3>
+        <div className="quick-actions">
+          <button 
+            className="quick-btn add-sheet-btn"
+            onClick={onAddSheet}
+          >
+            📋 Agregar Plancha
+          </button>
+          <button 
+            className="quick-btn add-cut-btn"
+            onClick={onAddCut}
+          >
+            ✂️ Agregar Cortes
+          </button>
+          <div className="quick-presets">
+            <span>Cortes rápidos:</span>
+            <button onClick={() => handleQuickCuts('furniture')}>
+              🛋️ Muebles
+            </button>
+            <button onClick={() => handleQuickCuts('cabinet')}>
+              🗄️ Gabinetes
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Configuración de la Placa (existente) */}
       <div className="sheet-config-section">
         <h3>Configuración de la Placa</h3>
         <div className="sheet-config">
@@ -103,7 +156,7 @@ const InputPanel = () => {
         </div>
       </div>
 
-      {/* Configuración del Algoritmo */}
+      {/* Resto del componente permanece igual */}
       <div className="algorithm-config-section">
         <h3>Configuración del Algoritmo</h3>
         <div className="algorithm-config">
@@ -142,7 +195,7 @@ const InputPanel = () => {
         </div>
       </div>
 
-      {/* Agregar Nueva Pieza */}
+      {/* Agregar Nueva Pieza (existente) */}
       <div className="add-piece-section">
         <h3>Agregar Nueva Pieza</h3>
         <div className="add-piece-form">
@@ -191,7 +244,7 @@ const InputPanel = () => {
         </div>
       </div>
 
-      {/* Lista de Piezas Actuales */}
+      {/* Lista de Piezas Actuales (existente) */}
       <div className="pieces-list-section">
         <h3>Piezas a Optimizar ({pieces.length})</h3>
         {pieces.length === 0 ? (

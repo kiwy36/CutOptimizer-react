@@ -1,91 +1,111 @@
-/**
- * 🎨 ESTILOS DE SHEET VISUALIZATION - Visualización de placas con piezas
- * 
- * 📍 PROPOSITO:
- * - Estilos para la representación visual de placas y piezas
- * - Patrones de fondo y elementos interactivos
- * - Diseño escalable y responsive
- */
-
-/* ========================================================================== */
-/* CONTENEDOR PRINCIPAL */
-/* ========================================================================== */
-
+/* SHEET VISUALIZATION - MEJORADO para ambos modos */
 .sheet-visualization {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: var(--spacing-2);
+  padding: 1rem;
 }
 
 .sheet-container {
   position: relative;
-  background: white;
-  border: 2px solid var(--color-gray-800);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-sm);
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-/* ========================================================================== */
-/* FONDO DE LA PLACA */
-/* ========================================================================== */
+/* Modo configuración - Plancha vacía */
+.sheet-container.configuring-mode {
+  border: 2px dashed #cbd5e1;
+  background: linear-gradient(45deg, #f8fafc 25%, #f1f5f9 25%, #f1f5f9 50%, #f8fafc 50%, #f8fafc 75%, #f1f5f9 75%);
+  background-size: 20px 20px;
+  animation: slide 2s linear infinite;
+}
 
+@keyframes slide {
+  0% { background-position: 0 0; }
+  100% { background-position: 20px 20px; }
+}
+
+.configuring-state {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #64748b;
+  z-index: 5;
+}
+
+.configuring-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.7;
+}
+
+.configuring-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.configuring-dimensions {
+  font-size: 0.75rem;
+  color: #475569;
+  margin-top: 0.25rem;
+}
+
+/* Fondo de la placa con patrón de grid mejorado */
 .sheet-background {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    linear-gradient(45deg, var(--color-gray-100) 25%, transparent 25%), 
-    linear-gradient(-45deg, var(--color-gray-100) 25%, transparent 25%), 
-    linear-gradient(45deg, transparent 75%, var(--color-gray-100) 75%), 
-    linear-gradient(-45deg, transparent 75%, var(--color-gray-100) 75%);
+  background-image: 
+    linear-gradient(rgba(203, 213, 225, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(203, 213, 225, 0.3) 1px, transparent 1px);
   background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-  opacity: 0.3;
+  opacity: 0.6;
 }
 
-/* ========================================================================== */
-/* PIEZAS */
-/* ========================================================================== */
-
+/* Piezas con mejor visualización */
 .piece {
   position: absolute;
-  border: 1px solid;
+  border: 2px solid;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
-  transition: all 0.2s ease;
-  cursor: help;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
   overflow: hidden;
 }
 
 .piece:hover {
-  transform: scale(1.05);
+  transform: scale(1.02);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   z-index: 10;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
 }
 
 .piece-label {
   font-weight: 600;
   text-align: center;
-  line-height: 1.2;
-  padding: 2px;
-  user-select: none;
   pointer-events: none;
+  user-select: none;
+  padding: 2px 4px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 3px;
+  margin: 2px;
 }
-
-/* ========================================================================== */
-/* INDICADOR DE ROTACIÓN */
-/* ========================================================================== */
 
 .rotation-indicator {
   position: absolute;
   top: 2px;
   right: 2px;
+  font-size: 0.8em;
   background: rgba(0, 0, 0, 0.7);
   color: white;
   border-radius: 50%;
@@ -94,50 +114,44 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  font-weight: bold;
   pointer-events: none;
 }
 
-/* ========================================================================== */
-/* DIMENSIONES DE LA PLACA */
-/* ========================================================================== */
-
+/* Dimensiones de la placa */
 .sheet-dimensions {
   position: absolute;
-  bottom: -25px;
+  bottom: -2rem;
   left: 50%;
   transform: translateX(-50%);
-  font-size: var(--font-size-xs);
-  color: var(--color-gray-600);
-  background: white;
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--border-radius-sm);
-  border: 1px solid var(--color-gray-300);
+  background: #1e293b;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
   white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  z-index: 5;
 }
 
-/* ========================================================================== */
-/* ESTADOS ESPECIALES */
-/* ========================================================================== */
-
-/* Pieza muy pequeña (ocultar texto) */
-.piece.small .piece-label {
-  display: none;
+/* Indicador de modo */
+.sheet-mode-indicator {
+  position: absolute;
+  top: -1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #3b82f6;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Efecto de selección */
-.piece.selected {
-  border-width: 2px;
-  border-style: dashed;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
-}
-
-/* ========================================================================== */
-/* ANIMACIONES */
-/* ========================================================================== */
-
-@keyframes piecePlacement {
+/* Estados de animación para nuevas piezas */
+@keyframes pieceAppear {
   0% {
     opacity: 0;
     transform: scale(0.8);
@@ -149,31 +163,48 @@
 }
 
 .piece {
-  animation: piecePlacement 0.3s ease-out;
+  animation: pieceAppear 0.3s ease-out;
 }
 
-/* ========================================================================== */
-/* RESPONSIVE */
-/* ========================================================================== */
+/* Efectos para diferentes estados de eficiencia */
+.sheet-container.high-efficiency {
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
 
+.sheet-container.medium-efficiency {
+  border-color: #f59e0b;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.sheet-container.low-efficiency {
+  border-color: #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* Efectos hover para mejor UX */
+.sheet-container:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .sheet-container {
-    max-width: 100%;
+  .sheet-dimensions {
+    font-size: 0.7rem;
+    bottom: -1.75rem;
   }
   
-  .piece-label {
-    font-size: 8px !important;
+  .sheet-mode-indicator {
+    font-size: 0.65rem;
+    top: -1.25rem;
   }
   
-  .rotation-indicator {
-    width: 12px;
-    height: 12px;
-    font-size: 8px;
+  .configuring-icon {
+    font-size: 1.5rem;
   }
-}
-
-/* Límites de tamaño para visualización */
-.sheet-container {
-  max-width: 100%;
-  max-height: 400px;
+  
+  .configuring-text {
+    font-size: 0.8rem;
+  }
 }
