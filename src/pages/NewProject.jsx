@@ -1,22 +1,15 @@
 /**
- * ➕ NEW PROJECT - Página para crear nuevo proyecto de optimización
+ * ➕ NEW PROJECT - Versión actualizada con comunicación mejorada entre componentes
  * 
  * 📍 FUNCIÓN:
- * - Página principal para crear proyectos de optimización
- * - Integra InputPanel y ResultsPanel en un layout de dos columnas
- * - Maneja el proceso completo de optimización
- * - Permite guardar proyectos en Firestore (preparado para Fase 6)
- * 
- * 🎯 CARACTERÍSTICAS:
- * - Layout de dos columnas (entrada + resultados)
- * - Botón de optimización con validaciones
- * - Estados de carga y errores
- * - Integración completa con useOptimizer hook
+ * - Permite crear, optimizar y guardar nuevos proyectos de corte
+ * - Usa el hook global useOptimizer para compartir estado entre componentes
+ * - Integra comunicación directa con InputPanel y ResultsPanel
  */
 
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import  useAuth  from '../hooks/useAuth'
+import useAuth from '../hooks/useAuth'
 import useOptimizer from '../hooks/useOptimizer'
 import InputPanel from '../components/optimizer/InputPanel'
 import ResultsPanel from '../components/optimizer/ResultsPanel'
@@ -28,17 +21,22 @@ const NewProject = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
   
-  // Hook del optimizador
+  // 🧩 Hook del optimizador - ESTADO COMPARTIDO GLOBAL
   const {
     pieces,
     sheets,
     isOptimizing,
+    problematicPieces,
     optimize,
     reset,
-    calculateStats
+    calculateStats,
+    addPiece,
+    removePiece,
+    config,
+    updateConfig
   } = useOptimizer()
 
-  // Estado local del componente
+  // 🧠 Estado local del componente
   const [projectName, setProjectName] = useState('')
   const [sheetConfig, setSheetConfig] = useState({
     width: 2440,
@@ -54,7 +52,7 @@ const NewProject = () => {
     setError('')
     
     try {
-      // Validar que hay piezas para optimizar
+      // Validar que haya piezas cargadas
       if (pieces.length === 0) {
         setError('Agrega al menos una pieza para optimizar')
         return
@@ -66,8 +64,16 @@ const NewProject = () => {
         return
       }
 
+      console.log('🔄 Optimizando con:', { 
+        pieces: pieces.length, 
+        sheetConfig,
+        piecesDetails: pieces 
+      })
+
       // Ejecutar optimización
       await optimize(sheetConfig.width, sheetConfig.height)
+      
+      console.log('✅ Optimización completada. Sheets:', sheets)
       
     } catch (error) {
       setError(error.message)
@@ -76,7 +82,7 @@ const NewProject = () => {
   }
 
   /**
-   * 💾 Maneja el guardado del proyecto (preparado para Firestore)
+   * 💾 Maneja el guardado del proyecto
    */
   const handleSaveProject = async () => {
     if (!user) {
@@ -98,8 +104,8 @@ const NewProject = () => {
     setError('')
 
     try {
-      // TODO: Implementar guardado en Firestore (Fase 6)
-      console.log('Guardando proyecto:', {
+      // 🔜 Pendiente: Implementar guardado en Firestore (Fase 6)
+      console.log('💾 Guardando proyecto:', {
         name: projectName,
         sheetConfig,
         pieces,
@@ -108,7 +114,7 @@ const NewProject = () => {
         userId: user.uid
       })
 
-      // Simular guardado (remover en Fase 6)
+      // Simula guardado (1 segundo)
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       // Redirigir a la lista de proyectos
@@ -127,6 +133,7 @@ const NewProject = () => {
   const handleReset = () => {
     reset()
     setProjectName('')
+    setSheetConfig({ width: 2440, height: 1220 })
     setError('')
   }
 
@@ -143,15 +150,15 @@ const NewProject = () => {
 
   return (
     <div className="new-project-page">
-      {/* Header de la página */}
+      {/* 🧭 Header principal */}
       <div className="project-header">
         <div className="header-content">
           <h1>Nuevo Proyecto</h1>
           <p>Crea y optimiza un nuevo proyecto de cortes</p>
         </div>
         
-        {/* Controles principales */}
-        <div className="project-controls">
+        {/* ✏️ Nombre del proyecto */}
+        <div className="project-name-section">
           <input
             type="text"
             placeholder="Nombre del proyecto..."
@@ -160,36 +167,10 @@ const NewProject = () => {
             className="project-name-input"
             disabled={isSaving}
           />
-          
-          <div className="control-buttons">
-            <button
-              onClick={handleOptimize}
-              disabled={isOptimizing || pieces.length === 0}
-              className="optimize-btn"
-            >
-              {isOptimizing ? '🔄 Optimizando...' : '🚀 Optimizar'}
-            </button>
-            
-            <button
-              onClick={handleSaveProject}
-              disabled={isSaving || sheets.length === 0 || !projectName.trim()}
-              className="save-btn"
-            >
-              {isSaving ? '💾 Guardando...' : '💾 Guardar Proyecto'}
-            </button>
-            
-            <button
-              onClick={handleReset}
-              disabled={isOptimizing || isSaving}
-              className="reset-btn"
-            >
-              🔄 Reiniciar
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* Mensajes de error */}
+      {/* ⚠️ Mensajes de error */}
       {error && (
         <ErrorMessage 
           message={error} 
@@ -198,70 +179,43 @@ const NewProject = () => {
         />
       )}
 
-      {/* Configuración rápida de placa */}
-      <div className="quick-sheet-config">
-        <h3>Configuración Rápida de Placa</h3>
-        <div className="config-fields">
-          <div className="config-field">
-            <label>Ancho de placa (mm)</label>
-            <input
-              type="number"
-              value={sheetConfig.width}
-              onChange={(e) => handleSheetConfigChange('width', e.target.value)}
-              min="100"
-              max="10000"
-              disabled={isOptimizing}
-            />
-          </div>
-          <div className="config-field">
-            <label>Alto de placa (mm)</label>
-            <input
-              type="number"
-              value={sheetConfig.height}
-              onChange={(e) => handleSheetConfigChange('height', e.target.value)}
-              min="100"
-              max="10000"
-              disabled={isOptimizing}
-            />
-          </div>
-          <div className="config-presets">
-            <span>Presets:</span>
-            <button 
-              onClick={() => setSheetConfig({ width: 2440, height: 1220 })}
-              disabled={isOptimizing}
-            >
-              Standard (2440×1220)
-            </button>
-            <button 
-              onClick={() => setSheetConfig({ width: 1220, height: 2440 })}
-              disabled={isOptimizing}
-            >
-              Vertical (1220×2440)
-            </button>
-            <button 
-              onClick={() => setSheetConfig({ width: 2000, height: 1000 })}
-              disabled={isOptimizing}
-            >
-              Mediano (2000×1000)
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Layout principal de dos columnas */}
+      {/* 🧩 Layout principal: InputPanel ↔ ResultsPanel */}
       <div className="optimizer-layout">
-        {/* Columna izquierda - Entrada de datos */}
+        {/* Columna izquierda: Entrada de datos */}
         <div className="input-column">
-          <InputPanel />
+          <InputPanel 
+            // Estado compartido
+            sheetConfig={sheetConfig}
+            onSheetConfigChange={handleSheetConfigChange}
+            onOptimize={handleOptimize}
+            onSaveProject={handleSaveProject} // ✅ NUEVO
+            onReset={handleReset} // ✅ NUEVO
+            // Funciones del optimizador
+            addPiece={addPiece}
+            removePiece={removePiece}
+            pieces={pieces}
+            config={config}
+            updateConfig={updateConfig}
+            isOptimizing={isOptimizing}
+            isSaving={isSaving} // ✅ NUEVO
+            projectName={projectName} // ✅ NUEVO
+          />
         </div>
 
-        {/* Columna derecha - Resultados */}
+        {/* Columna derecha: Resultados */}
         <div className="results-column">
-          <ResultsPanel />
+          <ResultsPanel 
+            sheetConfig={sheetConfig}
+            currentPieces={pieces}
+            sheets={sheets}
+            problematicPieces={problematicPieces}
+            isOptimizing={isOptimizing}
+            calculateStats={calculateStats}
+          />
         </div>
       </div>
 
-      {/* Estado de carga global */}
+      {/* 🔄 Estado de carga global */}
       {(isOptimizing || isSaving) && (
         <div className="global-loading">
           <LoadingSpinner size="large" />

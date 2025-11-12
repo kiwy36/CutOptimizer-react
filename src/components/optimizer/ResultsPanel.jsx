@@ -1,29 +1,19 @@
 /**
- * 📊 RESULTS PANEL - MEJORADO con visualización inmediata de planchas
- * 
- * 📍 FUNCIÓN MEJORADA:
- * - Muestra planchas inmediatamente después de ser configuradas
- * - Visualización en tiempo real de progreso
- * - Estados: Configurando → Optimizando → Optimizado
- * - Integración completa con SheetVisualization mejorado
+ * 📊 RESULTS PANEL - REPARADO con props correctas
  */
 
 import React from 'react'
-import useOptimizer from '../../hooks/useOptimizer'
 import SheetVisualization from './SheetVisualization'
 import './ResultsPanel.css'
 
 const ResultsPanel = ({ 
-  userActions = {}, 
   sheetConfig = {},
-  currentPieces = [] 
+  currentPieces = [],
+  sheets = [],
+  problematicPieces = [],
+  isOptimizing = false,
+  calculateStats = () => ({})
 }) => {
-  const {
-    sheets,
-    problematicPieces,
-    isOptimizing,
-    calculateStats
-  } = useOptimizer()
 
   const stats = calculateStats()
 
@@ -34,13 +24,6 @@ const ResultsPanel = ({
     if (efficiency >= 85) return 'efficiency-high'
     if (efficiency >= 70) return 'efficiency-medium'
     return 'efficiency-low'
-  }
-
-  /**
-   * ⏱️ Obtiene el texto de tiempo para acciones recientes
-   */
-  const getActionTimeText = () => {
-    return 'Hace unos segundos'
   }
 
   /**
@@ -61,18 +44,7 @@ const ResultsPanel = ({
   const shouldShowConfiguredSheets = () => {
     return sheetConfig.width > 0 && 
            sheetConfig.height > 0 && 
-           sheets.length === 0 &&
-           currentPieces.length === 0
-  }
-
-  /**
-   * 📊 Determina si mostrar planchas con piezas pero sin optimizar
-   */
-  const shouldShowSheetsWithPieces = () => {
-    return sheetConfig.width > 0 && 
-           sheetConfig.height > 0 && 
-           sheets.length === 0 &&
-           currentPieces.length > 0
+           sheets.length === 0
   }
 
   return (
@@ -85,57 +57,9 @@ const ResultsPanel = ({
         </div>
       )}
 
-      {/* Panel de Acciones del Usuario */}
-      {(userActions.sheetsAdded > 0 || userActions.cutsAdded > 0 || userActions.optimizationsRun > 0) && (
-        <div className="user-actions-panel">
-          <h3>Progreso del Proyecto</h3>
-          <div className="actions-timeline">
-            {userActions.sheetsAdded > 0 && (
-              <div className="action-item sheet-added">
-                <span className="action-icon">📋</span>
-                <div className="action-content">
-                  <span className="action-text">Planchas configuradas: {userActions.sheetsAdded}</span>
-                  <small className="action-time">{getActionTimeText()}</small>
-                </div>
-              </div>
-            )}
-            
-            {userActions.cutsAdded > 0 && (
-              <div className="action-item cut-added">
-                <span className="action-icon">✂️</span>
-                <div className="action-content">
-                  <span className="action-text">Cortes agregados: {userActions.cutsAdded} piezas</span>
-                  <small className="action-time">{getActionTimeText()}</small>
-                </div>
-              </div>
-            )}
-            
-            {userActions.optimizationsRun > 0 && (
-              <div className="action-item optimized">
-                <span className="action-icon">🎯</span>
-                <div className="action-content">
-                  <span className="action-text">Optimizaciones realizadas: {userActions.optimizationsRun}</span>
-                  <small className="action-time">{getActionTimeText()}</small>
-                </div>
-              </div>
-            )}
-            
-            {userActions.hasUnsavedChanges && (
-              <div className="action-item unsaved">
-                <span className="action-icon">💾</span>
-                <div className="action-content">
-                  <span className="action-text">Cambios sin guardar</span>
-                  <small className="action-time">Guarda el proyecto para conservar los cambios</small>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Visualización de Planchas - MEJORADA */}
+      {/* Visualización de Planchas - REPARADA */}
       <div className="sheets-visualization-section">
-        <h3>Visualización de Planchas</h3>
+        <h3>📊 Visualización de Planchas</h3>
         
         {/* Estado: Planchas optimizadas */}
         {sheets.length > 0 && (
@@ -146,11 +70,11 @@ const ResultsPanel = ({
             </div>
             <div className="sheets-grid">
               {sheets.map((sheet, index) => (
-                <div key={sheet.id} className="sheet-card optimized">
+                <div key={sheet.id || index} className="sheet-card optimized">
                   <div className="sheet-header">
                     <h4>Placa {index + 1}</h4>
                     <span className={`sheet-efficiency ${getEfficiencyClass(sheet.efficiency)}`}>
-                      {sheet.efficiency.toFixed(1)}%
+                      {sheet.efficiency?.toFixed(1) || 0}%
                     </span>
                   </div>
                   <SheetVisualization 
@@ -159,7 +83,7 @@ const ResultsPanel = ({
                     mode="optimized"
                   />
                   <div className="sheet-info">
-                    <span>Piezas: {sheet.pieces.length}</span>
+                    <span>Piezas: {sheet.pieces?.length || 0}</span>
                     <span>Utilización: {((sheet.usedArea / (sheet.width * sheet.height)) * 100).toFixed(1)}%</span>
                   </div>
                 </div>
@@ -168,50 +92,25 @@ const ResultsPanel = ({
           </div>
         )}
 
-        {/* Estado: Plancha configurada con piezas (antes de optimizar) */}
-        {shouldShowSheetsWithPieces() && (
+        {/* Estado: Plancha configurada (antes de optimizar) */}
+        {shouldShowConfiguredSheets() && (
           <div className="configured-sheets">
             <div className="section-header">
-              <h4>⚙️ Plancha Configurada con Piezas</h4>
-              <span className="section-badge">{currentPieces.length} piezas listas</span>
+              <h4>⚙️ Plancha Configurada</h4>
+              <span className="section-badge">
+                {currentPieces.length > 0 
+                  ? `${currentPieces.length} piezas listas` 
+                  : 'Esperando piezas'
+                }
+              </span>
             </div>
             <div className="sheets-grid">
               <div className="sheet-card configured">
                 <div className="sheet-header">
                   <h4>Placa Principal</h4>
-                  <span className="sheet-status">Lista para optimizar</span>
-                </div>
-                <SheetVisualization 
-                  sheet={getConfiguredSheet()}
-                  scale={400 / sheetConfig.width}
-                  mode="configuring"
-                />
-                <div className="sheet-info">
-                  <span>Piezas listas: {currentPieces.length}</span>
-                  <span>Área total: {currentPieces.reduce((sum, piece) => 
-                    sum + (piece.width * piece.height * piece.quantity), 0).toLocaleString()} mm²</span>
-                </div>
-                <div className="optimization-prompt">
-                  <p>✅ Plancha configurada y piezas listas</p>
-                  <small>Haz clic en "Optimizar Cortes" para organizar las piezas</small>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Estado: Plancha configurada vacía */}
-        {shouldShowConfiguredSheets() && (
-          <div className="empty-sheets">
-            <div className="section-header">
-              <h4>📋 Plancha Configurada</h4>
-              <span className="section-badge">Esperando piezas</span>
-            </div>
-            <div className="sheets-grid">
-              <div className="sheet-card empty">
-                <div className="sheet-header">
-                  <h4>Placa Principal</h4>
-                  <span className="sheet-status">Configurada</span>
+                  <span className="sheet-status">
+                    {currentPieces.length > 0 ? 'Lista para optimizar' : 'Configurada'}
+                  </span>
                 </div>
                 <SheetVisualization 
                   sheet={getConfiguredSheet()}
@@ -221,10 +120,22 @@ const ResultsPanel = ({
                 <div className="sheet-info">
                   <span>Tamaño: {sheetConfig.width} × {sheetConfig.height} mm</span>
                   <span>Área disponible: {(sheetConfig.width * sheetConfig.height).toLocaleString()} mm²</span>
+                  {currentPieces.length > 0 && (
+                    <span>Piezas listas: {currentPieces.length}</span>
+                  )}
                 </div>
-                <div className="empty-prompt">
-                  <p>📋 Plancha lista para usar</p>
-                  <small>Agrega piezas usando el panel izquierdo</small>
+                <div className="optimization-prompt">
+                  {currentPieces.length > 0 ? (
+                    <>
+                      <p>✅ {currentPieces.length} piezas listas para optimizar</p>
+                      <small>Haz clic en "Optimizar Cortes" para organizar las piezas</small>
+                    </>
+                  ) : (
+                    <>
+                      <p>📋 Plancha lista para usar</p>
+                      <small>Agrega piezas usando el panel izquierdo</small>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -238,20 +149,6 @@ const ResultsPanel = ({
               <div className="no-sheets-icon">📐</div>
               <h4>No hay planchas configuradas</h4>
               <p>Configura el tamaño de la plancha en el panel izquierdo para comenzar</p>
-              <div className="setup-steps">
-                <div className="setup-step">
-                  <span className="step-number">1</span>
-                  <span>Configura el ancho y alto de la plancha</span>
-                </div>
-                <div className="setup-step">
-                  <span className="step-number">2</span>
-                  <span>Agrega piezas a optimizar</span>
-                </div>
-                <div className="setup-step">
-                  <span className="step-number">3</span>
-                  <span>Ejecuta la optimización</span>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -260,7 +157,7 @@ const ResultsPanel = ({
       {/* Panel de estadísticas (solo cuando hay resultados) */}
       {sheets.length > 0 && (
         <div className="stats-panel">
-          <h3>Resultados de Optimización</h3>
+          <h3>📈 Resultados de Optimización</h3>
           <div className="stats-grid">
             <div className="stat-item">
               <span className="stat-label">Placas utilizadas:</span>
@@ -274,23 +171,23 @@ const ResultsPanel = ({
             
             <div className="stat-item">
               <span className="stat-label">Área total:</span>
-              <span className="stat-value">{stats.totalArea.toLocaleString()} mm²</span>
+              <span className="stat-value">{stats.totalArea?.toLocaleString() || 0} mm²</span>
             </div>
             
             <div className="stat-item">
               <span className="stat-label">Área utilizada:</span>
-              <span className="stat-value">{stats.usedArea.toLocaleString()} mm²</span>
+              <span className="stat-value">{stats.usedArea?.toLocaleString() || 0} mm²</span>
             </div>
             
             <div className="stat-item">
               <span className="stat-label">Desperdicio:</span>
-              <span className="stat-value">{stats.wasteArea.toLocaleString()} mm²</span>
+              <span className="stat-value">{stats.wasteArea?.toLocaleString() || 0} mm²</span>
             </div>
             
             <div className="stat-item">
               <span className="stat-label">Eficiencia:</span>
-              <span className={`stat-value ${getEfficiencyClass(stats.efficiency)}`}>
-                {stats.efficiency.toFixed(2)}%
+              <span className={`stat-value ${getEfficiencyClass(stats.efficiency || 0)}`}>
+                {(stats.efficiency || 0).toFixed(2)}%
               </span>
             </div>
           </div>

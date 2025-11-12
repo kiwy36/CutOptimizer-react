@@ -1,25 +1,33 @@
 /**
- * 📋 INPUT PANEL - MEJORADO con botones de acción rápida
+ * 📋 INPUT PANEL - VERSIÓN ACTUALIZADA Y CONECTADA
+ * 
+ * 🔧 FUNCIONES:
+ * - Configura las dimensiones de la placa
+ * - Define parámetros del algoritmo
+ * - Permite agregar y eliminar piezas
+ * - Ejecuta, guarda y reinicia proyectos
+ * 
+ * 🤝 Integrado con: NewProject.jsx y useOptimizer()
  */
 
 import React from 'react'
-import useOptimizer from '../../hooks/useOptimizer'
 import './InputPanel.css'
 
-const InputPanel = ({ onAddSheet, onAddCut }) => {
-  const {
-    pieces,
-    addPiece,
-    removePiece,
-    config,
-    updateConfig
-  } = useOptimizer()
-
-  const [sheetConfig, setSheetConfig] = React.useState({
-    width: 2440,
-    height: 1220
-  })
-
+const InputPanel = ({ 
+  sheetConfig,
+  onSheetConfigChange,
+  onOptimize,
+  onSaveProject, // ✅ NUEVO
+  onReset, // ✅ NUEVO
+  addPiece,
+  removePiece,
+  pieces,
+  config,
+  updateConfig,
+  isOptimizing,
+  isSaving, // ✅ NUEVO
+  projectName // ✅ NUEVO
+}) => {
   const [newPiece, setNewPiece] = React.useState({
     width: 300,
     height: 200,
@@ -33,18 +41,13 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
   const handleAddPiece = () => {
     if (newPiece.width > 0 && newPiece.height > 0 && newPiece.quantity > 0) {
       addPiece(newPiece)
-      // Resetear formulario
+      // Resetear formulario con nuevo color aleatorio
       setNewPiece({
         width: 300,
         height: 200,
         quantity: 1,
-        color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+        color: `#${Math.floor(Math.random() * 16777215).toString(16)}`
       })
-      
-      // Notificar que se agregó un corte
-      if (onAddCut) {
-        onAddCut()
-      }
     }
   }
 
@@ -53,15 +56,7 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
    */
   const handleSheetConfigChange = (field, value) => {
     const numericValue = parseInt(value) || 0
-    setSheetConfig(prev => ({
-      ...prev,
-      [field]: numericValue
-    }))
-    
-    // Notificar cambio de configuración de plancha
-    if (onAddSheet && (field === 'width' || field === 'height')) {
-      onAddSheet()
-    }
+    onSheetConfigChange(field, numericValue)
   }
 
   /**
@@ -74,64 +69,11 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
     }))
   }
 
-  /**
-   * 📦 Agregar cortes predefinidos rápidos
-   */
-  const handleQuickCuts = (type) => {
-    const quickCuts = {
-      furniture: [
-        { width: 600, height: 400, quantity: 2, color: '#3b82f6' },
-        { width: 300, height: 200, quantity: 4, color: '#ef4444' },
-        { width: 450, height: 300, quantity: 3, color: '#10b981' }
-      ],
-      cabinet: [
-        { width: 500, height: 350, quantity: 6, color: '#8b5cf6' },
-        { width: 200, height: 150, quantity: 8, color: '#f59e0b' }
-      ]
-    }
-    
-    const cuts = quickCuts[type] || []
-    cuts.forEach(cut => addPiece(cut))
-    
-    // Notificar múltiples cortes agregados
-    if (onAddCut && cuts.length > 0) {
-      cuts.forEach(() => onAddCut())
-    }
-  }
-
   return (
     <div className="input-panel">
-      {/* Botones de Acción Rápida */}
-      <div className="quick-actions-section">
-        <h3>Acciones Rápidas</h3>
-        <div className="quick-actions">
-          <button 
-            className="quick-btn add-sheet-btn"
-            onClick={onAddSheet}
-          >
-            📋 Agregar Plancha
-          </button>
-          <button 
-            className="quick-btn add-cut-btn"
-            onClick={onAddCut}
-          >
-            ✂️ Agregar Cortes
-          </button>
-          <div className="quick-presets">
-            <span>Cortes rápidos:</span>
-            <button onClick={() => handleQuickCuts('furniture')}>
-              🛋️ Muebles
-            </button>
-            <button onClick={() => handleQuickCuts('cabinet')}>
-              🗄️ Gabinetes
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Configuración de la Placa (existente) */}
+      {/* Configuración de la Placa */}
       <div className="sheet-config-section">
-        <h3>Configuración de la Placa</h3>
+        <h3>📐 Configuración de la Placa</h3>
         <div className="sheet-config">
           <div className="config-group">
             <label>Ancho (mm)</label>
@@ -141,6 +83,7 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
               onChange={(e) => handleSheetConfigChange('width', e.target.value)}
               min="100"
               max="10000"
+              disabled={isOptimizing || isSaving}
             />
           </div>
           <div className="config-group">
@@ -151,14 +94,38 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
               onChange={(e) => handleSheetConfigChange('height', e.target.value)}
               min="100"
               max="10000"
+              disabled={isOptimizing || isSaving}
             />
           </div>
         </div>
+        
+        {/* Presets rápidos de placa */}
+        <div className="sheet-presets">
+          <span>Presets:</span>
+          <button 
+            onClick={() => {
+              onSheetConfigChange('width', 2440)
+              onSheetConfigChange('height', 1220)
+            }}
+            disabled={isOptimizing || isSaving}
+          >
+            Standard (2440×1220)
+          </button>
+          <button 
+            onClick={() => {
+              onSheetConfigChange('width', 1220)
+              onSheetConfigChange('height', 2440)
+            }}
+            disabled={isOptimizing || isSaving}
+          >
+            Vertical (1220×2440)
+          </button>
+        </div>
       </div>
 
-      {/* Resto del componente permanece igual */}
+      {/* Configuración del Algoritmo */}
       <div className="algorithm-config-section">
-        <h3>Configuración del Algoritmo</h3>
+        <h3>⚙️ Configuración del Algoritmo</h3>
         <div className="algorithm-config">
           <div className="config-group">
             <label>
@@ -166,6 +133,7 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
                 type="checkbox"
                 checked={config.allowRotation}
                 onChange={(e) => updateConfig({ allowRotation: e.target.checked })}
+                disabled={isOptimizing || isSaving}
               />
               Permitir rotación de piezas
             </label>
@@ -175,6 +143,7 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
             <select
               value={config.sortingMethod}
               onChange={(e) => updateConfig({ sortingMethod: e.target.value })}
+              disabled={isOptimizing || isSaving}
             >
               <option value="max-side-desc">Lado más largo (desc)</option>
               <option value="area-desc">Área (desc)</option>
@@ -187,6 +156,7 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
             <select
               value={config.algorithm}
               onChange={(e) => updateConfig({ algorithm: e.target.value })}
+              disabled={isOptimizing || isSaving}
             >
               <option value="shelf">Shelf Algorithm</option>
               <option value="guillotine">Guillotine Algorithm</option>
@@ -195,9 +165,9 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
         </div>
       </div>
 
-      {/* Agregar Nueva Pieza (existente) */}
+      {/* Agregar Nueva Pieza */}
       <div className="add-piece-section">
-        <h3>Agregar Nueva Pieza</h3>
+        <h3>✂️ Agregar Nueva Pieza</h3>
         <div className="add-piece-form">
           <div className="form-group">
             <label>Ancho (mm)</label>
@@ -206,6 +176,7 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
               value={newPiece.width}
               onChange={(e) => handleNewPieceChange('width', e.target.value)}
               min="1"
+              disabled={isOptimizing || isSaving}
             />
           </div>
           <div className="form-group">
@@ -215,6 +186,7 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
               value={newPiece.height}
               onChange={(e) => handleNewPieceChange('height', e.target.value)}
               min="1"
+              disabled={isOptimizing || isSaving}
             />
           </div>
           <div className="form-group">
@@ -225,6 +197,7 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
               onChange={(e) => handleNewPieceChange('quantity', e.target.value)}
               min="1"
               max="100"
+              disabled={isOptimizing || isSaving}
             />
           </div>
           <div className="form-group">
@@ -233,20 +206,22 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
               type="color"
               value={newPiece.color}
               onChange={(e) => handleNewPieceChange('color', e.target.value)}
+              disabled={isOptimizing || isSaving}
             />
           </div>
           <button 
             className="add-piece-btn"
             onClick={handleAddPiece}
+            disabled={isOptimizing || isSaving}
           >
             + Agregar Pieza
           </button>
         </div>
       </div>
 
-      {/* Lista de Piezas Actuales (existente) */}
+      {/* Lista de Piezas Actuales */}
       <div className="pieces-list-section">
-        <h3>Piezas a Optimizar ({pieces.length})</h3>
+        <h3>📦 Piezas a Optimizar ({pieces.length})</h3>
         {pieces.length === 0 ? (
           <div className="empty-state">
             <p>No hay piezas agregadas</p>
@@ -272,6 +247,7 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
                   className="remove-piece-btn"
                   onClick={() => removePiece(piece.id)}
                   title="Eliminar pieza"
+                  disabled={isOptimizing || isSaving}
                 >
                   ×
                 </button>
@@ -279,6 +255,51 @@ const InputPanel = ({ onAddSheet, onAddCut }) => {
             ))}
           </div>
         )}
+      </div>
+
+      {/* BOTONES DE ACCIÓN PRINCIPALES */}
+      <div className="action-buttons-section">
+        <h3>🚀 Acciones del Proyecto</h3>
+        <div className="action-buttons">
+          <button
+            onClick={onOptimize}
+            disabled={isOptimizing || pieces.length === 0}
+            className="optimize-btn primary"
+          >
+            {isOptimizing ? '🔄 Optimizando...' : '🎯 Optimizar Cortes'}
+          </button>
+          
+          <div className="secondary-buttons">
+            <button
+              onClick={onSaveProject}
+              disabled={isSaving || pieces.length === 0 || !projectName.trim()}
+              className="save-btn"
+            >
+              {isSaving ? '💾 Guardando...' : '💾 Guardar Proyecto'}
+            </button>
+            
+            <button
+              onClick={onReset}
+              disabled={isOptimizing || isSaving}
+              className="reset-btn"
+            >
+              🔄 Reiniciar
+            </button>
+          </div>
+        </div>
+        
+        {/* Información de estado */}
+        <div className="action-status">
+          {pieces.length > 0 && (
+            <p>✅ {pieces.length} piezas listas para optimizar</p>
+          )}
+          {sheetConfig.width > 0 && sheetConfig.height > 0 && (
+            <p>📐 Placa configurada: {sheetConfig.width} × {sheetConfig.height} mm</p>
+          )}
+          {projectName.trim() && (
+            <p>📝 Proyecto: {projectName}</p>
+          )}
+        </div>
       </div>
     </div>
   )
