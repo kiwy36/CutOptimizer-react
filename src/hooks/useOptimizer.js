@@ -8,12 +8,9 @@
  * - Migra la funcionalidad de optimizer.js a React hooks
  * 
  * 🎯 ALGORITMOS IMPLEMENTADOS:
- * - Shelf Algorithm (Mejorado con rotación)
+ * - Shelf Algorithm (Mejorado con rotación y manejo de múltiples placas)
  * - Guillotine Algorithm (Básico)
  * - Cálculo de estadísticas y eficiencia
- * 
- * 🔄 USO:
- * const { pieces, sheets, optimize, addPiece, removePiece, reset } = useOptimizer()
  */
 
 import { useState, useCallback } from 'react'
@@ -46,10 +43,6 @@ const useOptimizer = () => {
   // GESTIÓN DE PIEZAS
   // =============================================================================
 
-  /**
-   * ➕ Agrega una nueva pieza a la lista
-   * @param {Object} piece - Pieza a agregar (width, height, quantity, color)
-   */
   const addPiece = useCallback((piece = { width: 300, height: 200, quantity: 1, color: '#3b82f6' }) => {
     const newPiece = {
       id: Date.now() + Math.random(),
@@ -59,23 +52,13 @@ const useOptimizer = () => {
       color: piece.color || `#${Math.floor(Math.random()*16777215).toString(16)}`,
       ...piece
     }
-    
     setPieces(prev => [...prev, newPiece])
   }, [])
 
-  /**
-   * 🗑️ Elimina una pieza de la lista
-   * @param {string} pieceId - ID de la pieza a eliminar
-   */
   const removePiece = useCallback((pieceId) => {
     setPieces(prev => prev.filter(piece => piece.id !== pieceId))
   }, [])
 
-  /**
-   * ✏️ Actualiza una pieza existente
-   * @param {string} pieceId - ID de la pieza a actualizar
-   * @param {Object} updates - Campos a actualizar
-   */
   const updatePiece = useCallback((pieceId, updates) => {
     setPieces(prev => prev.map(piece => 
       piece.id === pieceId ? { ...piece, ...updates } : piece
@@ -83,52 +66,33 @@ const useOptimizer = () => {
   }, [])
 
   // =============================================================================
-  // ALGORITMOS DE OPTIMIZACIÓN - FUNCIONES AUXILIARES
+  // FUNCIONES AUXILIARES
   // =============================================================================
 
-  /**
-   * 🔄 Ordena piezas según el método configurado
-   * @param {Array} pieces - Array de piezas a ordenar
-   * @returns {Array} Piezas ordenadas
-   */
   const sortPieces = useCallback((pieces) => {
     const method = config.sortingMethod
-    
     switch (method) {
       case 'max-side-desc':
-        return [...pieces].sort((a, b) => 
-          Math.max(b.width, b.height) - Math.max(a.width, a.height))
-      
+        return [...pieces].sort((a, b) => Math.max(b.width, b.height) - Math.max(a.width, a.height))
       case 'area-desc':
         return [...pieces].sort((a, b) => (b.width * b.height) - (a.width * a.height))
-      
       case 'width-desc':
         return [...pieces].sort((a, b) => b.width - a.width)
-      
       case 'height-desc':
         return [...pieces].sort((a, b) => b.height - a.height)
-      
       default:
-        return [...pieces].sort((a, b) => Math.max(b.width, b.height) - Math.max(a.width, a.height))
+        return [...pieces]
     }
   }, [config.sortingMethod])
 
-  /**
-   * ✅ Verifica si una pieza puede colocarse en una posición
-   */
   const canPlacePiece = useCallback((piece, x, y, rowHeight, sheetWidth, sheetHeight, rotated = false) => {
     const pieceWidth = rotated ? piece.height : piece.width
     const pieceHeight = rotated ? piece.width : piece.height
-    
     if (x + pieceWidth > sheetWidth) return false
     if (y + pieceHeight > sheetHeight) return false
-    
     return true
   }, [])
 
-  /**
-   * 🏗️ Crea una nueva placa vacía
-   */
   const createNewSheet = useCallback((width, height) => ({
     id: Date.now() + Math.random(),
     pieces: [],
@@ -138,9 +102,6 @@ const useOptimizer = () => {
     efficiency: 0
   }), [])
 
-  /**
-   * 📍 Coloca una pieza en una placa
-   */
   const placePiece = useCallback((sheet, piece, x, y, rotated = false) => {
     const placedPiece = {
       ...piece,
@@ -150,21 +111,15 @@ const useOptimizer = () => {
       placedWidth: rotated ? piece.height : piece.width,
       placedHeight: rotated ? piece.width : piece.height
     }
-    
     sheet.pieces.push(placedPiece)
     sheet.usedArea += placedPiece.placedWidth * placedPiece.placedHeight
     sheet.efficiency = (sheet.usedArea / (sheet.width * sheet.height)) * 100
-    
     return placedPiece
   }, [])
 
-  /**
-   * 📝 Obtiene la razón por la que una pieza no pudo colocarse
-   */
   const getUnplacedReason = useCallback((piece, sheetWidth, sheetHeight) => {
     const fitsNormal = piece.width <= sheetWidth && piece.height <= sheetHeight
     const fitsRotated = config.allowRotation && piece.height <= sheetWidth && piece.width <= sheetHeight
-    
     if (!fitsNormal && !fitsRotated) {
       return `Pieza demasiado grande (${piece.width}x${piece.height}mm) para la placa (${sheetWidth}x${sheetHeight}mm)`
     } else {
@@ -173,18 +128,13 @@ const useOptimizer = () => {
   }, [config.allowRotation])
 
   // =============================================================================
-  // ALGORITMOS DE OPTIMIZACIÓN - PRINCIPALES
+  // 🎯 SHELF ALGORITHM - REPARADO Y MEJORADO
   // =============================================================================
 
-  /**
-   * 🎯 Shelf Algorithm Mejorado (con rotación)
-   */
   const shelfAlgorithm = useCallback((pieces, sheetWidth, sheetHeight) => {
-    let piecesToPlace = pieces.map(piece => ({ 
-      ...piece, 
-      rotated: false 
-    }))
+    console.log(`🔧 Ejecutando Shelf Algorithm para ${pieces.length} piezas...`)
     
+    let piecesToPlace = pieces.map(piece => ({ ...piece, rotated: false }))
     piecesToPlace = sortPieces(piecesToPlace)
     
     const sheets = []
@@ -195,12 +145,12 @@ const useOptimizer = () => {
       let currentY = 0
       let currentX = 0
       let currentRowHeight = 0
+      let placedInThisSheet = false
       
       for (let i = 0; i < piecesToPlace.length; i++) {
         const piece = piecesToPlace[i]
         let placed = false
         
-        // Intentar orientación normal
         if (canPlacePiece(piece, currentX, currentY, currentRowHeight, sheetWidth, sheetHeight, false)) {
           placePiece(currentSheet, piece, currentX, currentY, false)
           currentX += piece.width
@@ -208,8 +158,8 @@ const useOptimizer = () => {
           piecesToPlace.splice(i, 1)
           i--
           placed = true
+          placedInThisSheet = true
         } 
-        // Intentar rotación si está permitida
         else if (config.allowRotation && canPlacePiece(piece, currentX, currentY, currentRowHeight, sheetWidth, sheetHeight, true)) {
           placePiece(currentSheet, piece, currentX, currentY, true)
           currentX += piece.height
@@ -217,57 +167,49 @@ const useOptimizer = () => {
           piecesToPlace.splice(i, 1)
           i--
           placed = true
+          placedInThisSheet = true
         }
         
-        // Si no cabe, intentar nueva fila
         if (!placed && currentX > 0) {
           currentY += currentRowHeight
           currentX = 0
           currentRowHeight = 0
           i--
         }
+
+        if (currentY >= sheetHeight) break
       }
-      
-      // Evaluar eficiencia de la placa
+
       if (currentSheet.pieces.length > 0) {
-        const efficiency = currentSheet.usedArea / (sheetWidth * sheetHeight)
-        
-        if (efficiency >= config.efficiencyThreshold || sheets.length === 0) {
-          sheets.push(currentSheet)
-        } else {
-          // Devolver piezas a la cola si la eficiencia es baja
-          piecesToPlace = [...piecesToPlace, ...currentSheet.pieces.map(p => ({
-            ...p,
-            rotated: false
-          }))]
-        }
-      } else {
+        const totalSheetArea = sheetWidth * sheetHeight
+        const efficiency = (currentSheet.usedArea / totalSheetArea) * 100
+        currentSheet.efficiency = efficiency
+        sheets.push(currentSheet)
+        console.log(`✅ Placa ${sheets.length} creada: ${currentSheet.pieces.length} piezas, eficiencia: ${efficiency.toFixed(1)}%`)
+      }
+
+      if (!placedInThisSheet && piecesToPlace.length > 0) {
+        console.warn(`⚠️ No se pudo colocar más piezas. ${piecesToPlace.length} piezas restantes`)
         break
       }
     }
-    
-    // Reportar piezas no colocadas
+
     if (piecesToPlace.length > 0) {
       unplacedPieces = piecesToPlace.map(piece => ({
         ...piece,
         reason: getUnplacedReason(piece, sheetWidth, sheetHeight)
       }))
+      console.warn(`❌ ${unplacedPieces.length} piezas no pudieron colocarse`)
     }
-    
-    return { sheets, unplacedPieces }
-  }, [
-    sortPieces, 
-    canPlacePiece, 
-    createNewSheet, 
-    placePiece, 
-    config.allowRotation, 
-    config.efficiencyThreshold,
-    getUnplacedReason
-  ])
 
-  /**
-   * 📋 Algoritmo Guillotine (versión básica)
-   */
+    console.log(`✅ Algoritmo completado: ${sheets.length} placas utilizadas`)
+    return { sheets, unplacedPieces }
+  }, [sortPieces, canPlacePiece, createNewSheet, placePiece, config.allowRotation, getUnplacedReason])
+
+  // =============================================================================
+  // 🪚 ALGORITMO GUILLOTINE (igual)
+  // =============================================================================
+
   const guillotineAlgorithm = useCallback((pieces, sheetWidth, sheetHeight) => {
     const sheets = []
     let piecesToPlace = sortPieces([...pieces])
@@ -317,61 +259,62 @@ const useOptimizer = () => {
         }
       }
       
-      if (sheet.pieces.length > 0) {
-        sheets.push(sheet)
-      }
+      if (sheet.pieces.length > 0) sheets.push(sheet)
     }
     
     return { sheets, unplacedPieces: [] }
   }, [sortPieces, createNewSheet, placePiece])
 
   // =============================================================================
-  // FUNCIÓN PRINCIPAL DE OPTIMIZACIÓN
+  // 🚀 FUNCIÓN PRINCIPAL DE OPTIMIZACIÓN
   // =============================================================================
 
-  /**
-   * 🚀 Ejecuta el proceso de optimización
-   * @param {number} sheetWidth - Ancho de la placa
-   * @param {number} sheetHeight - Alto de la placa
-   */
   const optimize = useCallback(async (sheetWidth, sheetHeight) => {
     if (isOptimizing) {
       console.warn('⚠️ Optimización ya en progreso')
       return
     }
 
-    if (pieces.length === 0) {
-      throw new Error('❌ Agrega al menos una pieza para optimizar')
-    }
+    if (pieces.length === 0) throw new Error('❌ Agrega al menos una pieza para optimizar')
 
     setIsOptimizing(true)
     setProblematicPieces([])
 
     try {
-      // Validar entradas
-      if (isNaN(sheetWidth) || sheetWidth <= 0 || isNaN(sheetHeight) || sheetHeight <= 0) {
-        throw new Error('❌ El tamaño de la placa debe ser un número positivo')
-      }
+      // 🧩 VALIDACIONES DE TAMAÑO DE PLACA
+      if (isNaN(sheetWidth) || sheetWidth <= 0 || isNaN(sheetHeight) || sheetHeight <= 0)
+        throw new Error('❌ Tamaño de placa inválido')
 
-      // Validar rango de tamaño razonable
-      if (sheetWidth < 100 || sheetHeight < 100) {
-        throw new Error('❌ El tamaño mínimo de placa es 100x100mm')
-      }
+      if (sheetWidth < 100 || sheetHeight < 100)
+        throw new Error('❌ Tamaño mínimo de placa: 100x100mm')
 
-      if (sheetWidth > 10000 || sheetHeight > 10000) {
-        throw new Error('❌ El tamaño máximo de placa es 10000x10000mm')
-      }
+      if (sheetWidth > 10000 || sheetHeight > 10000)
+        throw new Error('❌ Tamaño máximo de placa: 10000x10000mm')
 
-      // Filtrar piezas que no caben ni rotadas
+      // 🔍 DEPURACIÓN: INFO DE PIEZAS Y PLACA
+      console.log('🔍 DEBUG - Validando piezas vs placa:', {
+        sheetSize: `${sheetWidth}x${sheetHeight}`,
+        totalPieces: pieces.length,
+        pieces: pieces.map(p => `${p.width}x${p.height} (qty: ${p.quantity})`)
+      })
+
       const validPieces = []
       const removedPieces = []
-      
+
+      // 🧠 VALIDACIÓN INDIVIDUAL DE PIEZAS
       for (const piece of pieces) {
         const fitsNormal = piece.width <= sheetWidth && piece.height <= sheetHeight
-        const fitsRotated = config.allowRotation && piece.height <= sheetWidth && piece.width <= sheetHeight
-        
+        const fitsRotated =
+          config.allowRotation && piece.height <= sheetWidth && piece.width <= sheetHeight
+
+        console.log(`🔍 DEBUG - Pieza ${piece.width}x${piece.height}:`, {
+          fitsNormal,
+          fitsRotated,
+          allowRotation: config.allowRotation
+        })
+
         if (fitsNormal || fitsRotated) {
-          // Expandir piezas según cantidad
+          // Expande según cantidad
           for (let i = 0; i < piece.quantity; i++) {
             validPieces.push({
               ...piece,
@@ -379,13 +322,22 @@ const useOptimizer = () => {
               quantity: 1
             })
           }
+          console.log(`✅ Pieza ${piece.width}x${piece.height} - VÁLIDA`)
         } else {
           removedPieces.push({
             ...piece,
-            reason: `No cabe en la placa ni rotada (${piece.width}x${piece.height}mm vs placa ${sheetWidth}x${sheetHeight}mm)`
+            reason: `No cabe en la placa ${sheetWidth}x${sheetHeight}mm (necesita ${piece.width}x${piece.height}mm)`
           })
+          console.log(`❌ Pieza ${piece.width}x${piece.height} - NO CABE`)
         }
       }
+
+      // 📋 RESUMEN DE VALIDACIÓN
+      console.log('🔍 DEBUG - Resultado validación:', {
+        validPieces: validPieces.length,
+        removedPieces: removedPieces.length,
+        validPiecesDetails: validPieces.map(p => `${p.width}x${p.height}`)
+      })
 
       if (removedPieces.length > 0) {
         setProblematicPieces(removedPieces)
@@ -393,29 +345,26 @@ const useOptimizer = () => {
       }
 
       if (validPieces.length === 0) {
-        throw new Error('❌ Ninguna pieza cabe en la placa especificada')
+        throw new Error(
+          `❌ Ninguna pieza cabe en la placa ${sheetWidth}x${sheetHeight}mm. ` +
+          `Piezas más pequeñas: ${Math.min(...pieces.map(p => p.width))}x${Math.min(...pieces.map(p => p.height))}mm`
+        )
       }
 
-      // Ejecutar algoritmo seleccionado
-      let result
-      if (config.algorithm === 'guillotine') {
-        result = guillotineAlgorithm(validPieces, sheetWidth, sheetHeight)
-      } else {
-        result = shelfAlgorithm(validPieces, sheetWidth, sheetHeight)
-      }
+      // ⚙️ EJECUCIÓN DEL ALGORITMO
+      const result =
+        config.algorithm === 'guillotine'
+          ? guillotineAlgorithm(validPieces, sheetWidth, sheetHeight)
+          : shelfAlgorithm(validPieces, sheetWidth, sheetHeight)
 
-      // Agregar piezas no colocadas a las problemáticas
-      if (result.unplacedPieces && result.unplacedPieces.length > 0) {
+      // 🧩 PIEZAS NO COLOCADAS
+      if (result.unplacedPieces?.length > 0)
         setProblematicPieces(prev => [...prev, ...result.unplacedPieces])
-      }
 
+      // ✅ GUARDAR RESULTADO FINAL
       setSheets(result.sheets)
-      
-      console.log(`✅ Optimización completada: ${result.sheets.length} placas utilizadas`)
-      if (result.unplacedPieces && result.unplacedPieces.length > 0) {
-        console.warn(`⚠️ ${result.unplacedPieces.length} piezas no pudieron colocarse`)
-      }
-      
+      console.log(`✅ Optimización completada: ${result.sheets.length} placas usadas`)
+
       return result
 
     } catch (error) {
@@ -424,58 +373,26 @@ const useOptimizer = () => {
     } finally {
       setIsOptimizing(false)
     }
-  }, [
-    pieces, 
-    isOptimizing, 
-    config.algorithm, 
-    config.allowRotation, 
-    shelfAlgorithm, 
-    guillotineAlgorithm
-  ])
+  }, [pieces, isOptimizing, config.algorithm, config.allowRotation, shelfAlgorithm, guillotineAlgorithm])
+
 
   // =============================================================================
-  // CÁLCULO DE ESTADÍSTICAS
+  // 📊 ESTADÍSTICAS + RESET + UTILIDADES
   // =============================================================================
 
-  /**
-   * 📊 Calcula estadísticas de la optimización
-   */
   const calculateStats = useCallback(() => {
-    if (sheets.length === 0) {
-      return {
-        totalSheets: 0,
-        totalArea: 0,
-        usedArea: 0,
-        wasteArea: 0,
-        efficiency: 0,
-        totalPieces: 0
-      }
-    }
-    
+    if (sheets.length === 0) return { totalSheets: 0, totalArea: 0, usedArea: 0, wasteArea: 0, efficiency: 0, totalPieces: 0 }
+
     const totalSheets = sheets.length
-    const totalArea = sheets.reduce((sum, sheet) => sum + (sheet.width * sheet.height), 0)
-    const usedArea = sheets.reduce((sum, sheet) => sum + sheet.usedArea, 0)
+    const totalArea = sheets.reduce((sum, s) => sum + (s.width * s.height), 0)
+    const usedArea = sheets.reduce((sum, s) => sum + s.usedArea, 0)
     const wasteArea = totalArea - usedArea
     const efficiency = (usedArea / totalArea) * 100
-    const totalPieces = sheets.reduce((sum, sheet) => sum + sheet.pieces.length, 0)
-    
-    return {
-      totalSheets,
-      totalArea,
-      usedArea,
-      wasteArea,
-      efficiency,
-      totalPieces
-    }
+    const totalPieces = sheets.reduce((sum, s) => sum + s.pieces.length, 0)
+
+    return { totalSheets, totalArea, usedArea, wasteArea, efficiency, totalPieces }
   }, [sheets])
 
-  // =============================================================================
-  // RESET Y UTILIDADES
-  // =============================================================================
-
-  /**
-   * 🔄 Reinicia el optimizador al estado inicial
-   */
   const reset = useCallback(() => {
     setPieces([])
     setSheets([])
@@ -483,67 +400,42 @@ const useOptimizer = () => {
     setIsOptimizing(false)
   }, [])
 
-  /**
-   * ⚙️ Actualiza la configuración del algoritmo
-   */
   const updateConfig = useCallback((newConfig) => {
     setConfig(prev => ({ ...prev, ...newConfig }))
   }, [])
 
-  /**
-   * 📦 Obtiene todas las piezas expandidas (según cantidad)
-   */
   const getExpandedPieces = useCallback(() => {
     const expanded = []
     pieces.forEach(piece => {
       for (let i = 0; i < piece.quantity; i++) {
-        expanded.push({
-          ...piece,
-          id: `${piece.id}_${i}`,
-          quantity: 1
-        })
+        expanded.push({ ...piece, id: `${piece.id}_${i}`, quantity: 1 })
       }
     })
     return expanded
   }, [pieces])
 
-  /**
-   * 📐 Valida si una pieza individual es válida
-   */
-  const isValidPiece = useCallback((piece) => {
-    return piece.width > 0 && 
-           piece.height > 0 && 
-           piece.quantity > 0 &&
-           piece.color
-  }, [])
+  const isValidPiece = useCallback((piece) => (
+    piece.width > 0 && piece.height > 0 && piece.quantity > 0 && piece.color
+  ), [])
 
   // =============================================================================
-  // VALORES DE RETORNO DEL HOOK
+  // RETORNO DEL HOOK
   // =============================================================================
 
   return {
-    // Estado
     pieces,
     sheets,
     isOptimizing,
     problematicPieces,
     config,
-    
-    // Gestión de piezas
     addPiece,
     removePiece,
     updatePiece,
     getExpandedPieces,
     isValidPiece,
-    
-    // Optimización
     optimize,
     calculateStats,
-    
-    // Configuración
     updateConfig,
-    
-    // Utilidades
     reset
   }
 }

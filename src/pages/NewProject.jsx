@@ -9,6 +9,7 @@
 
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { projectService } from '../services/firebase'
 import useAuth from '../hooks/useAuth'
 import useOptimizer from '../hooks/useOptimizer'
 import InputPanel from '../components/optimizer/InputPanel'
@@ -84,6 +85,7 @@ const NewProject = () => {
   /**
    * 💾 Maneja el guardado del proyecto
    */
+
   const handleSaveProject = async () => {
     if (!user) {
       setError('Debes estar autenticado para guardar proyectos')
@@ -104,26 +106,40 @@ const NewProject = () => {
     setError('')
 
     try {
-      // 🔜 Pendiente: Implementar guardado en Firestore (Fase 6)
-      console.log('💾 Guardando proyecto:', {
-        name: projectName,
-        sheetConfig,
-        pieces,
-        sheets,
-        stats: calculateStats(),
-        userId: user.uid
-      })
-
-      // Simula guardado (1 segundo)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      console.log('💾 Guardando proyecto en Firebase...');
       
-      // Redirigir a la lista de proyectos
-      navigate('/projects')
+      // ✅ NUEVO: Guardar en Firebase usando projectService
+      const projectData = {
+        name: projectName.trim(),
+        sheetConfig: {
+          width: sheetConfig.width,
+          height: sheetConfig.height
+        },
+        pieces: pieces,
+        sheets: sheets,
+        stats: calculateStats(),
+        userId: user.uid,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const savedProject = await projectService.createProject(projectData, user.uid);
+      
+      console.log('✅ Proyecto guardado exitosamente:', savedProject.id);
+      
+      // Mostrar mensaje de éxito
+      setError(''); // Limpiar errores
+      
+      // Redirigir a la lista de proyectos después de 1 segundo
+      setTimeout(() => {
+        navigate('/projects');
+      }, 1000);
       
     } catch (error) {
-      setError('Error al guardar el proyecto: ' + error.message)
+      console.error('❌ Error al guardar proyecto:', error);
+      setError('Error al guardar el proyecto: ' + error.message);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
   }
 

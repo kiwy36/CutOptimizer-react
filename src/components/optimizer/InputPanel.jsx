@@ -259,21 +259,21 @@ const InputPanel = ({
 
       {/* BOTONES DE ACCIÓN PRINCIPALES */}
       <div className="action-buttons-section">
-        <h3>🚀 Acciones del Proyecto</h3>
+        <h3>Acciones del Proyecto</h3>
         <div className="action-buttons">
           <button
             onClick={onOptimize}
             disabled={isOptimizing || pieces.length === 0}
-            className="optimize-btn primary"
+            className="botones-acciones"
           >
-            {isOptimizing ? '🔄 Optimizando...' : '🎯 Optimizar Cortes'}
+            {isOptimizing ? '🔄 Optimizando...' : '🚀 Optimizar Cortes'}
           </button>
           
           <div className="secondary-buttons">
             <button
               onClick={onSaveProject}
               disabled={isSaving || pieces.length === 0 || !projectName.trim()}
-              className="save-btn"
+              className="botones-acciones"
             >
               {isSaving ? '💾 Guardando...' : '💾 Guardar Proyecto'}
             </button>
@@ -281,9 +281,9 @@ const InputPanel = ({
             <button
               onClick={onReset}
               disabled={isOptimizing || isSaving}
-              className="reset-btn"
+              className="botones-acciones"
             >
-              🔄 Reiniciar
+              🔄 Reiniciar Todo
             </button>
           </div>
         </div>

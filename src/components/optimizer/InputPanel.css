@@ -381,3 +381,85 @@
 .pieces-list::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+/* === ESTILOS DE BOTONES DE ACCIÓN === */
+.botones-acciones {
+  background: linear-gradient(135deg, #007bff, #0056d6);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  font-size: 15px;
+  display: inline-block;
+}
+
+/* HOVER: ligero brillo y movimiento */
+.botones-acciones:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #3399ff, #0062ff);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ESTADO DESACTIVADO */
+.botones-acciones:disabled {
+  background: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* VARIANTES SEGÚN FUNCIÓN */
+.action-buttons .secondary-buttons .botones-acciones:nth-child(1) {
+  background: linear-gradient(135deg, #4caf50, #2e7d32); /* Guardar */
+}
+
+.action-buttons .secondary-buttons .botones-acciones:nth-child(2) {
+  background: linear-gradient(135deg, #f44336, #b71c1c); /* Reiniciar */
+}
+
+/* ESTADO DE ACCIÓN (guardando u optimizando) */
+.botones-acciones:disabled:active,
+.botones-acciones:disabled.optimizing,
+.botones-acciones:disabled.saving {
+  background: repeating-linear-gradient(
+    45deg,
+    #cccccc,
+    #cccccc 10px,
+    #bbbbbb 10px,
+    #bbbbbb 20px
+  );
+  animation: stripes 1s linear infinite;
+  color: #444;
+}
+
+/* ANIMACIÓN DE RAYAS (efecto de carga visual) */
+@keyframes stripes {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 40px 0;
+  }
+}
+
+/* CONTENEDOR GENERAL */
+.action-buttons-section {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-top: 2px solid #e0e0e0;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.secondary-buttons {
+  display: flex;
+  gap: 10px;
+}
