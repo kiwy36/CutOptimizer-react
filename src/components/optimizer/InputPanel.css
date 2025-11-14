@@ -463,3 +463,62 @@
   display: flex;
   gap: 10px;
 }
+/* Agregar estos estilos al final de InputPanel.css */
+
+.project-name-section {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.project-name-section h3 {
+  margin-bottom: 1rem;
+  color: #2d3748;
+  font-size: 1.1rem;
+}
+
+.project-name-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.project-name-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.project-name-input:disabled {
+  background-color: #f7fafc;
+  cursor: not-allowed;
+}
+
+.name-required {
+  color: #e53e3e;
+  font-style: italic;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+/* Mejorar la sección de estado */
+.action-status {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 4px solid #3b82f6;
+}
+
+.action-status p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+}
+
+.action-status strong {
+  color: #2d3748;
+}

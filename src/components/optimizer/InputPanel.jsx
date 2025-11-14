@@ -22,11 +22,13 @@ const InputPanel = ({
   addPiece,
   removePiece,
   pieces,
+  sheets,
   config,
   updateConfig,
   isOptimizing,
   isSaving, // ✅ NUEVO
-  projectName // ✅ NUEVO
+  projectName,
+  onProjectNameChange
 }) => {
   const [newPiece, setNewPiece] = React.useState({
     width: 300,
@@ -256,7 +258,21 @@ const InputPanel = ({
           </div>
         )}
       </div>
-
+      {/* ✅ NUEVA SECCIÓN: Nombre del Proyecto */}
+      <div className="project-name-section">
+        <h3>📝 Nombre del Proyecto</h3>
+        <input
+          type="text"
+          placeholder="Ingresa un nombre para tu proyecto..."
+          value={projectName}
+          onChange={(e) => onProjectNameChange(e.target.value)}
+          className="project-name-input"
+          disabled={isSaving}
+        />
+        {!projectName.trim() && (
+          <small className="name-required">* Requerido para guardar</small>
+        )}
+      </div>
       {/* BOTONES DE ACCIÓN PRINCIPALES */}
       <div className="action-buttons-section">
         <h3>Acciones del Proyecto</h3>
@@ -272,7 +288,7 @@ const InputPanel = ({
           <div className="secondary-buttons">
             <button
               onClick={onSaveProject}
-              disabled={isSaving || pieces.length === 0 || !projectName.trim()}
+              disabled={isSaving || sheets.length === 0 || !projectName.trim()}
               className="botones-acciones"
             >
               {isSaving ? '💾 Guardando...' : '💾 Guardar Proyecto'}

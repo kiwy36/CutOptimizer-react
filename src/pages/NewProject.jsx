@@ -108,7 +108,7 @@ const NewProject = () => {
     try {
       console.log('💾 Guardando proyecto en Firebase...');
       
-      // ✅ NUEVO: Guardar en Firebase usando projectService
+      // ✅ CORREGIDO: Usar estructura compatible con projectService
       const projectData = {
         name: projectName.trim(),
         sheetConfig: {
@@ -117,23 +117,21 @@ const NewProject = () => {
         },
         pieces: pieces,
         sheets: sheets,
-        stats: calculateStats(),
-        userId: user.uid,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        // ❌ REMOVER: createdAt y updatedAt (projectService los maneja)
+        // ✅ projectService automáticamente agrega: userId, createdAt, updatedAt, isDeleted
       };
 
       const savedProject = await projectService.createProject(projectData, user.uid);
       
       console.log('✅ Proyecto guardado exitosamente:', savedProject.id);
       
-      // Mostrar mensaje de éxito
-      setError(''); // Limpiar errores
+      // Mostrar mensaje de éxito temporal
+      setError('✅ Proyecto guardado correctamente. Redirigiendo...');
       
-      // Redirigir a la lista de proyectos después de 1 segundo
+      // Redirigir a la lista de proyectos después de 1.5 segundos
       setTimeout(() => {
         navigate('/projects');
-      }, 1000);
+      }, 1500);
       
     } catch (error) {
       console.error('❌ Error al guardar proyecto:', error);
@@ -215,6 +213,8 @@ const NewProject = () => {
             isOptimizing={isOptimizing}
             isSaving={isSaving} // ✅ NUEVO
             projectName={projectName} // ✅ NUEVO
+            onProjectNameChange={setProjectName}
+            sheets={sheets}
           />
         </div>
 
