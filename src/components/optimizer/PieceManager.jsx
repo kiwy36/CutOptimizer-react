@@ -150,7 +150,7 @@ const PieceManager = () => {
             {pieces.length === 0 ? (
               <>
                 <div className="no-pieces-icon">📦</div>
-                <p>No hay piezas agregadas</p>
+                <p>No hay piezas agregadas </p>
               </>
             ) : (
               <>
