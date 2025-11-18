@@ -1,18 +1,11 @@
 /**
- * 📁 PROJECTS - Página de listado de proyectos del usuario
+ * 📁 PROJECTS GALLERY - COMPLETADO con integración Firestore
  * 
  * 📍 FUNCIÓN:
  * - Muestra todos los proyectos guardados del usuario actual
  * - Grid de tarjetas de proyectos con información básica
- * - Funcionalidad de búsqueda y filtrado
- * - Acciones: Editar, eliminar, ver detalles
- * 
- * 🎯 CARACTERÍSTICAS:
- * - Integración con useProjects hook
- * - Grid responsivo de proyectos
- * - Estados de carga y errores
- * - Búsqueda en tiempo real
- * - Proyectos ordenados por fecha de actualización
+ * - Funcionalidad de búsqueda, eliminación y duplicación
+ * - Integración completa con Firestore
  */
 
 import React, { useState, useMemo } from 'react'
@@ -24,9 +17,19 @@ import Card from '../components/shared/Card'
 import './ProjectsGallery.css'
 
 const ProjectsGallery = () => {
-  const { projects, loading, error, refreshProjects } = useProjects()
+  const { 
+    projects, 
+    loading, 
+    error, 
+    deleteProject, 
+    duplicateProject, 
+    refreshProjects,
+    clearError 
+  } = useProjects()
+  
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState('updatedAt')
+  const [processingAction, setProcessingAction] = useState(null) // Para tracking de acciones
 
   /**
    * 🔍 Filtra y ordena los proyectos
@@ -51,7 +54,7 @@ const ProjectsGallery = () => {
           return new Date(b.createdAt) - new Date(a.createdAt)
         case 'updatedAt':
         default:
-          return new Date(b.updatedAt) - new Date(a.updatedAt)
+          return new Date(b.updatedAt) - new Date(a.createdAt)
       }
     })
     
@@ -72,27 +75,49 @@ const ProjectsGallery = () => {
   }, [projects])
 
   /**
-   * 🗑️ Maneja la eliminación de un proyecto (placeholder)
+   * 🗑️ Maneja la eliminación de un proyecto - IMPLEMENTADO CON FIRESTORE
    */
   const handleDeleteProject = async (projectId, projectName) => {
-    if (!window.confirm(`¿Estás seguro de que quieres eliminar el proyecto "${projectName}"?`)) {
+    if (!window.confirm(`¿Estás seguro de que quieres eliminar el proyecto "${projectName}"?\nEsta acción no se puede deshacer.`)) {
       return
     }
 
+    setProcessingAction(`deleting-${projectId}`)
+    clearError()
+
     try {
-      // TODO: Implementar eliminación en Firestore (Fase 6)
-      console.log('Eliminando proyecto:', projectId)
-      
-      // Simular eliminación
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
-      // En una implementación real, esto actualizaría la lista automáticamente
-      // a través del hook useProjects
-      refreshProjects()
-      
+      await deleteProject(projectId)
+      // La lista se actualiza automáticamente a través del hook
+      console.log('✅ Proyecto eliminado exitosamente')
     } catch (error) {
-      console.error('Error al eliminar proyecto:', error)
-      alert('Error al eliminar el proyecto: ' + error.message)
+      console.error('❌ Error al eliminar proyecto:', error)
+      // El error se maneja en el hook useProjects
+    } finally {
+      setProcessingAction(null)
+    }
+  }
+
+  /**
+   * 📋 Maneja la duplicación de un proyecto - IMPLEMENTADO CON FIRESTORE
+   */
+  const handleDuplicateProject = async (projectId, projectName) => {
+    const newName = prompt(
+      'Ingresa un nombre para la copia del proyecto:',
+      `${projectName} (Copia)`
+    )
+
+    if (!newName || newName.trim() === '') return
+
+    setProcessingAction(`duplicating-${projectId}`)
+    clearError()
+
+    try {
+      await duplicateProject(projectId, newName.trim())
+      console.log('✅ Proyecto duplicado exitosamente')
+    } catch (error) {
+      console.error('❌ Error al duplicar proyecto:', error)
+    } finally {
+      setProcessingAction(null)
     }
   }
 
@@ -138,6 +163,14 @@ const ProjectsGallery = () => {
     return 'efficiency-low'
   }
 
+  /**
+   * 🔄 Maneja la recarga manual de proyectos
+   */
+  const handleRefresh = async () => {
+    clearError()
+    await refreshProjects()
+  }
+
   return (
     <div className="projects-page">
       {/* Header de la página */}
@@ -147,9 +180,19 @@ const ProjectsGallery = () => {
           <p>Gestiona y revisa todos tus proyectos de optimización guardados</p>
         </div>
         
-        <Link to="/projects/new" className="new-project-btn">
-          ➕ Nuevo Proyecto
-        </Link>
+        <div className="header-actions">
+          <button 
+            onClick={handleRefresh}
+            disabled={loading}
+            className="refresh-btn"
+            title="Actualizar lista"
+          >
+            🔄
+          </button>
+          <Link to="/projects/new" className="new-project-btn">
+            ➕ Nuevo Proyecto
+          </Link>
+        </div>
       </div>
 
       {/* Estadísticas rápidas */}
@@ -183,11 +226,13 @@ const ProjectsGallery = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
+            disabled={loading}
           />
           {searchTerm && (
             <button 
               className="clear-search"
               onClick={() => setSearchTerm('')}
+              disabled={loading}
             >
               ✕
             </button>
@@ -200,6 +245,7 @@ const ProjectsGallery = () => {
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             className="sort-select"
+            disabled={loading}
           >
             <option value="updatedAt">Más recientes</option>
             <option value="createdAt">Fecha de creación</option>
@@ -213,7 +259,7 @@ const ProjectsGallery = () => {
         <ErrorMessage 
           message={error}
           type="error"
-          onClose={refreshProjects}
+          onClose={clearError}
         />
       )}
 
@@ -259,6 +305,7 @@ const ProjectsGallery = () => {
             <div className="projects-grid">
               {filteredAndSortedProjects.map((project) => {
                 const efficiency = getProjectEfficiency(project)
+                const isProcessing = processingAction?.includes(project.id)
                 
                 return (
                   <Card key={project.id} className="project-card">
@@ -272,7 +319,7 @@ const ProjectsGallery = () => {
                     <div className="project-info">
                       <div className="info-row">
                         <span className="info-label">ID:</span>
-                        <span className="info-value">{project.id}</span>
+                        <span className="info-value monospace">{project.id.substring(0, 8)}...</span>
                       </div>
                       <div className="info-row">
                         <span className="info-label">Piezas:</span>
@@ -281,6 +328,12 @@ const ProjectsGallery = () => {
                       <div className="info-row">
                         <span className="info-label">Placas:</span>
                         <span className="info-value">{project.sheets?.length || 0}</span>
+                      </div>
+                      <div className="info-row">
+                        <span className="info-label">Tamaño placa:</span>
+                        <span className="info-value">
+                          {project.sheetConfig?.width || 0}×{project.sheetConfig?.height || 0}mm
+                        </span>
                       </div>
                       <div className="info-row">
                         <span className="info-label">Creado:</span>
@@ -296,29 +349,52 @@ const ProjectsGallery = () => {
                       <Link 
                         to={`/projects/${project.id}`}
                         className="action-btn edit-btn"
+                        title="Editar proyecto"
                       >
-                        ✏️ Editar
+                        {isProcessing && processingAction === `duplicating-${project.id}` ? (
+                          '🔄'
+                        ) : (
+                          '✏️ Editar'
+                        )}
                       </Link>
                       
                       <button
-                        onClick={() => handleDeleteProject(project.id, project.name)}
-                        className="action-btn delete-btn"
-                        title="Eliminar proyecto"
-                      >
-                        🗑️ Eliminar
-                      </button>
-                      
-                      <button
-                        onClick={() => {
-                          // TODO: Implementar duplicado (Fase 6)
-                          console.log('Duplicar proyecto:', project.id)
-                        }}
+                        onClick={() => handleDuplicateProject(project.id, project.name)}
+                        disabled={isProcessing}
                         className="action-btn duplicate-btn"
                         title="Duplicar proyecto"
                       >
-                        📋 Duplicar
+                        {isProcessing && processingAction === `duplicating-${project.id}` ? (
+                          '🔄'
+                        ) : (
+                          '📋 Duplicar'
+                        )}
+                      </button>
+                      
+                      <button
+                        onClick={() => handleDeleteProject(project.id, project.name)}
+                        disabled={isProcessing}
+                        className="action-btn delete-btn"
+                        title="Eliminar proyecto"
+                      >
+                        {isProcessing && processingAction === `deleting-${project.id}` ? (
+                          '🔄'
+                        ) : (
+                          '🗑️ Eliminar'
+                        )}
                       </button>
                     </div>
+
+                    {/* Indicador de procesamiento */}
+                    {isProcessing && (
+                      <div className="processing-overlay">
+                        <div className="processing-spinner"></div>
+                        <span>
+                          {processingAction === `deleting-${project.id}` && 'Eliminando...'}
+                          {processingAction === `duplicating-${project.id}` && 'Duplicando...'}
+                        </span>
+                      </div>
+                    )}
                   </Card>
                 )
               })}

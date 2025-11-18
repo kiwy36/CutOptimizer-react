@@ -1,22 +1,17 @@
 /**
- * 📄 PROJECT DETAIL - Página para editar proyecto existente
+ * 📄 PROJECT DETAIL - COMPLETADO con integración Firestore
  * 
  * 📍 FUNCIÓN:
  * - Carga y edita proyectos existentes del usuario
  * - Permite re-optimizar y modificar proyectos
- * - Actualiza cambios en la base de datos (preparado para Firestore)
- * - Integra los mismos componentes que NewProject pero con datos cargados
- * 
- * 🎯 CARACTERÍSTICAS:
- * - Carga de proyecto específico por ID
- * - Formulario pre-llenado con datos existentes
- * - Funcionalidad de re-optimización
- * - Guardado de cambios
+ * - Actualiza cambios en Firestore
+ * - Integración completa con useOptimizer
  */
 
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import useAuth  from '../hooks/useAuth'
+import useAuth from '../hooks/useAuth'
+import { useProjects } from '../hooks/useProjects'
 import useOptimizer from '../hooks/useOptimizer'
 import InputPanel from '../components/optimizer/InputPanel'
 import ResultsPanel from '../components/optimizer/ResultsPanel'
@@ -29,15 +24,21 @@ const ProjectDetail = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
   
-  // Hook del optimizador
+  // Hooks
+  const { getProject, updateProject, loading: projectsLoading, error: projectsError, clearError } = useProjects()
   const {
     pieces,
     sheets,
     isOptimizing,
+    problematicPieces,
     optimize,
     reset,
     addPiece,
-    calculateStats
+    removePiece,
+    updatePiece,
+    calculateStats,
+    config,
+    updateConfig
   } = useOptimizer()
 
   // Estado local del componente
@@ -53,7 +54,7 @@ const ProjectDetail = () => {
   const [hasChanges, setHasChanges] = useState(false)
 
   /**
-   * 📥 Carga el proyecto desde Firestore (simulado por ahora)
+   * 📥 Carga el proyecto desde Firestore - IMPLEMENTADO
    */
   useEffect(() => {
     const loadProject = async () => {
@@ -65,46 +66,46 @@ const ProjectDetail = () => {
 
       try {
         setIsLoading(true)
+        clearError()
         setError('')
 
-        // TODO: Implementar carga desde Firestore (Fase 6)
-        // Simular carga de proyecto
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        console.log('🔄 Cargando proyecto desde Firestore:', projectId)
         
-        // Datos de ejemplo (remover en Fase 6)
-        const mockProject = {
-          id: projectId,
-          name: `Proyecto ${projectId}`,
-          sheetConfig: { width: 2440, height: 1220 },
-          pieces: [
-            { id: '1', width: 300, height: 200, quantity: 2, color: '#3b82f6' },
-            { id: '2', width: 450, height: 300, quantity: 1, color: '#ef4444' },
-            { id: '3', width: 200, height: 150, quantity: 3, color: '#10b981' }
-          ],
-          sheets: [],
-          userId: user.uid,
-          createdAt: new Date(),
-          updatedAt: new Date()
+        // Cargar proyecto real desde Firestore
+        const projectData = await getProject(projectId)
+        
+        if (!projectData) {
+          throw new Error('Proyecto no encontrado')
         }
 
-        setProject(mockProject)
-        setProjectName(mockProject.name)
-        setSheetConfig(mockProject.sheetConfig)
+        setProject(projectData)
+        setProjectName(projectData.name || '')
+        setSheetConfig(projectData.sheetConfig || { width: 2440, height: 1220 })
         
         // Cargar piezas en el optimizador
-        reset()
-        mockProject.pieces.forEach(piece => addPiece(piece))
+        reset() // Limpiar estado anterior
+        if (projectData.pieces && projectData.pieces.length > 0) {
+          projectData.pieces.forEach(piece => addPiece(piece))
+        }
+        
+        // Cargar resultados de optimización si existen
+        if (projectData.sheets && projectData.sheets.length > 0) {
+          // Note: Las sheets se manejan automáticamente al optimizar
+          console.log('📊 Proyecto cargado con', projectData.sheets.length, 'placas optimizadas')
+        }
+
+        console.log('✅ Proyecto cargado exitosamente:', projectData.name)
         
       } catch (error) {
+        console.error('❌ Error al cargar proyecto:', error)
         setError('Error al cargar el proyecto: ' + error.message)
-        console.error('Error loading project:', error)
       } finally {
         setIsLoading(false)
       }
     }
 
     loadProject()
-  }, [projectId, user, reset, addPiece])
+  }, [projectId, user, getProject, reset, addPiece, clearError])
 
   /**
    * 🚀 Ejecuta el proceso de re-optimización
@@ -125,18 +126,22 @@ const ProjectDetail = () => {
         return
       }
 
+      console.log('🔄 Re-optimizando proyecto...')
+      
       // Ejecutar optimización
       await optimize(sheetConfig.width, sheetConfig.height)
       setHasChanges(true)
       
+      console.log('✅ Re-optimización completada')
+      
     } catch (error) {
       setError(error.message)
-      console.error('Error en re-optimización:', error)
+      console.error('❌ Error en re-optimización:', error)
     }
   }
 
   /**
-   * 💾 Guarda los cambios del proyecto
+   * 💾 Guarda los cambios del proyecto - IMPLEMENTADO CON FIRESTORE
    */
   const handleSaveChanges = async () => {
     if (!user || !project) {
@@ -153,29 +158,29 @@ const ProjectDetail = () => {
     setError('')
 
     try {
-      // TODO: Implementar actualización en Firestore (Fase 6)
-      console.log('Actualizando proyecto:', {
-        id: project.id,
-        name: projectName,
-        sheetConfig,
-        pieces,
-        sheets,
-        stats: calculateStats(),
-        userId: user.uid,
-        updatedAt: new Date()
-      })
+      console.log('💾 Guardando cambios en Firestore...')
+      
+      // Preparar datos de actualización
+      const updates = {
+        name: projectName.trim(),
+        sheetConfig: {
+          width: sheetConfig.width,
+          height: sheetConfig.height
+        },
+        pieces: pieces,
+        sheets: sheets
+      }
 
-      // Simular guardado (remover en Fase 6)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Actualizar en Firestore
+      await updateProject(projectId, updates)
       
       setHasChanges(false)
+      setProject(prev => ({ ...prev, ...updates, updatedAt: new Date() }))
       
-      // Mostrar mensaje de éxito
-      setError('')
-      // En una implementación real, podrías mostrar un toast de éxito
-      console.log('Proyecto actualizado exitosamente')
+      console.log('✅ Cambios guardados exitosamente')
       
     } catch (error) {
+      console.error('❌ Error al guardar cambios:', error)
       setError('Error al guardar los cambios: ' + error.message)
     } finally {
       setIsSaving(false)
@@ -207,6 +212,25 @@ const ProjectDetail = () => {
     navigate('/projects')
   }
 
+  /**
+   * 🔄 Maneja el reinicio del proyecto
+   */
+  const handleResetProject = () => {
+    if (hasChanges && !window.confirm('¿Estás seguro de que quieres reiniciar? Se perderán los cambios no guardados.')) {
+      return
+    }
+    
+    // Recargar proyecto original
+    if (project) {
+      reset()
+      project.pieces.forEach(piece => addPiece(piece))
+      setProjectName(project.name || '')
+      setSheetConfig(project.sheetConfig || { width: 2440, height: 1220 })
+      setHasChanges(false)
+      setError('')
+    }
+  }
+
   // Mostrar loading mientras carga
   if (isLoading) {
     return (
@@ -219,11 +243,18 @@ const ProjectDetail = () => {
   }
 
   // Mostrar error si no se pudo cargar el proyecto
-  if (error && !project) {
+  if ((error || projectsError) && !project) {
     return (
       <div className="project-detail-page">
         <div className="error-container">
-          <ErrorMessage message={error} type="error" />
+          <ErrorMessage 
+            message={error || projectsError} 
+            type="error" 
+            onClose={() => {
+              setError('')
+              clearError()
+            }}
+          />
           <button 
             onClick={() => navigate('/projects')}
             className="back-btn"
@@ -244,116 +275,134 @@ const ProjectDetail = () => {
             onClick={handleBackToList}
             className="back-button"
             title="Volver a proyectos"
+            disabled={isSaving}
           >
             ←
           </button>
           <div className="header-text">
             <h1>Editando Proyecto</h1>
-            <p>ID: {projectId}</p>
+            <p className="project-id">ID: {projectId}</p>
           </div>
         </div>
         
         {/* Controles principales */}
         <div className="project-controls">
-          <input
-            type="text"
-            placeholder="Nombre del proyecto..."
-            value={projectName}
-            onChange={(e) => {
-              setProjectName(e.target.value)
-              setHasChanges(true)
-            }}
-            className="project-name-input"
-            disabled={isSaving}
-          />
+          <div className="name-control">
+            <input
+              type="text"
+              placeholder="Nombre del proyecto..."
+              value={projectName}
+              onChange={(e) => {
+                setProjectName(e.target.value)
+                setHasChanges(true)
+              }}
+              className="project-name-input"
+              disabled={isSaving}
+            />
+            {!projectName.trim() && (
+              <span className="name-required">* Requerido</span>
+            )}
+          </div>
           
           <div className="control-buttons">
             <button
               onClick={handleReoptimize}
-              disabled={isOptimizing || pieces.length === 0}
+              disabled={isOptimizing || pieces.length === 0 || isSaving}
               className="optimize-btn"
             >
               {isOptimizing ? '🔄 Re-optimizando...' : '🔄 Re-optimizar'}
             </button>
             
             <button
+              onClick={handleResetProject}
+              disabled={isOptimizing || isSaving || !hasChanges}
+              className="reset-btn"
+            >
+              🔄 Reiniciar
+            </button>
+            
+            <button
               onClick={handleSaveChanges}
-              disabled={isSaving || !hasChanges}
+              disabled={isSaving || !hasChanges || !projectName.trim()}
               className="save-btn"
             >
               {isSaving ? '💾 Guardando...' : '💾 Guardar Cambios'}
             </button>
 
             {hasChanges && (
-              <span className="changes-indicator">* Cambios sin guardar</span>
+              <span className="changes-indicator" title="Tienes cambios sin guardar">
+                *
+              </span>
             )}
           </div>
         </div>
       </div>
 
       {/* Mensajes de error */}
-      {error && (
+      {(error || projectsError) && (
         <ErrorMessage 
-          message={error} 
+          message={error || projectsError} 
           type="error"
-          onClose={() => setError('')}
+          onClose={() => {
+            setError('')
+            clearError()
+          }}
         />
       )}
 
       {/* Información del proyecto */}
       <div className="project-info">
         <div className="info-card">
-          <h3>Información del Proyecto</h3>
+          <h3>📋 Información del Proyecto</h3>
           <div className="info-grid">
+            <div className="info-item">
+              <span className="info-label">Estado:</span>
+              <span className="info-value">
+                {hasChanges ? (
+                  <span className="status-modified">Modificado</span>
+                ) : (
+                  <span className="status-saved">Guardado</span>
+                )}
+              </span>
+            </div>
             <div className="info-item">
               <span className="info-label">Creado:</span>
               <span className="info-value">
-                {project?.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A'}
+                {project?.createdAt ? new Date(project.createdAt).toLocaleDateString('es-ES', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                }) : 'N/A'}
               </span>
             </div>
             <div className="info-item">
               <span className="info-label">Actualizado:</span>
               <span className="info-value">
-                {project?.updatedAt ? new Date(project.updatedAt).toLocaleDateString() : 'N/A'}
+                {project?.updatedAt ? new Date(project.updatedAt).toLocaleDateString('es-ES', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                }) : 'N/A'}
               </span>
             </div>
             <div className="info-item">
-              <span className="info-label">Piezas:</span>
+              <span className="info-label">Piezas actuales:</span>
               <span className="info-value">{pieces.length}</span>
             </div>
             <div className="info-item">
               <span className="info-label">Optimizaciones:</span>
               <span className="info-value">{sheets.length}</span>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Configuración de placa */}
-      <div className="quick-sheet-config">
-        <h3>Configuración de Placa</h3>
-        <div className="config-fields">
-          <div className="config-field">
-            <label>Ancho de placa (mm)</label>
-            <input
-              type="number"
-              value={sheetConfig.width}
-              onChange={(e) => handleSheetConfigChange('width', e.target.value)}
-              min="100"
-              max="10000"
-              disabled={isOptimizing}
-            />
-          </div>
-          <div className="config-field">
-            <label>Alto de placa (mm)</label>
-            <input
-              type="number"
-              value={sheetConfig.height}
-              onChange={(e) => handleSheetConfigChange('height', e.target.value)}
-              min="100"
-              max="10000"
-              disabled={isOptimizing}
-            />
+            <div className="info-item">
+              <span className="info-label">Eficiencia:</span>
+              <span className="info-value">
+                {sheets.length > 0 ? `${calculateStats().efficiency.toFixed(1)}%` : 'N/A'}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -362,22 +411,49 @@ const ProjectDetail = () => {
       <div className="optimizer-layout">
         {/* Columna izquierda - Entrada de datos */}
         <div className="input-column">
-          <InputPanel />
+          <InputPanel 
+            // Estado compartido
+            sheetConfig={sheetConfig}
+            onSheetConfigChange={handleSheetConfigChange}
+            onOptimize={handleReoptimize}
+            onSaveProject={handleSaveChanges}
+            onReset={handleResetProject}
+            // Funciones del optimizador
+            addPiece={addPiece}
+            removePiece={removePiece}
+            updatePiece={updatePiece}
+            pieces={pieces}
+            config={config}
+            updateConfig={updateConfig}
+            isOptimizing={isOptimizing}
+            isSaving={isSaving}
+            projectName={projectName}
+            onProjectNameChange={setProjectName}
+            sheets={sheets}
+          />
         </div>
 
         {/* Columna derecha - Resultados */}
         <div className="results-column">
-          <ResultsPanel />
+          <ResultsPanel 
+            sheetConfig={sheetConfig}
+            currentPieces={pieces}
+            sheets={sheets}
+            problematicPieces={problematicPieces}
+            isOptimizing={isOptimizing}
+            calculateStats={calculateStats}
+          />
         </div>
       </div>
 
       {/* Estado de carga global */}
-      {(isOptimizing || isSaving) && (
+      {(isOptimizing || isSaving || projectsLoading) && (
         <div className="global-loading">
           <LoadingSpinner size="large" />
           <p>
             {isOptimizing && 'Re-optimizando cortes...'}
-            {isSaving && 'Guardando cambios...'}
+            {isSaving && 'Guardando cambios en Firestore...'}
+            {projectsLoading && 'Cargando proyecto...'}
           </p>
         </div>
       )}
