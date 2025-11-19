@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { projectService } from '../services/firebase'
 import useAuth from './useAuth'
 
 /**
- * 📁 HOOK PERSONALIZADO PARA PROYECTOS - COMPLETADO
- * 📍 Maneja el estado y operaciones CRUD completas de proyectos
+ * 📁 HOOK PERSONALIZADO PARA PROYECTOS - COMPLETO Y CORREGIDO
+ * 📍 Maneja el estado y operaciones CRUD de proyectos
  */
 export function useProjects() {
   const [projects, setProjects] = useState([])
@@ -13,10 +13,13 @@ export function useProjects() {
   const { user } = useAuth()
 
   /**
-   * 📥 Cargar proyectos del usuario
+   * 📥 Cargar proyectos del usuario - USANDO useCallback
    */
-  const loadProjects = async () => {
-    if (!user) return
+  const loadProjects = useCallback(async () => {
+    if (!user) {
+      setProjects([])
+      return
+    }
     
     setLoading(true)
     setError(null)
@@ -30,7 +33,7 @@ export function useProjects() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user]) // ✅ user como dependencia
 
   /**
    * ➕ Crear nuevo proyecto
@@ -60,7 +63,7 @@ export function useProjects() {
     setLoading(true)
     try {
       await projectService.deleteProject(projectId, user.uid)
-      // Actualizar lista localmente
+      // Filtrar proyecto eliminado del estado local
       setProjects(prev => prev.filter(project => project.id !== projectId))
     } catch (err) {
       setError('Error al eliminar proyecto: ' + err.message)
@@ -73,12 +76,12 @@ export function useProjects() {
   /**
    * 📋 Duplicar proyecto
    */
-  const duplicateProject = async (projectId, newName = '') => {
+  const duplicateProject = async (projectId) => {
     if (!user) throw new Error('Usuario no autenticado')
     
     setLoading(true)
     try {
-      const duplicatedProject = await projectService.duplicateProject(projectId, user.uid, newName)
+      const duplicatedProject = await projectService.duplicateProject(projectId, user.uid)
       setProjects(prev => [duplicatedProject, ...prev])
       return duplicatedProject
     } catch (err) {
@@ -90,7 +93,22 @@ export function useProjects() {
   }
 
   /**
-   * ✏️ Actualizar proyecto existente
+   * ✏️ Obtener proyecto específico
+   */
+  const getProject = async (projectId) => {
+    if (!user) throw new Error('Usuario no autenticado')
+    
+    try {
+      const project = await projectService.getProject(projectId, user.uid)
+      return project
+    } catch (err) {
+      setError('Error al cargar proyecto: ' + err.message)
+      throw err
+    }
+  }
+
+  /**
+   * 💾 Actualizar proyecto existente
    */
   const updateProject = async (projectId, updates) => {
     if (!user) throw new Error('Usuario no autenticado')
@@ -98,7 +116,7 @@ export function useProjects() {
     setLoading(true)
     try {
       const updatedProject = await projectService.updateProject(projectId, updates, user.uid)
-      // Actualizar en la lista local
+      // Actualizar proyecto en la lista
       setProjects(prev => prev.map(project => 
         project.id === projectId ? { ...project, ...updates, updatedAt: new Date() } : project
       ))
@@ -111,64 +129,20 @@ export function useProjects() {
     }
   }
 
-  /**
-   * 📄 Obtener proyecto específico
-   */
-  const getProject = async (projectId) => {
-    if (!user) throw new Error('Usuario no autenticado')
-    
-    setLoading(true)
-    try {
-      const project = await projectService.getProject(projectId, user.uid)
-      return project
-    } catch (err) {
-      setError('Error al cargar proyecto: ' + err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  /**
-   * 🔍 Buscar proyectos
-   */
-  const searchProjects = async (searchTerm) => {
-    if (!user) throw new Error('Usuario no autenticado')
-    
-    setLoading(true)
-    try {
-      const results = await projectService.searchProjects(user.uid, searchTerm)
-      return results
-    } catch (err) {
-      setError('Error al buscar proyectos: ' + err.message)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Cargar proyectos cuando el usuario cambie
+  // Cargar proyectos cuando el usuario cambie - CORREGIDO
   useEffect(() => {
     loadProjects()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user])
+  }, [loadProjects]) // ✅ loadProjects como dependencia (gracias a useCallback)
 
   return {
-    // Estado
     projects,
     loading,
     error,
-    
-    // Operaciones CRUD
     createProject,
     deleteProject,
     duplicateProject,
-    updateProject,
     getProject,
-    searchProjects,
-    
-    // Utilidades
-    refreshProjects: loadProjects,
-    clearError: () => setError(null)
+    updateProject,
+    refreshProjects: loadProjects
   }
 }
