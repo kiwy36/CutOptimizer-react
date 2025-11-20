@@ -1,19 +1,10 @@
 /**
- * 🗄️ PROJECT SERVICE - Servicio para operaciones con proyectos en Firestore
+ * 🗄️ PROJECT SERVICE - Servicio CORREGIDO para operaciones con proyectos en Firestore
  * 
- * 📍 FUNCIÓN:
- * - Maneja todas las operaciones CRUD para proyectos
- * - Conecta la aplicación con Firestore
- * - Proporciona métodos para crear, leer, actualizar y eliminar proyectos
- * - Gestiona la estructura de datos de proyectos
- * 
- * 🎯 OPERACIONES:
- * - createProject: Crear nuevo proyecto
- * - getUserProjects: Obtener proyectos del usuario
- * - getProject: Obtener proyecto específico
- * - updateProject: Actualizar proyecto existente
- * - deleteProject: Eliminar proyecto
- * - duplicateProject: Duplicar proyecto
+ * 📍 ESTRUCTURA CORREGIDA:
+ * - Usa subcolecciones: users/{userId}/projects
+ * - Aislamiento total entre usuarios
+ * - Seguridad mejorada con validaciones estrictas
  */
 
 import { 
@@ -31,14 +22,15 @@ import {
 import { db } from './config'
 
 // =============================================================================
-// CONSTANTES Y CONFIGURACIÓN
+// CONSTANTES Y CONFIGURACIÓN - ACTUALIZADA
 // =============================================================================
 
 /**
- * 📋 Nombres de colecciones en Firestore
+ * 📋 Nombres de colecciones en Firestore (ESTRUCTURA CORREGIDA)
  */
 const COLLECTIONS = {
-  PROJECTS: 'projects'
+  USERS: 'users',
+  USER_PROJECTS: 'projects' // Subcolección de users/{userId}/projects
 }
 
 /**
@@ -52,18 +44,18 @@ const PROJECT_SCHEMA = {
   },
   pieces: [],
   sheets: [],
-  userId: '',
+  userId: '', // Mantener por compatibilidad y doble validación
   createdAt: null,
   updatedAt: null,
   isDeleted: false
 }
 
 // =============================================================================
-// OPERACIONES CRUD - PROYECTOS
+// OPERACIONES CRUD - PROYECTOS (ESTRUCTURA CORREGIDA)
 // =============================================================================
 
 /**
- * ➕ CREAR NUEVO PROYECTO
+ * ➕ CREAR NUEVO PROYECTO - CORREGIDO
  * 
  * @param {Object} projectData - Datos del proyecto a crear
  * @param {string} userId - ID del usuario propietario
@@ -84,16 +76,19 @@ export const createProject = async (projectData, userId) => {
     const project = {
       ...PROJECT_SCHEMA,
       ...projectData,
-      userId,
+      userId, // Doble validación de propiedad
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       isDeleted: false
     }
 
-    // Crear documento en Firestore
-    const docRef = await addDoc(collection(db, COLLECTIONS.PROJECTS), project)
+    // ✅ ESTRUCTURA CORREGIDA: users/{userId}/projects
+    const userProjectsRef = collection(db, COLLECTIONS.USERS, userId, COLLECTIONS.USER_PROJECTS)
     
-    console.log('✅ Proyecto creado exitosamente:', docRef.id)
+    // Crear documento en la subcolección del usuario
+    const docRef = await addDoc(userProjectsRef, project)
+    
+    console.log('✅ Proyecto creado en subcolección usuario:', userId, docRef.id)
     
     // Retornar proyecto con ID
     return {
@@ -110,7 +105,7 @@ export const createProject = async (projectData, userId) => {
 }
 
 /**
- * 📥 OBTENER PROYECTOS DEL USUARIO
+ * 📥 OBTENER PROYECTOS DEL USUARIO - CORREGIDO
  * 
  * @param {string} userId - ID del usuario
  * @returns {Promise<Array>} Lista de proyectos del usuario
@@ -121,10 +116,13 @@ export const getUserProjects = async (userId) => {
       throw new Error('Se requiere ID de usuario para obtener proyectos')
     }
 
+    // ✅ ESTRUCTURA CORREGIDA: users/{userId}/projects
+    const userProjectsRef = collection(db, COLLECTIONS.USERS, userId, COLLECTIONS.USER_PROJECTS)
+
     // Consultar proyectos del usuario, ordenados por fecha de actualización
+    // NOTA: Ya no necesitamos where('userId', '==', userId) porque la estructura lo garantiza
     const q = query(
-      collection(db, COLLECTIONS.PROJECTS),
-      where('userId', '==', userId),
+      userProjectsRef,
       where('isDeleted', '==', false),
       orderBy('updatedAt', 'desc')
     )
@@ -143,7 +141,7 @@ export const getUserProjects = async (userId) => {
       })
     })
 
-    console.log(`✅ Se obtuvieron ${projects.length} proyectos para el usuario ${userId}`)
+    console.log(`✅ Se obtuvieron ${projects.length} proyectos del usuario ${userId}`)
     return projects
 
   } catch (error) {
@@ -153,7 +151,7 @@ export const getUserProjects = async (userId) => {
 }
 
 /**
- * 📄 OBTENER PROYECTO ESPECÍFICO
+ * 📄 OBTENER PROYECTO ESPECÍFICO - CORREGIDO
  * 
  * @param {string} projectId - ID del proyecto
  * @param {string} userId - ID del usuario (para seguridad)
@@ -165,8 +163,9 @@ export const getProject = async (projectId, userId) => {
       throw new Error('Se requieren ID de proyecto y usuario')
     }
 
-    const docRef = doc(db, COLLECTIONS.PROJECTS, projectId)
-    const docSnap = await getDoc(docRef)
+    // ✅ ESTRUCTURA CORREGIDA: users/{userId}/projects/{projectId}
+    const projectRef = doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.USER_PROJECTS, projectId)
+    const docSnap = await getDoc(projectRef)
 
     if (!docSnap.exists()) {
       throw new Error('El proyecto no existe')
@@ -174,7 +173,7 @@ export const getProject = async (projectId, userId) => {
 
     const projectData = docSnap.data()
 
-    // Verificar que el usuario sea el propietario
+    // ✅ VERIFICACIÓN EXTRA: El userId debe coincidir (doble seguridad)
     if (projectData.userId !== userId) {
       throw new Error('No tienes permisos para acceder a este proyecto')
     }
@@ -201,7 +200,7 @@ export const getProject = async (projectId, userId) => {
 }
 
 /**
- * ✏️ ACTUALIZAR PROYECTO EXISTENTE
+ * ✏️ ACTUALIZAR PROYECTO EXISTENTE - CORREGIDO
  * 
  * @param {string} projectId - ID del proyecto a actualizar
  * @param {Object} updates - Campos a actualizar
@@ -223,13 +222,13 @@ export const updateProject = async (projectId, updates, userId) => {
       updatedAt: serverTimestamp()
     }
 
-    // Actualizar en Firestore
-    const projectRef = doc(db, COLLECTIONS.PROJECTS, projectId)
+    // ✅ ESTRUCTURA CORREGIDA: users/{userId}/projects/{projectId}
+    const projectRef = doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.USER_PROJECTS, projectId)
     await updateDoc(projectRef, updateData)
 
     console.log('✅ Proyecto actualizado exitosamente:', projectId)
     
-    // Retornar proyecto actualizado (simulado)
+    // Retornar proyecto actualizado
     return {
       id: projectId,
       ...updateData,
@@ -243,7 +242,7 @@ export const updateProject = async (projectId, updates, userId) => {
 }
 
 /**
- * 🗑️ ELIMINAR PROYECTO (Borrado lógico)
+ * 🗑️ ELIMINAR PROYECTO (Borrado lógico) - CORREGIDO
  * 
  * @param {string} projectId - ID del proyecto a eliminar
  * @param {string} userId - ID del usuario (para seguridad)
@@ -258,8 +257,10 @@ export const deleteProject = async (projectId, userId) => {
     // Verificar que el proyecto existe y pertenece al usuario
     await getProject(projectId, userId)
 
+    // ✅ ESTRUCTURA CORREGIDA: users/{userId}/projects/{projectId}
+    const projectRef = doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.USER_PROJECTS, projectId)
+    
     // Borrado lógico (marcar como eliminado)
-    const projectRef = doc(db, COLLECTIONS.PROJECTS, projectId)
     await updateDoc(projectRef, {
       isDeleted: true,
       updatedAt: serverTimestamp()
@@ -274,7 +275,7 @@ export const deleteProject = async (projectId, userId) => {
 }
 
 /**
- * 📋 DUPLICAR PROYECTO
+ * 📋 DUPLICAR PROYECTO - CORREGIDO
  * 
  * @param {string} projectId - ID del proyecto a duplicar
  * @param {string} userId - ID del usuario
@@ -303,7 +304,7 @@ export const duplicateProject = async (projectId, userId, newName = '') => {
     // Remover ID del original
     delete duplicatedProject.id
 
-    // Crear nuevo proyecto
+    // Crear nuevo proyecto usando la estructura corregida
     const newProject = await createProject(duplicatedProject, userId)
     
     console.log('✅ Proyecto duplicado exitosamente:', newProject.id)
@@ -316,11 +317,11 @@ export const duplicateProject = async (projectId, userId, newName = '') => {
 }
 
 // =============================================================================
-// OPERACIONES ESPECIALIZADAS
+// OPERACIONES ESPECIALIZADAS - CORREGIDAS
 // =============================================================================
 
 /**
- * 🔍 BUSCAR PROYECTOS POR NOMBRE
+ * 🔍 BUSCAR PROYECTOS POR NOMBRE - CORREGIDO
  * 
  * @param {string} userId - ID del usuario
  * @param {string} searchTerm - Término de búsqueda
@@ -328,12 +329,15 @@ export const duplicateProject = async (projectId, userId, newName = '') => {
  */
 export const searchProjects = async (userId, searchTerm) => {
   try {
-    if (!userId || !searchTerm) {
+    if (!userId) {
+      throw new Error('Se requiere ID de usuario')
+    }
+
+    if (!searchTerm) {
       return await getUserProjects(userId)
     }
 
-    // Obtener todos los proyectos y filtrar localmente
-    // (Firestore no soporta búsqueda de texto completo en el plan gratuito)
+    // Obtener todos los proyectos del usuario y filtrar localmente
     const allProjects = await getUserProjects(userId)
     const filteredProjects = allProjects.filter(project =>
       project.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -349,7 +353,7 @@ export const searchProjects = async (userId, searchTerm) => {
 }
 
 /**
- * 📊 OBTENER ESTADÍSTICAS DE PROYECTOS
+ * 📊 OBTENER ESTADÍSTICAS DE PROYECTOS - CORREGIDO
  * 
  * @param {string} userId - ID del usuario
  * @returns {Promise<Object>} Estadísticas de proyectos
