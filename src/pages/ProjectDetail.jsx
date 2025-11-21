@@ -1,5 +1,5 @@
 /**
- * 📄 PROJECT DETAIL - COMPLETO CON INTEGRACIÓN FIRESTORE
+ * 📄 PROJECT DETAIL - COMPLETO CON MEJOR MANEJO DE ERRORES Y FIRESTORE
  */
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -45,17 +45,18 @@ const ProjectDetail = () => {
   const [hasChanges, setHasChanges] = useState(false)
 
   /**
-   * 📥 Carga el proyecto desde Firestore
+   * 📥 Carga el proyecto desde Firestore - CORREGIDO
    */
   useEffect(() => {
     const loadProject = async () => {
+      // ✅ VALIDACIÓN TEMPRANA DE PARÁMETROS
       if (!user) {
         setError('Usuario no autenticado')
         setIsLoading(false)
         return
       }
 
-      if (!projectId) {
+      if (!projectId || projectId === 'undefined' || projectId === 'null') {
         setError('ID de proyecto inválido')
         setIsLoading(false)
         return
@@ -67,7 +68,7 @@ const ProjectDetail = () => {
 
         console.log('🔄 Cargando proyecto:', projectId)
         
-        // CARGAR PROYECTO REAL DESDE FIRESTORE
+        // ✅ CARGAR PROYECTO CON MEJOR MANEJO DE ERRORES
         const projectData = await projectService.getProject(projectId, user.uid)
         
         console.log('✅ Proyecto cargado:', projectData)
@@ -77,13 +78,14 @@ const ProjectDetail = () => {
         setSheetConfig(projectData.sheetConfig || { width: 2440, height: 1220 })
         
         // CARGAR DATOS EN EL OPTIMIZADOR
-        reset() // Limpiar estado anterior
+        reset()
         
         // Cargar piezas
         if (projectData.pieces && projectData.pieces.length > 0) {
           projectData.pieces.forEach(piece => {
             addPiece(piece)
           })
+          console.log(`✅ ${projectData.pieces.length} piezas cargadas en optimizador`)
         }
         
         // Cargar resultados de optimización previos
@@ -94,7 +96,15 @@ const ProjectDetail = () => {
         
       } catch (error) {
         console.error('❌ Error al cargar proyecto:', error)
-        setError('Error al cargar el proyecto: ' + error.message)
+        
+        // ✅ MEJOR MANEJO DE ERRORES ESPECÍFICOS
+        if (error.message.includes('no existe') || error.message.includes('no encontrado')) {
+          setError('El proyecto no existe o ha sido eliminado')
+        } else if (error.message.includes('permisos')) {
+          setError('No tienes permisos para acceder a este proyecto')
+        } else {
+          setError('Error al cargar el proyecto: ' + error.message)
+        }
       } finally {
         setIsLoading(false)
       }
@@ -104,7 +114,7 @@ const ProjectDetail = () => {
   }, [projectId, user, reset, addPiece])
 
   /**
-   * 🚀 Ejecuta re-optimización
+   * 🚀 Ejecuta re-optimización - CORREGIDO
    */
   const handleReoptimize = async () => {
     setError('')
@@ -131,7 +141,7 @@ const ProjectDetail = () => {
   }
 
   /**
-   * 💾 Guarda cambios en Firestore
+   * 💾 Guarda cambios en Firestore - CORREGIDO
    */
   const handleSaveChanges = async () => {
     if (!user || !project) {

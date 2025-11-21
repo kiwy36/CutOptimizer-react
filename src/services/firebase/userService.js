@@ -14,6 +14,10 @@ import {
   setDoc, 
   getDoc, 
   updateDoc,
+  collection,
+  query,
+  orderBy,
+  getDocs,
   serverTimestamp 
 } from 'firebase/firestore'
 import { db } from './config'
@@ -27,7 +31,8 @@ import { db } from './config'
  */
 const COLLECTIONS = {
   USERS: 'users',
-  WORKSPACES: 'workspaces'
+  WORKSPACES: 'workspaces',
+  USER_PROJECTS: 'projects' // ✅ NUEVA: Colección para proyectos de usuario
 }
 
 /**
@@ -217,7 +222,6 @@ export const updateUserStats = async (userId) => {
     }
 
     // Obtener proyectos del usuario para calcular estadísticas
-    const { getUserProjects } = await import('./projectService')
     const projects = await getUserProjects(userId)
 
     const stats = {
@@ -249,6 +253,59 @@ export const updateUserStats = async (userId) => {
   } catch (error) {
     console.error('❌ Error al actualizar estadísticas:', error)
     // No lanzar error para no interrumpir el flujo principal
+  }
+}
+
+// =============================================================================
+// GESTIÓN DE PROYECTOS DEL USUARIO
+// =============================================================================
+
+/**
+ * 📥 OBTENER PROYECTOS DEL USUARIO - CON MANEJO MEJORADO DE FECHAS
+ * 
+ * @param {string} userId - ID del usuario
+ * @returns {Promise<Array>} Array de proyectos del usuario
+ */
+export const getUserProjects = async (userId) => {
+  try {
+    if (!userId) {
+      throw new Error('Se requiere ID de usuario para obtener proyectos')
+    }
+
+    const userProjectsRef = collection(db, COLLECTIONS.USERS, userId, COLLECTIONS.USER_PROJECTS)
+    const q = query(userProjectsRef, orderBy('updatedAt', 'desc'))
+
+    const querySnapshot = await getDocs(q)
+    const projects = []
+
+    querySnapshot.forEach((doc) => {
+      const projectData = doc.data()
+      
+      if (!projectData.isDeleted) {
+        // ✅ MANEJO MEJORADO DE FECHAS
+        const createdAt = projectData.createdAt 
+          ? (projectData.createdAt.toDate ? projectData.createdAt.toDate() : new Date(projectData.createdAt))
+          : new Date()
+        
+        const updatedAt = projectData.updatedAt 
+          ? (projectData.updatedAt.toDate ? projectData.updatedAt.toDate() : new Date(projectData.updatedAt))
+          : new Date()
+
+        projects.push({
+          id: doc.id,
+          ...projectData,
+          createdAt,
+          updatedAt
+        })
+      }
+    })
+
+    console.log(`✅ Se obtuvieron ${projects.length} proyectos del usuario ${userId}`)
+    return projects
+
+  } catch (error) {
+    console.error('❌ Error al obtener proyectos del usuario:', error)
+    throw new Error(`No se pudieron cargar los proyectos: ${error.message}`)
   }
 }
 
@@ -509,6 +566,9 @@ const userService = {
   getUserProfile,
   updateUserProfile,
   updateUserStats,
+  
+  // Gestión de proyectos
+  getUserProjects, // ✅ NUEVA: Función para obtener proyectos
   
   // Workspaces
   createDefaultWorkspace,

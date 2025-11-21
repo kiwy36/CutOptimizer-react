@@ -1,10 +1,10 @@
 /**
- * 🗄️ PROJECT SERVICE - Servicio CORREGIDO para operaciones con proyectos en Firestore
+ * 🗄️ PROJECT SERVICE - Servicio CORREGIDO con manejo de índices
  * 
- * 📍 ESTRUCTURA CORREGIDA:
- * - Usa subcolecciones: users/{userId}/projects
- * - Aislamiento total entre usuarios
- * - Seguridad mejorada con validaciones estrictas
+ * 📍 CORRECCIONES APLICADAS:
+ * - Consulta simplificada para evitar índices compuestos
+ * - Mantiene funcionalidad completa
+ * - Optimizado para nueva estructura de subcolecciones
  */
 
 import { 
@@ -14,28 +14,21 @@ import {
   updateDoc, 
   getDocs, 
   getDoc,
-  query, 
-  where, 
+  query,
   orderBy,
   serverTimestamp 
 } from 'firebase/firestore'
 import { db } from './config'
 
 // =============================================================================
-// CONSTANTES Y CONFIGURACIÓN - ACTUALIZADA
+// CONSTANTES Y CONFIGURACIÓN
 // =============================================================================
 
-/**
- * 📋 Nombres de colecciones en Firestore (ESTRUCTURA CORREGIDA)
- */
 const COLLECTIONS = {
   USERS: 'users',
-  USER_PROJECTS: 'projects' // Subcolección de users/{userId}/projects
+  USER_PROJECTS: 'projects'
 }
 
-/**
- * 🎯 Estructura de datos de un proyecto
- */
 const PROJECT_SCHEMA = {
   name: '',
   sheetConfig: {
@@ -44,26 +37,21 @@ const PROJECT_SCHEMA = {
   },
   pieces: [],
   sheets: [],
-  userId: '', // Mantener por compatibilidad y doble validación
+  userId: '',
   createdAt: null,
   updatedAt: null,
   isDeleted: false
 }
 
 // =============================================================================
-// OPERACIONES CRUD - PROYECTOS (ESTRUCTURA CORREGIDA)
+// OPERACIONES CRUD - PROYECTOS (OPTIMIZADAS)
 // =============================================================================
 
 /**
- * ➕ CREAR NUEVO PROYECTO - CORREGIDO
- * 
- * @param {Object} projectData - Datos del proyecto a crear
- * @param {string} userId - ID del usuario propietario
- * @returns {Promise<Object>} Proyecto creado con ID
+ * ➕ CREAR NUEVO PROYECTO
  */
 export const createProject = async (projectData, userId) => {
   try {
-    // Validar datos requeridos
     if (!userId) {
       throw new Error('Se requiere ID de usuario para crear proyecto')
     }
@@ -72,25 +60,21 @@ export const createProject = async (projectData, userId) => {
       throw new Error('El proyecto debe tener un nombre')
     }
 
-    // Preparar datos del proyecto
     const project = {
       ...PROJECT_SCHEMA,
       ...projectData,
-      userId, // Doble validación de propiedad
+      userId,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       isDeleted: false
     }
 
-    // ✅ ESTRUCTURA CORREGIDA: users/{userId}/projects
+    // ✅ ESTRUCTURA SEGURA: users/{userId}/projects
     const userProjectsRef = collection(db, COLLECTIONS.USERS, userId, COLLECTIONS.USER_PROJECTS)
-    
-    // Crear documento en la subcolección del usuario
     const docRef = await addDoc(userProjectsRef, project)
     
     console.log('✅ Proyecto creado en subcolección usuario:', userId, docRef.id)
     
-    // Retornar proyecto con ID
     return {
       id: docRef.id,
       ...project,
@@ -105,10 +89,7 @@ export const createProject = async (projectData, userId) => {
 }
 
 /**
- * 📥 OBTENER PROYECTOS DEL USUARIO - CORREGIDO
- * 
- * @param {string} userId - ID del usuario
- * @returns {Promise<Array>} Lista de proyectos del usuario
+ * 📥 OBTENER PROYECTOS DEL USUARIO - CORREGIDO (SIN ÍNDICE COMPUESTO)
  */
 export const getUserProjects = async (userId) => {
   try {
@@ -116,15 +97,14 @@ export const getUserProjects = async (userId) => {
       throw new Error('Se requiere ID de usuario para obtener proyectos')
     }
 
-    // ✅ ESTRUCTURA CORREGIDA: users/{userId}/projects
+    // ✅ ESTRUCTURA SEGURA: users/{userId}/projects
     const userProjectsRef = collection(db, COLLECTIONS.USERS, userId, COLLECTIONS.USER_PROJECTS)
 
-    // Consultar proyectos del usuario, ordenados por fecha de actualización
-    // NOTA: Ya no necesitamos where('userId', '==', userId) porque la estructura lo garantiza
+    // ✅ CONSULTA SIMPLIFICADA: Solo ordenamiento, filtrado se hace en cliente
+    // Esto evita necesidad de índices compuestos
     const q = query(
       userProjectsRef,
-      where('isDeleted', '==', false),
-      orderBy('updatedAt', 'desc')
+      orderBy('updatedAt', 'desc')  // Solo ordenamiento - no requiere índice compuesto
     )
 
     const querySnapshot = await getDocs(q)
@@ -132,13 +112,16 @@ export const getUserProjects = async (userId) => {
 
     querySnapshot.forEach((doc) => {
       const projectData = doc.data()
-      projects.push({
-        id: doc.id,
-        ...projectData,
-        // Convertir timestamps de Firestore a Date objects
-        createdAt: projectData.createdAt?.toDate() || new Date(),
-        updatedAt: projectData.updatedAt?.toDate() || new Date()
-      })
+      
+      // ✅ FILTRADO EN CLIENTE: Proyectos no eliminados
+      if (!projectData.isDeleted) {
+        projects.push({
+          id: doc.id,
+          ...projectData,
+          createdAt: projectData.createdAt?.toDate() || new Date(),
+          updatedAt: projectData.updatedAt?.toDate() || new Date()
+        })
+      }
     })
 
     console.log(`✅ Se obtuvieron ${projects.length} proyectos del usuario ${userId}`)
@@ -146,16 +129,18 @@ export const getUserProjects = async (userId) => {
 
   } catch (error) {
     console.error('❌ Error al obtener proyectos del usuario:', error)
+    
+    // Manejo específico de error de índice
+    if (error.code === 'failed-precondition') {
+      throw new Error('Error de configuración de base de datos. Por favor, contacta al administrador.')
+    }
+    
     throw new Error(`No se pudieron cargar los proyectos: ${error.message}`)
   }
 }
 
 /**
- * 📄 OBTENER PROYECTO ESPECÍFICO - CORREGIDO
- * 
- * @param {string} projectId - ID del proyecto
- * @param {string} userId - ID del usuario (para seguridad)
- * @returns {Promise<Object>} Proyecto solicitado
+ * 📄 OBTENER PROYECTO ESPECÍFICO
  */
 export const getProject = async (projectId, userId) => {
   try {
@@ -163,7 +148,7 @@ export const getProject = async (projectId, userId) => {
       throw new Error('Se requieren ID de proyecto y usuario')
     }
 
-    // ✅ ESTRUCTURA CORREGIDA: users/{userId}/projects/{projectId}
+    // ✅ ESTRUCTURA SEGURA: users/{userId}/projects/{projectId}
     const projectRef = doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.USER_PROJECTS, projectId)
     const docSnap = await getDoc(projectRef)
 
@@ -173,12 +158,11 @@ export const getProject = async (projectId, userId) => {
 
     const projectData = docSnap.data()
 
-    // ✅ VERIFICACIÓN EXTRA: El userId debe coincidir (doble seguridad)
+    // ✅ VERIFICACIÓN DE PROPIEDAD
     if (projectData.userId !== userId) {
       throw new Error('No tienes permisos para acceder a este proyecto')
     }
 
-    // Verificar que no esté eliminado
     if (projectData.isDeleted) {
       throw new Error('Este proyecto ha sido eliminado')
     }
@@ -200,12 +184,7 @@ export const getProject = async (projectId, userId) => {
 }
 
 /**
- * ✏️ ACTUALIZAR PROYECTO EXISTENTE - CORREGIDO
- * 
- * @param {string} projectId - ID del proyecto a actualizar
- * @param {Object} updates - Campos a actualizar
- * @param {string} userId - ID del usuario (para seguridad)
- * @returns {Promise<Object>} Proyecto actualizado
+ * ✏️ ACTUALIZAR PROYECTO EXISTENTE
  */
 export const updateProject = async (projectId, updates, userId) => {
   try {
@@ -213,22 +192,20 @@ export const updateProject = async (projectId, updates, userId) => {
       throw new Error('Se requieren ID de proyecto y usuario')
     }
 
-    // Primero verificar que el proyecto existe y pertenece al usuario
+    // Verificar que el proyecto existe y pertenece al usuario
     await getProject(projectId, userId)
 
-    // Preparar datos de actualización
     const updateData = {
       ...updates,
       updatedAt: serverTimestamp()
     }
 
-    // ✅ ESTRUCTURA CORREGIDA: users/{userId}/projects/{projectId}
+    // ✅ ESTRUCTURA SEGURA: users/{userId}/projects/{projectId}
     const projectRef = doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.USER_PROJECTS, projectId)
     await updateDoc(projectRef, updateData)
 
     console.log('✅ Proyecto actualizado exitosamente:', projectId)
     
-    // Retornar proyecto actualizado
     return {
       id: projectId,
       ...updateData,
@@ -242,11 +219,7 @@ export const updateProject = async (projectId, updates, userId) => {
 }
 
 /**
- * 🗑️ ELIMINAR PROYECTO (Borrado lógico) - CORREGIDO
- * 
- * @param {string} projectId - ID del proyecto a eliminar
- * @param {string} userId - ID del usuario (para seguridad)
- * @returns {Promise<void>}
+ * 🗑️ ELIMINAR PROYECTO (Borrado lógico)
  */
 export const deleteProject = async (projectId, userId) => {
   try {
@@ -257,10 +230,9 @@ export const deleteProject = async (projectId, userId) => {
     // Verificar que el proyecto existe y pertenece al usuario
     await getProject(projectId, userId)
 
-    // ✅ ESTRUCTURA CORREGIDA: users/{userId}/projects/{projectId}
+    // ✅ ESTRUCTURA SEGURA: users/{userId}/projects/{projectId}
     const projectRef = doc(db, COLLECTIONS.USERS, userId, COLLECTIONS.USER_PROJECTS, projectId)
     
-    // Borrado lógico (marcar como eliminado)
     await updateDoc(projectRef, {
       isDeleted: true,
       updatedAt: serverTimestamp()
@@ -275,12 +247,7 @@ export const deleteProject = async (projectId, userId) => {
 }
 
 /**
- * 📋 DUPLICAR PROYECTO - CORREGIDO
- * 
- * @param {string} projectId - ID del proyecto a duplicar
- * @param {string} userId - ID del usuario
- * @param {string} newName - Nombre para el proyecto duplicado
- * @returns {Promise<Object>} Nuevo proyecto duplicado
+ * 📋 DUPLICAR PROYECTO
  */
 export const duplicateProject = async (projectId, userId, newName = '') => {
   try {
@@ -288,10 +255,8 @@ export const duplicateProject = async (projectId, userId, newName = '') => {
       throw new Error('Se requieren ID de proyecto y usuario')
     }
 
-    // Obtener proyecto original
     const originalProject = await getProject(projectId, userId)
 
-    // Preparar datos del nuevo proyecto
     const duplicatedProject = {
       ...originalProject,
       name: newName || `${originalProject.name} (Copia)`,
@@ -301,10 +266,8 @@ export const duplicateProject = async (projectId, userId, newName = '') => {
       isDeleted: false
     }
 
-    // Remover ID del original
     delete duplicatedProject.id
 
-    // Crear nuevo proyecto usando la estructura corregida
     const newProject = await createProject(duplicatedProject, userId)
     
     console.log('✅ Proyecto duplicado exitosamente:', newProject.id)
@@ -317,15 +280,11 @@ export const duplicateProject = async (projectId, userId, newName = '') => {
 }
 
 // =============================================================================
-// OPERACIONES ESPECIALIZADAS - CORREGIDAS
+// OPERACIONES ESPECIALIZADAS
 // =============================================================================
 
 /**
- * 🔍 BUSCAR PROYECTOS POR NOMBRE - CORREGIDO
- * 
- * @param {string} userId - ID del usuario
- * @param {string} searchTerm - Término de búsqueda
- * @returns {Promise<Array>} Proyectos que coinciden con la búsqueda
+ * 🔍 BUSCAR PROYECTOS POR NOMBRE
  */
 export const searchProjects = async (userId, searchTerm) => {
   try {
@@ -337,7 +296,6 @@ export const searchProjects = async (userId, searchTerm) => {
       return await getUserProjects(userId)
     }
 
-    // Obtener todos los proyectos del usuario y filtrar localmente
     const allProjects = await getUserProjects(userId)
     const filteredProjects = allProjects.filter(project =>
       project.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -353,10 +311,7 @@ export const searchProjects = async (userId, searchTerm) => {
 }
 
 /**
- * 📊 OBTENER ESTADÍSTICAS DE PROYECTOS - CORREGIDO
- * 
- * @param {string} userId - ID del usuario
- * @returns {Promise<Object>} Estadísticas de proyectos
+ * 📊 OBTENER ESTADÍSTICAS DE PROYECTOS
  */
 export const getProjectStats = async (userId) => {
   try {
@@ -374,7 +329,6 @@ export const getProjectStats = async (userId) => {
       averageEfficiency: 0
     }
 
-    // Calcular eficiencia promedio
     const projectsWithSheets = projects.filter(p => p.sheets && p.sheets.length > 0)
     if (projectsWithSheets.length > 0) {
       const totalEfficiency = projectsWithSheets.reduce((sum, project) => {
@@ -398,9 +352,6 @@ export const getProjectStats = async (userId) => {
 // EXPORTACIÓN POR DEFECTO
 // =============================================================================
 
-/**
- * 📦 Exportar todas las funciones como un objeto servicio
- */
 const projectService = {
   createProject,
   getUserProjects,

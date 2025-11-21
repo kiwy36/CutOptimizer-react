@@ -1,5 +1,5 @@
 /**
- * 📁 PROJECTS GALLERY - COMPLETO CON INTEGRACIÓN FIRESTORE
+ * 📁 PROJECTS GALLERY - COMPLETO CON INTEGRACIÓN FIRESTORE Y MANEJO ROBUSTO DE FECHAS
  */
 import React, { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
@@ -24,6 +24,49 @@ const ProjectsGallery = () => {
   const [actionLoading, setActionLoading] = useState(null) // Para tracking de acciones
 
   /**
+   * 📅 Formatea la fecha para mostrar - CORREGIDO
+   */
+  const formatDate = (dateValue) => {
+    if (!dateValue) return 'N/A'
+    
+    let date
+    try {
+      // ✅ MANEJO ROBUSTO DE DIFERENTES FORMATOS DE FECHA
+      if (dateValue instanceof Date) {
+        date = dateValue
+      } else if (dateValue.toDate) {
+        date = dateValue.toDate() // Firestore Timestamp
+      } else if (typeof dateValue === 'string') {
+        date = new Date(dateValue)
+      } else {
+        date = new Date(dateValue)
+      }
+      
+      // Validar que la fecha sea válida
+      if (isNaN(date.getTime())) {
+        return 'Fecha inválida'
+      }
+      
+      const now = new Date()
+      const diffTime = Math.abs(now - date)
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      
+      if (diffDays === 1) return 'Ayer'
+      if (diffDays < 7) return `Hace ${diffDays} días`
+      if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`
+      
+      return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
+    } catch (error) {
+      console.error('Error formateando fecha:', error, dateValue)
+      return 'Fecha inválida'
+    }
+  }
+
+  /**
    * 🔍 Filtra y ordena los proyectos
    */
   const filteredAndSortedProjects = useMemo(() => {
@@ -36,15 +79,36 @@ const ProjectsGallery = () => {
       )
     }
     
+    // ✅ MEJORA: Manejo robusto en ordenamiento de fechas
     filtered.sort((a, b) => {
+      const getDateValue = (project, field) => {
+        const dateValue = project[field]
+        if (!dateValue) return 0
+        
+        try {
+          if (dateValue instanceof Date) {
+            return dateValue.getTime()
+          } else if (dateValue.toDate) {
+            return dateValue.toDate().getTime()
+          } else if (typeof dateValue === 'string') {
+            return new Date(dateValue).getTime()
+          } else {
+            return new Date(dateValue).getTime()
+          }
+        } catch (error) {
+          console.error(`Error procesando fecha ${field}:`, error)
+          return 0
+        }
+      }
+
       switch (sortBy) {
         case 'name':
-          return a.name?.localeCompare(b.name)
+          return (a.name || '').localeCompare(b.name || '')
         case 'createdAt':
-          return new Date(b.createdAt) - new Date(a.createdAt)
+          return getDateValue(b, 'createdAt') - getDateValue(a, 'createdAt')
         case 'updatedAt':
         default:
-          return new Date(b.updatedAt) - new Date(a.createdAt)
+          return getDateValue(b, 'updatedAt') - getDateValue(a, 'updatedAt')
       }
     })
     
@@ -98,28 +162,6 @@ const ProjectsGallery = () => {
     
     return { totalProjects, totalSheets, totalPieces }
   }, [projects])
-
-  /**
-   * 📅 Formatea la fecha para mostrar
-   */
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A'
-    
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffTime = Math.abs(now - date)
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    
-    if (diffDays === 1) return 'Ayer'
-    if (diffDays < 7) return `Hace ${diffDays} días`
-    if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`
-    
-    return date.toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
 
   /**
    * 🎯 Obtiene la eficiencia promedio
