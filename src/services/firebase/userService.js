@@ -515,43 +515,6 @@ export const completeUserLogin = async (email, password) => {
 // FUNCIONES UTILITARIAS ADICIONALES
 // =============================================================================
 
-/**
- * 🧪 CREAR USUARIO DEMO - Para testing
- * @returns {Promise<Object>} Usuario demo creado
- */
-export const createDemoUser = async () => {
-  try {
-    const demoEmail = 'demo@cutoptimizer.com'
-    const demoPassword = 'demodemo'
-    
-    console.log('🔄 Creando usuario demo...')
-    
-    const result = await completeUserRegistration(demoEmail, demoPassword, {
-      displayName: 'Usuario Demo',
-      preferences: {
-        language: 'es',
-        theme: 'light',
-        defaultSheetSize: { width: 2440, height: 1220 },
-        allowRotation: true,
-        algorithm: 'shelf'
-      }
-    })
-    
-    console.log('✅ Usuario demo creado exitosamente')
-    return result
-    
-  } catch (error) {
-    console.error('❌ Error al crear usuario demo:', error)
-    
-    // Si el usuario ya existe, intentar login
-    if (error.message.includes('ya está registrado')) {
-      console.log('🔄 Usuario demo ya existe, iniciando sesión...')
-      return await completeUserLogin('demo@cutoptimizer.com', 'demodemo')
-    }
-    
-    throw new Error(`No se pudo crear el usuario demo: ${error.message}`)
-  }
-}
 
 // =============================================================================
 // EXPORTACIÓN POR DEFECTO
@@ -577,9 +540,6 @@ const userService = {
   // Autenticación mejorada
   completeUserRegistration,
   completeUserLogin,
-  
-  // Utilidades
-  createDemoUser
 }
 
 export default userService
