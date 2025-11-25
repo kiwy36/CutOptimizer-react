@@ -1,6 +1,13 @@
 /**
- * 📄 PROJECT DETAIL - COMPLETO CON MEJOR MANEJO DE ERRORES Y FIRESTORE
+ * 📄 PROJECT DETAIL - VERSIÓN COMPLETAMENTE FUNCIONAL
+ * 
+ * 📍 FUNCIÓN:
+ * - Carga proyectos existentes desde Firestore (users/{userId}/projects/{projectId})
+ * - Permite editar y re-optimizar proyectos guardados
+ * - Guarda cambios automáticamente en Firestore
+ * - Interfaz idéntica a NewProject pero con datos precargados
  */
+
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { projectService } from '../services/firebase'
@@ -13,7 +20,7 @@ import ErrorMessage from '../components/shared/ErrorMessage'
 import './ProjectDetail.css'
 
 const ProjectDetail = () => {
-  const { projectId } = useParams()
+  const { id } = useParams()
   const { user } = useAuth()
   const navigate = useNavigate()
   
@@ -45,88 +52,92 @@ const ProjectDetail = () => {
   const [hasChanges, setHasChanges] = useState(false)
 
   /**
-   * 📥 Carga el proyecto desde Firestore - CORREGIDO
+   * 📥 CARGA EL PROYECTO DESDE FIRESTORE - COMPLETAMENTE REESCRITO
    */
   useEffect(() => {
     const loadProject = async () => {
-      // ✅ VALIDACIÓN TEMPRANA DE PARÁMETROS
+      // ✅ VALIDACIONES TEMPRANAS
       if (!user) {
-        setError('Usuario no autenticado')
+        setError('❌ Usuario no autenticado')
         setIsLoading(false)
         return
       }
 
-      if (!projectId || projectId === 'undefined' || projectId === 'null') {
-        setError('ID de proyecto inválido')
+      if (!id) {
+        setError('❌ ID de proyecto no proporcionado')
         setIsLoading(false)
         return
       }
+
+      console.log('🔄 Cargando proyecto:', id, 'para usuario:', user.uid)
 
       try {
         setIsLoading(true)
         setError('')
 
-        console.log('🔄 Cargando proyecto:', projectId)
+        // ✅ CARGAR PROYECTO DESDE FIRESTORE
+        const projectData = await projectService.getProject(id, user.uid)
         
-        // ✅ CARGAR PROYECTO CON MEJOR MANEJO DE ERRORES
-        const projectData = await projectService.getProject(projectId, user.uid)
+        console.log('✅ Proyecto cargado exitosamente:', projectData)
         
-        console.log('✅ Proyecto cargado:', projectData)
-        
+        // ✅ ESTABLECER DATOS EN EL ESTADO
         setProject(projectData)
-        setProjectName(projectData.name || '')
+        setProjectName(projectData.name || 'Sin nombre')
         setSheetConfig(projectData.sheetConfig || { width: 2440, height: 1220 })
         
-        // CARGAR DATOS EN EL OPTIMIZADOR
-        reset()
+        // ✅ RESETEAR Y CARGAR DATOS EN EL OPTIMIZADOR
+        reset() // Limpiar estado anterior
         
-        // Cargar piezas
+        // Cargar piezas en el optimizador
         if (projectData.pieces && projectData.pieces.length > 0) {
           projectData.pieces.forEach(piece => {
             addPiece(piece)
           })
           console.log(`✅ ${projectData.pieces.length} piezas cargadas en optimizador`)
         }
-        
-        // Cargar resultados de optimización previos
-        if (projectData.sheets && projectData.sheets.length > 0) {
-          // El hook useOptimizer maneja sheets automáticamente
-          console.log('📊 Sheets cargadas:', projectData.sheets.length)
-        }
+
+        // Las sheets se cargan automáticamente desde projectData
+        console.log('📊 Sheets disponibles:', projectData.sheets?.length || 0)
         
       } catch (error) {
-        console.error('❌ Error al cargar proyecto:', error)
+        console.error('❌ Error crítico al cargar proyecto:', error)
         
-        // ✅ MEJOR MANEJO DE ERRORES ESPECÍFICOS
-        if (error.message.includes('no existe') || error.message.includes('no encontrado')) {
-          setError('El proyecto no existe o ha sido eliminado')
+        // ✅ MANEJO DETALLADO DE ERRORES
+        let errorMessage = 'Error al cargar el proyecto'
+        
+        if (error.message.includes('no existe')) {
+          errorMessage = '❌ El proyecto no existe o ha sido eliminado'
         } else if (error.message.includes('permisos')) {
-          setError('No tienes permisos para acceder a este proyecto')
+          errorMessage = '❌ No tienes permisos para acceder a este proyecto'
+        } else if (error.message.includes('configuración')) {
+          errorMessage = '❌ Error de configuración de la base de datos'
         } else {
-          setError('Error al cargar el proyecto: ' + error.message)
+          errorMessage = `❌ ${error.message}`
         }
+        
+        setError(errorMessage)
       } finally {
         setIsLoading(false)
       }
     }
 
     loadProject()
-  }, [projectId, user, reset, addPiece])
+  }, [id, user, reset, addPiece])
 
   /**
-   * 🚀 Ejecuta re-optimización - CORREGIDO
+   * 🚀 RE-OPTIMIZAR PROYECTO
    */
   const handleReoptimize = async () => {
     setError('')
     
     try {
       if (pieces.length === 0) {
-        setError('No hay piezas para optimizar')
+        setError('❌ No hay piezas para optimizar')
         return
       }
 
       if (sheetConfig.width <= 0 || sheetConfig.height <= 0) {
-        setError('El tamaño de la placa debe ser mayor a 0')
+        setError('❌ El tamaño de la placa debe ser mayor a 0')
         return
       }
 
@@ -135,22 +146,22 @@ const ProjectDetail = () => {
       setHasChanges(true)
       
     } catch (error) {
-      setError(error.message)
+      setError(`❌ Error en optimización: ${error.message}`)
       console.error('Error en re-optimización:', error)
     }
   }
 
   /**
-   * 💾 Guarda cambios en Firestore - CORREGIDO
+   * 💾 GUARDAR CAMBIOS EN FIRESTORE
    */
   const handleSaveChanges = async () => {
     if (!user || !project) {
-      setError('Usuario no autenticado o proyecto no cargado')
+      setError('❌ Usuario no autenticado o proyecto no cargado')
       return
     }
 
     if (!projectName.trim()) {
-      setError('Ingresa un nombre para el proyecto')
+      setError('❌ Ingresa un nombre para el proyecto')
       return
     }
 
@@ -160,7 +171,7 @@ const ProjectDetail = () => {
     try {
       console.log('💾 Guardando cambios del proyecto...')
       
-      // PREPARAR DATOS ACTUALIZADOS
+      // Preparar datos actualizados
       const updates = {
         name: projectName.trim(),
         sheetConfig: {
@@ -171,7 +182,7 @@ const ProjectDetail = () => {
         sheets: sheets
       }
 
-      // ACTUALIZAR EN FIRESTORE
+      // Actualizar en Firestore
       await projectService.updateProject(project.id, updates, user.uid)
       
       console.log('✅ Proyecto actualizado exitosamente')
@@ -185,14 +196,14 @@ const ProjectDetail = () => {
       
     } catch (error) {
       console.error('❌ Error al guardar cambios:', error)
-      setError('Error al guardar los cambios: ' + error.message)
+      setError(`❌ Error al guardar: ${error.message}`)
     } finally {
       setIsSaving(false)
     }
   }
 
   /**
-   * 📏 Maneja cambios en configuración de placa
+   * 📏 MANEJAR CAMBIOS EN CONFIGURACIÓN
    */
   const handleSheetConfigChange = (field, value) => {
     const numericValue = parseInt(value) || 0
@@ -204,7 +215,7 @@ const ProjectDetail = () => {
   }
 
   /**
-   * ➕ Maneja agregar pieza (para pasar a InputPanel)
+   * ➕ MANEJAR AGREGAR PIEZA
    */
   const handleAddPiece = (piece) => {
     addPiece(piece)
@@ -212,7 +223,7 @@ const ProjectDetail = () => {
   }
 
   /**
-   * 🗑️ Maneja eliminar pieza (para pasar a InputPanel)
+   * 🗑️ MANEJAR ELIMINAR PIEZA
    */
   const handleRemovePiece = (pieceId) => {
     removePiece(pieceId)
@@ -220,19 +231,20 @@ const ProjectDetail = () => {
   }
 
   /**
-   * 🏠 Regresa a la lista
+   * 🏠 VOLVER A LA LISTA
    */
   const handleBackToList = () => {
-    if (hasChanges) {
-      const confirmLeave = window.confirm(
-        'Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?'
-      )
-      if (!confirmLeave) return
+    if (hasChanges && !window.confirm('Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?')) {
+      return
     }
     navigate('/projects')
   }
 
-  // Loading
+  // ===========================================================================
+  // RENDERIZADO
+  // ===========================================================================
+
+  // Estado de carga
   if (isLoading) {
     return (
       <div className="project-detail-page">
@@ -260,6 +272,7 @@ const ProjectDetail = () => {
     )
   }
 
+  // Proyecto cargado correctamente
   return (
     <div className="project-detail-page">
       {/* Header */}
@@ -273,8 +286,8 @@ const ProjectDetail = () => {
             ←
           </button>
           <div className="header-text">
-            <h1>Editando Proyecto</h1>
-            <p>ID: {projectId}</p>
+            <h1>Editando: {projectName}</h1>
+            <p>ID: {id}</p>
           </div>
         </div>
         
@@ -316,7 +329,7 @@ const ProjectDetail = () => {
         </div>
       </div>
 
-      {/* Mensajes de error/éxito */}
+      {/* Mensajes de estado */}
       {error && (
         <ErrorMessage 
           message={error} 
@@ -328,35 +341,31 @@ const ProjectDetail = () => {
       {/* Información del proyecto */}
       <div className="project-info">
         <div className="info-card">
-          <h3>Información del Proyecto</h3>
+          <h3>📋 Información del Proyecto</h3>
           <div className="info-grid">
             <div className="info-item">
-              <span className="info-label">Creado:</span>
-              <span className="info-value">
-                {project?.createdAt ? new Date(project.createdAt).toLocaleDateString() : 'N/A'}
-              </span>
+              <span className="info-label">Proyecto ID:</span>
+              <span className="info-value">{id}</span>
             </div>
             <div className="info-item">
-              <span className="info-label">Actualizado:</span>
-              <span className="info-value">
-                {project?.updatedAt ? new Date(project.updatedAt).toLocaleDateString() : 'N/A'}
-              </span>
-            </div>
-            <div className="info-item">
-              <span className="info-label">Piezas:</span>
+              <span className="info-label">Piezas cargadas:</span>
               <span className="info-value">{pieces.length}</span>
             </div>
             <div className="info-item">
               <span className="info-label">Optimizaciones:</span>
               <span className="info-value">{sheets.length}</span>
             </div>
+            <div className="info-item">
+              <span className="info-label">Tamaño placa:</span>
+              <span className="info-value">{sheetConfig.width} × {sheetConfig.height} mm</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Layout principal IDÉNTICO A NEWPROJECT */}
+      {/* Layout principal - IDÉNTICO A NEWPROJECT */}
       <div className="optimizer-layout">
-        {/* Columna izquierda: InputPanel con TODAS las props */}
+        {/* Columna izquierda: InputPanel */}
         <div className="input-column">
           <InputPanel 
             // Estado compartido
@@ -388,7 +397,7 @@ const ProjectDetail = () => {
           />
         </div>
 
-        {/* Columna derecha: ResultsPanel con TODAS las props */}
+        {/* Columna derecha: ResultsPanel */}
         <div className="results-column">
           <ResultsPanel 
             sheetConfig={sheetConfig}

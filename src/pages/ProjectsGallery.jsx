@@ -340,12 +340,14 @@ const ProjectsGallery = () => {
                     
                     <div className="project-actions">
                       <Link 
-                        to={`/projects/${project.id || ''}`} 
+                        to={`/projects/${project.id}`}
                         className="action-btn edit-btn"
                         onClick={(e) => {
                           if (!project.id) {
                             e.preventDefault()
                             console.error('ID de proyecto no disponible')
+                          } else {
+                            console.log('🔗 Navegando a editar proyecto:', project.id)
                           }
                         }}
                       >
