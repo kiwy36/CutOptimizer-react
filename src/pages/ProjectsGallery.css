@@ -148,24 +148,44 @@
 }
 
 /* ========================================================================== */
+/* GRID VIRTUALIZADO */
+/* ========================================================================== */
+
+.virtualized-grid {
+  margin: 0 auto;
+}
+
+.virtualized-cell {
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+/* ========================================================================== */
 /* GRID DE PROYECTOS */
 /* ========================================================================== */
 
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: var(--spacing-6);
+  gap: 10px; /* Reducido de var(--spacing-6) a 10px para mejor separación visual */
 }
 
 .project-card {
   transition: all 0.3s ease;
   border: 1px solid var(--color-gray-200);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 8px; /* Añadido para mejor visualización con menor gap */
+  background: white;
 }
 
 .project-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
   border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Header de tarjeta */
@@ -184,6 +204,11 @@
   font-size: var(--font-size-lg);
   flex: 1;
   margin-right: var(--spacing-2);
+  font-size: 1.1em;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .efficiency-badge {
@@ -192,26 +217,36 @@
   font-size: var(--font-size-xs);
   font-weight: 600;
   white-space: nowrap;
+  padding: 4px 8px;
+  border-radius: 12px;
 }
 
 .efficiency-high {
   background: var(--color-success-light);
   color: var(--color-success);
+  background-color: #d4edda;
+  color: #155724;
 }
 
 .efficiency-medium {
   background: var(--color-warning-light);
   color: var(--color-warning);
+  background-color: #fff3cd;
+  color: #856404;
 }
 
 .efficiency-low {
   background: var(--color-error-light);
   color: var(--color-error);
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 /* Información del proyecto */
 .project-info {
   margin-bottom: var(--spacing-4);
+  flex: 1;
+  margin-bottom: 12px;
 }
 
 .info-row {
@@ -219,6 +254,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-2);
+  margin-bottom: 4px;
+  font-size: 0.9em;
 }
 
 .info-row:last-child {
@@ -228,18 +265,23 @@
 .info-label {
   color: var(--color-gray-600);
   font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: #666;
 }
 
 .info-value {
   color: var(--color-gray-800);
   font-size: var(--font-size-sm);
   font-weight: 500;
+  font-weight: 600;
 }
 
 /* Acciones del proyecto */
 .project-actions {
   display: flex;
   gap: var(--spacing-2);
+  flex-wrap: wrap;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -256,10 +298,26 @@
   flex: 1;
   text-align: center;
   min-width: 80px;
+  flex: 1;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8em;
+  min-width: 60px;
 }
 
 .action-btn:hover {
   transform: translateY(-1px);
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .edit-btn:hover {
@@ -268,16 +326,31 @@
   color: var(--color-primary);
 }
 
+.edit-btn {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
 .delete-btn:hover {
   background: var(--color-error-light);
   border-color: var(--color-error);
   color: var(--color-error);
 }
 
+.delete-btn {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
 .duplicate-btn:hover {
   background: var(--color-success-light);
   border-color: var(--color-success);
   color: var(--color-success);
+}
+
+.duplicate-btn {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
 }
 
 /* ========================================================================== */
@@ -295,6 +368,7 @@
 .empty-state {
   text-align: center;
   padding: var(--spacing-12);
+  padding: 40px 20px;
 }
 
 .empty-content {
@@ -302,10 +376,13 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-4);
+  gap: 16px;
 }
 
 .empty-icon {
   font-size: 4rem;
+  opacity: 0.5;
+  font-size: 3em;
   opacity: 0.5;
 }
 
@@ -373,6 +450,7 @@
   
   .projects-grid {
     grid-template-columns: 1fr;
+    gap: 10px; /* Mantener 10px también en móvil */
   }
   
   .project-actions {
