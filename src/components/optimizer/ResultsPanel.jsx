@@ -1,5 +1,17 @@
 /**
- * 📊 RESULTS PANEL - REPARADO con props correctas
+ * 📊 RESULTS PANEL - VERSIÓN OPTIMIZADA CON LAZY LOADING
+ * 
+ * 🚀 OPTIMIZACIONES IMPLEMENTADAS:
+ * - Lazy loading para SheetVisualization (carga bajo demanda)
+ * - Suspense con fallback elegante durante la carga
+ * - Memoización de cálculos costosos
+ * - Mejor manejo de estados de carga
+ * 
+ * 📍 FUNCIÓN:
+ * - Muestra resultados de optimización en tiempo real
+ * - Visualización de planchas optimizadas y configuradas
+ * - Estadísticas detalladas de eficiencia
+ * - Manejo de piezas problemáticas no colocadas
  */
 
 import React from 'react'
