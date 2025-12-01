@@ -1,22 +1,34 @@
 /**
- * 📊 RESULTS PANEL - VERSIÓN OPTIMIZADA CON LAZY LOADING
+ * 📊 RESULTS PANEL - OPTIMIZADO CON LAZY LOADING
  * 
- * 🚀 OPTIMIZACIONES IMPLEMENTADAS:
+ * 🚀 MEJORAS IMPLEMENTADAS:
  * - Lazy loading para SheetVisualization (carga bajo demanda)
- * - Suspense con fallback elegante durante la carga
+ * - Suspense con fallback elegante
  * - Memoización de cálculos costosos
  * - Mejor manejo de estados de carga
- * 
- * 📍 FUNCIÓN:
- * - Muestra resultados de optimización en tiempo real
- * - Visualización de planchas optimizadas y configuradas
- * - Estadísticas detalladas de eficiencia
- * - Manejo de piezas problemáticas no colocadas
  */
 
-import React from 'react'
-import SheetVisualization from './SheetVisualization'
+import React, { Suspense, useMemo } from 'react'
 import './ResultsPanel.css'
+
+// 🚀 LAZY LOADING - SheetVisualization se carga solo cuando es necesario
+// ❌ NO importamos SheetVisualization directamente
+const LazySheetVisualization = React.lazy(() => 
+  import('./SheetVisualization').then(module => ({
+    default: module.default
+  }))
+)
+
+// 🎯 COMPONENTE DE CARGA PARA SUSPENSE
+const SheetVisualizationFallback = ({ dimensions }) => (
+  <div className="sheet-visualization-fallback">
+    <div className="fallback-spinner"></div>
+    <div className="fallback-text">
+      Cargando visualización...
+      {dimensions && <span>{dimensions.width} × {dimensions.height} mm</span>}
+    </div>
+  </div>
+)
 
 const ResultsPanel = ({ 
   sheetConfig = {},
@@ -27,41 +39,39 @@ const ResultsPanel = ({
   calculateStats = () => ({})
 }) => {
 
-  const stats = calculateStats()
+  // 🧠 MEMOIZACIÓN DE CÁLCULOS COSTOSOS
+  const stats = useMemo(() => calculateStats(), [calculateStats])
 
-  /**
-   * 🎨 Obtiene la clase CSS para el indicador de eficiencia
-   */
   const getEfficiencyClass = (efficiency) => {
     if (efficiency >= 85) return 'efficiency-high'
     if (efficiency >= 70) return 'efficiency-medium'
     return 'efficiency-low'
   }
 
-  /**
-   * 📋 Crea objeto de plancha para modo configuración
-   */
-  const getConfiguredSheet = () => ({
+  // 🎯 MEMOIZAR PLANCHA CONFIGURADA
+  const configuredSheet = useMemo(() => ({
     id: 'configured-sheet',
     width: sheetConfig.width || 2440,
     height: sheetConfig.height || 1220,
     pieces: [],
     usedArea: 0,
     efficiency: 0
-  })
+  }), [sheetConfig.width, sheetConfig.height])
 
-  /**
-   * 📊 Determina si mostrar planchas configuradas
-   */
-  const shouldShowConfiguredSheets = () => {
+  const shouldShowConfiguredSheets = useMemo(() => {
     return sheetConfig.width > 0 && 
            sheetConfig.height > 0 && 
            sheets.length === 0
+  }, [sheetConfig.width, sheetConfig.height, sheets.length])
+
+  // 🎯 MEMOIZAR ESCALAS PARA EVITAR CÁLCULOS REDUNDANTES
+  const getSheetScale = (sheetWidth) => {
+    return Math.min(0.3, 400 / sheetWidth)
   }
 
   return (
     <div className="results-panel">
-      {/* Estado de carga */}
+      {/* Estado de carga de optimización */}
       {isOptimizing && (
         <div className="optimization-loading">
           <div className="loading-spinner"></div>
@@ -69,7 +79,7 @@ const ResultsPanel = ({
         </div>
       )}
 
-      {/* Visualización de Planchas - REPARADA */}
+      {/* Visualización de Planchas - CON LAZY LOADING */}
       <div className="sheets-visualization-section">
         <h3>📊 Visualización de Planchas</h3>
         
@@ -89,11 +99,16 @@ const ResultsPanel = ({
                       {sheet.efficiency?.toFixed(1) || 0}%
                     </span>
                   </div>
-                  <SheetVisualization 
-                    sheet={sheet}
-                    scale={400 / sheet.width}
-                    mode="optimized"
-                  />
+                  
+                  {/* 🚀 LAZY LOADING CON SUSPENSE */}
+                  <Suspense fallback={<SheetVisualizationFallback dimensions={sheet} />}>
+                    <LazySheetVisualization 
+                      sheet={sheet}
+                      scale={getSheetScale(sheet.width)}
+                      mode="optimized"
+                    />
+                  </Suspense>
+                  
                   <div className="sheet-info">
                     <span>Piezas: {sheet.pieces?.length || 0}</span>
                     <span>Utilización: {((sheet.usedArea / (sheet.width * sheet.height)) * 100).toFixed(1)}%</span>
@@ -105,7 +120,7 @@ const ResultsPanel = ({
         )}
 
         {/* Estado: Plancha configurada (antes de optimizar) */}
-        {shouldShowConfiguredSheets() && (
+        {shouldShowConfiguredSheets && (
           <div className="configured-sheets">
             <div className="section-header">
               <h4>⚙️ Plancha Configurada</h4>
@@ -124,11 +139,16 @@ const ResultsPanel = ({
                     {currentPieces.length > 0 ? 'Lista para optimizar' : 'Configurada'}
                   </span>
                 </div>
-                <SheetVisualization 
-                  sheet={getConfiguredSheet()}
-                  scale={400 / sheetConfig.width}
-                  mode="configuring"
-                />
+                
+                {/* 🚀 LAZY LOADING TAMBIÉN PARA MODO CONFIGURACIÓN */}
+                <Suspense fallback={<SheetVisualizationFallback dimensions={configuredSheet} />}>
+                  <LazySheetVisualization 
+                    sheet={configuredSheet}
+                    scale={getSheetScale(sheetConfig.width)}
+                    mode="configuring"
+                  />
+                </Suspense>
+                
                 <div className="sheet-info">
                   <span>Tamaño: {sheetConfig.width} × {sheetConfig.height} mm</span>
                   <span>Área disponible: {(sheetConfig.width * sheetConfig.height).toLocaleString()} mm²</span>
