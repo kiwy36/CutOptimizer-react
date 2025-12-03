@@ -1,27 +1,76 @@
 /* ======================================================
-   🌐 App.css - Estructura simplificada y responsiva
+   🌐 App.css - Estructura optimizada y responsiva
    ------------------------------------------------------
-   - Aplica solo al layout general (App.jsx)
-   - Navbar y Footer visibles siempre
-   - Contenido central adaptable
+   Variables CSS para consistencia y fácil mantenimiento
    ====================================================== */
 
-/* ========== RESET BÁSICO ========== */
-* {
+/* ========== VARIABLES CSS ========== */
+:root {
+  /* Colores principales - FONDO GRIS por defecto */
+  --color-bg: #f5f5f7; /* Gris claro moderno */
+  --color-bg-secondary: #e8e8ed; /* Gris un poco más oscuro para contrastes */
+  --color-text: #1d1d1f; /* Casi negro para mejor contraste */
+  --color-text-light: #6e6e73; /* Gris para texto secundario */
+  --color-primary: #007bff;
+  --color-border: #d2d2d7; /* Gris para bordes */
+  --color-card: #ffffff; /* Blanco para tarjetas/componentes */
+  
+  /* Espaciados base */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-xxl: 3rem;
+  
+  /* Breakpoints */
+  --breakpoint-tablet: 768px;
+  --breakpoint-mobile: 480px;
+  --breakpoint-small-mobile: 360px;
+  
+  /* Transiciones */
+  --transition-fast: 150ms ease;
+  --transition-base: 300ms ease;
+  --transition-slow: 500ms ease;
+  
+  /* Sombras */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* ========== RESET MODERNO ========== */
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* ========== BASE GLOBAL ========== */
+html {
+  /* Mejor scroll suave */
+  scroll-behavior: smooth;
+  
+  /* Prevenir ajuste de texto en iOS */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* ========== BASE GLOBAL RESPONSIVA ========== */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
+               "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f8f9fa;
-  color: #333;
+  background-color: var(--color-bg); /* FONDO GRIS */
+  color: var(--color-text);
   line-height: 1.6;
+  min-height: 100vh;
+  
+  /* Mejor renderizado de fuentes */
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
 }
 
 /* ========== CONTENEDOR PRINCIPAL ========== */
@@ -29,55 +78,242 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--color-bg); /* FONDO GRIS también aquí */
+  
+  /* Evitar salto de contenido durante carga */
+  overflow-anchor: none;
 }
 
-/* ========== CONTENIDO PRINCIPAL ========== */
+/* ========== CONTENIDO PRINCIPAL OPTIMIZADO ========== */
 .main-content {
-  flex: 1;
-  padding: 1.5rem;
+  flex: 1 0 auto; /* Crece y encoge pero no menos del contenido */
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  transition: padding 0.3s ease;
+  padding: var(--space-xl);
+  background-color: var(--color-card); /* Fondo blanco para el contenido */
+  border-radius: 12px; /* Esquinas redondeadas suaves */
+  box-shadow: var(--shadow-sm); /* Sombra sutil para profundidad */
+  
+  /* Transición suave para cambios de padding */
+  transition: 
+    padding var(--transition-base),
+    max-width var(--transition-base),
+    border-radius var(--transition-base);
+  
+  /* Mejor manejo de desbordamiento */
+  overflow-x: hidden;
+  margin-top: var(--space-md); /* Separación del navbar */
+  margin-bottom: var(--space-md); /* Separación del footer */
 }
 
-/* ====== ADAPTABILIDAD RESPONSIVA ====== */
+/* ========== RESPONSIVE BREAKPOINTS ========== */
+
+/* Tablet (768px - 992px) */
 @media (max-width: 992px) {
   .main-content {
-    padding: 1rem;
+    padding: var(--space-lg);
     max-width: 95%;
+    border-radius: 10px;
   }
 }
 
-@media (max-width: 600px) {
+/* Tablet pequeña (768px y menor) */
+@media (max-width: 768px) {
   .main-content {
-    padding: 0.75rem;
+    padding: var(--space-md);
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    box-shadow: none; /* Sin sombra en móviles para más espacio */
   }
 }
 
-/* ========== SPINNER DE CARGA ========== */
+/* Móvil grande (480px - 767px) */
+@media (max-width: 767px) {
+  .main-content {
+    padding: var(--space-sm);
+    border-radius: 6px;
+  }
+  
+  body {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+}
+
+/* Móvil pequeño (480px y menor) */
+@media (max-width: 480px) {
+  .main-content {
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: 4px;
+    margin-top: var(--space-xs);
+    margin-bottom: var(--space-xs);
+  }
+  
+  /* Mejor uso de espacio en móviles pequeños */
+  .app {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Móvil muy pequeño (360px y menor) */
+@media (max-width: 360px) {
+  .main-content {
+    padding: var(--space-xs);
+    border-radius: 2px;
+  }
+  
+  body {
+    font-size: 14px;
+  }
+}
+
+/* ========== SPINNER DE CARGA OPTIMIZADO ========== */
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
+  padding: var(--space-xxl);
   min-height: 60vh;
+  min-height: 60dvh; /* Usa dvh para mejor compatibilidad con navegadores móviles */
   text-align: center;
+  background-color: var(--color-card); /* Fondo blanco para el spinner */
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  
+  /* Hardware acceleration para animaciones */
+  transform: translateZ(0);
+  will-change: opacity;
 }
 
 .loading-container p {
-  margin-top: 1rem;
-  font-size: 1.1rem;
-  color: #555;
+  margin-top: var(--space-md);
+  font-size: clamp(1rem, 2.5vw, 1.2rem); /* Tamaño responsive */
+  color: var(--color-text-light);
+  
+  /* Prevenir salto de línea innecesario */
+  max-width: 90%;
+  word-break: keep-all;
 }
 
-/* ====== Animación sutil al spinner ====== */
+/* ========== ANIMACIONES OPTIMIZADAS ========== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .loading-container p {
-  animation: fadeIn 0.8s ease-in-out;
+  animation: fadeInUp 0.6s var(--transition-slow) both;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Animación escalonada para múltiples elementos */
+.loading-container > * {
+  opacity: 0;
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.loading-container > :nth-child(1) { animation-delay: 0.1s; }
+.loading-container > :nth-child(2) { animation-delay: 0.3s; }
+
+/* ========== MEJORAS DE PERFORMANCE ========== */
+
+/* Mejor scrolling en iOS */
+@supports (-webkit-overflow-scrolling: touch) {
+  .main-content {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Optimización para dispositivos táctiles */
+@media (hover: none) and (pointer: coarse) {
+  /* Aumentar área táctil en móviles */
+  .loading-container {
+    padding: var(--space-xl);
+  }
+  
+  /* Mejor feedback táctil */
+  .loading-container p {
+    padding: var(--space-sm);
+  }
+}
+
+/* Prevenir zoom en inputs en iOS */
+@media screen and (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* Previene zoom automático en iOS */
+  }
+}
+
+/* ========== UTILIDADES ========== */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ========== LOADING STATES ========== */
+[aria-busy="true"] {
+  cursor: wait;
+}
+
+[aria-busy="true"] * {
+  pointer-events: none;
+}
+
+/* ========== ESTILOS PARA COMPONENTES INTERNOS ========== */
+.optimizer-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+  margin-top: var(--space-lg);
+}
+
+@media (max-width: 768px) {
+  .optimizer-container {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+}
+
+/* ========== IMPROVED PRINT STYLES ========== */
+@media print {
+  .main-content {
+    padding: 0;
+    max-width: none;
+    box-shadow: none;
+    border-radius: 0;
+    background-color: white; /* Fondo blanco para imprimir */
+  }
+  
+  .loading-container {
+    min-height: auto;
+    padding: 2cm 0;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  
+  body {
+    background-color: white !important;
+  }
+  
+  .app {
+    background-color: white !important;
+  }
 }
