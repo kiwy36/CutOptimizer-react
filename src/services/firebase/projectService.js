@@ -7,17 +7,8 @@
  * - Optimizado para nueva estructura de subcolecciones
  */
 
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  getDocs, 
-  getDoc,
-  query,
-  orderBy,
-  serverTimestamp 
-} from 'firebase/firestore'
+import { collection, doc, getDocs, getDoc, query, orderBy } from 'firebase/firestore'
+import { addDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from './config'
 
 // =============================================================================

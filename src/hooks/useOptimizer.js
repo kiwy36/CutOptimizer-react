@@ -130,7 +130,6 @@ const useOptimizer = () => {
   // =============================================================================
   // 🎯 SHELF ALGORITHM - REPARADO Y MEJORADO
   // =============================================================================
-
   const shelfAlgorithm = useCallback((pieces, sheetWidth, sheetHeight) => {
     console.log(`🔧 Ejecutando Shelf Algorithm para ${pieces.length} piezas...`)
     

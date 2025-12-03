@@ -17,7 +17,8 @@
     "react-router-dom": "^7.9.4",
     "react-virtualized-auto-sizer": "^1.0.26",
     "react-window": "^2.2.3",
-    "react-window-infinite-loader": "^2.0.0"
+    "react-window-infinite-loader": "^2.0.0",
+    "sweetalert2": "^11.26.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
