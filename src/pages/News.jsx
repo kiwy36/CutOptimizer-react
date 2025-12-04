@@ -109,13 +109,6 @@ const Noticias = () => {
           <p>Vuelve pronto para ver las últimas actualizaciones</p>
         </div>
       )}
-
-      {/* Footer de noticias */}
-      <div className="news-footer">
-        <p>
-          ¿Tienes sugerencias? <a href="/contact">Contáctanos</a>
-        </p>
-      </div>
     </div>
   )
 }

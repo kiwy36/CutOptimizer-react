@@ -1,159 +1,576 @@
-/* 🎨 NEWS - Estilos principales */
-.news-component {
-  max-width: 1000px;
-  margin: 3rem auto;
-  padding: 2rem;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-  font-family: 'Inter', system-ui, sans-serif;
+/* ======================================================
+   📰 NEWS - Estilos optimizados para responsividad completa
+   ------------------------------------------------------
+   Breakpoints específicos para:
+   - Desktop (> 1024px)
+   - Tablet (768px - 1024px)
+   - Tablet pequeña (576px - 767px)
+   - Móvil grande (425px - 575px)
+   - Móvil pequeño (< 425px)
+   ====================================================== */
+
+/* ========== VARIABLES CSS ========== */
+:root {
+  --news-primary: #2c3e50;
+  --news-secondary: #3498db;
+  --news-accent: #2ecc71;
+  --news-light: #f8f9fa;
+  --news-dark: #2c3e50;
+  --news-gray: #6c757d;
+  --news-border: #e9ecef;
+  
+  --news-radius-sm: 8px;
+  --news-radius-md: 12px;
+  --news-radius-lg: 16px;
+  
+  --news-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --news-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --news-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  
+  --news-spacing-xs: 0.5rem;
+  --news-spacing-sm: 1rem;
+  --news-spacing-md: 1.5rem;
+  --news-spacing-lg: 2rem;
+  --news-spacing-xl: 3rem;
 }
 
-/* 🧭 Encabezado */
+/* ========== COMPONENTE PRINCIPAL ========== */
+.news-component {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: var(--news-spacing-lg);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: var(--news-radius-lg);
+  box-shadow: var(--news-shadow-md);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+.news-component::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--news-accent), var(--news-secondary));
+  z-index: 1;
+}
+
+/* ========== ENCABEZADO ========== */
 .news-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--news-spacing-xl);
+  padding-bottom: var(--news-spacing-md);
+  border-bottom: 1px solid var(--news-border);
+  position: relative;
 }
 
 .news-header h2 {
-  font-size: 1.8rem;
-  color: #222;
-  margin-bottom: 0.5rem;
+  font-size: clamp(1.8rem, 4vw, 2.2rem);
+  color: var(--news-dark);
+  margin-bottom: var(--news-spacing-xs);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--news-dark), var(--news-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .news-header p {
-  color: #666;
-  font-size: 1rem;
+  color: var(--news-gray);
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
-/* 📰 Lista de noticias */
+/* ========== LISTA DE NOTICIAS ========== */
 .news-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--news-spacing-md);
+  margin-bottom: var(--news-spacing-lg);
+}
+
+/* ========== TARJETA DE NOTICIA ========== */
+.news-item {
+  background: white;
+  border-radius: var(--news-radius-md);
+  padding: var(--news-spacing-md);
+  box-shadow: var(--news-shadow-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
-/* 📦 Tarjeta de noticia */
-.news-item {
-  display: flex;
-  align-items: flex-start;
-  background: #fafafa;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.news-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(135deg, transparent, rgba(52, 152, 219, 0.03), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .news-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+  box-shadow: var(--news-shadow-lg);
+  border-color: var(--news-border);
 }
 
-/* 🎯 Icono */
+.news-item:hover::before {
+  opacity: 1;
+}
+
+/* ========== ICONO ========== */
 .news-icon {
-  font-size: 2rem;
-  margin-right: 1rem;
-  flex-shrink: 0;
+  font-size: 2.5rem;
+  margin-bottom: var(--news-spacing-sm);
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--news-light), white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
 }
 
-/* 📝 Contenido */
+.news-item:hover .news-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* ========== CONTENIDO ========== */
 .news-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .news-title {
-  font-size: 1.2rem;
-  color: #333;
-  margin-bottom: 0.3rem;
+  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+  color: var(--news-dark);
+  margin-bottom: var(--news-spacing-xs);
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .news-meta {
-  font-size: 0.85rem;
-  color: #777;
-  margin-bottom: 0.6rem;
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+  gap: var(--news-spacing-sm);
+  margin-bottom: var(--news-spacing-md);
+  flex-wrap: wrap;
 }
 
-.news-text {
-  font-size: 1rem;
-  color: #555;
-  line-height: 1.5;
-}
-
-/* 🟢 Tipos de noticias */
-.news-announcement {
-  border-left: 4px solid #4caf50;
-}
-
-.news-improvement {
-  border-left: 4px solid #2196f3;
-}
-
-.news-upcoming {
-  border-left: 4px solid #ff9800;
-}
-
-.news-default {
-  border-left: 4px solid #9e9e9e;
-}
-
-/* 📭 Vacío */
-.news-empty {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: #666;
-}
-
-.news-empty .empty-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-/* 🔗 Footer del componente */
-.news-footer {
-  margin-top: 2rem;
-  text-align: center;
-  font-size: 0.95rem;
-  color: #666;
-}
-
-.news-footer a {
-  color: #2196f3;
-  text-decoration: none;
+.news-date {
+  font-size: 0.85rem;
+  color: var(--news-gray);
+  background: var(--news-light);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
   font-weight: 500;
 }
 
-.news-footer a:hover {
-  text-decoration: underline;
+.news-type {
+  font-size: 0.75rem;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-/* 📱 Responsividad */
-@media (max-width: 768px) {
+.news-text {
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  color: var(--news-gray);
+  line-height: 1.6;
+  flex: 1;
+  margin-top: auto;
+}
+
+/* ========== TIPOS DE NOTICIAS ========== */
+.news-announcement {
+  border-top: 4px solid var(--news-accent);
+}
+
+.news-announcement .news-type {
+  background: linear-gradient(135deg, var(--news-accent), #27ae60);
+}
+
+.news-improvement {
+  border-top: 4px solid var(--news-secondary);
+}
+
+.news-improvement .news-type {
+  background: linear-gradient(135deg, var(--news-secondary), #2980b9);
+}
+
+.news-upcoming {
+  border-top: 4px solid #ff9800;
+}
+
+.news-upcoming .news-type {
+  background: linear-gradient(135deg, #ff9800, #f39c12);
+}
+
+.news-default {
+  border-top: 4px solid #9e9e9e;
+}
+
+.news-default .news-type {
+  background: linear-gradient(135deg, #9e9e9e, #7f8c8d);
+}
+
+/* ========== ESTADO VACÍO ========== */
+.news-empty {
+  text-align: center;
+  padding: var(--news-spacing-xl) var(--news-spacing-md);
+  color: var(--news-gray);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: var(--news-spacing-md);
+  opacity: 0.5;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.news-empty h3 {
+  font-size: 1.5rem;
+  color: var(--news-dark);
+  margin-bottom: var(--news-spacing-xs);
+}
+
+.news-empty p {
+  font-size: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* ========== FOOTER DEL COMPONENTE ========== */
+.news-footer {
+  margin-top: var(--news-spacing-xl);
+  padding-top: var(--news-spacing-md);
+  border-top: 1px solid var(--news-border);
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--news-gray);
+}
+
+.news-footer a {
+  color: var(--news-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  position: relative;
+  padding: 0.25rem 0;
+}
+
+.news-footer a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--news-accent);
+  transition: width 0.3s ease;
+}
+
+.news-footer a:hover::after {
+  width: 100%;
+}
+
+/* ========== BREAKPOINTS ESPECÍFICOS ========== */
+
+/* TABLET GRANDE (768px - 1024px) */
+@media (max-width: 1024px) {
   .news-component {
-    padding: 1.5rem;
+    padding: var(--news-spacing-md);
+    margin: 1.5rem auto;
+    border-radius: var(--news-radius-md);
   }
-
+  
+  .news-list {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--news-spacing-sm);
+  }
+  
   .news-item {
-    flex-direction: column;
-    align-items: flex-start;
+    padding: var(--news-spacing-sm);
   }
-
+  
   .news-icon {
-    margin-bottom: 0.5rem;
+    width: 50px;
+    height: 50px;
+    font-size: 2rem;
   }
 }
 
-@media (max-width: 480px) {
+/* TABLET PEQUEÑA (576px - 767px) */
+@media (max-width: 767px) {
+  .news-component {
+    padding: var(--news-spacing-sm);
+    margin: 1rem;
+    border-radius: var(--news-radius-sm);
+  }
+  
+  .news-header {
+    margin-bottom: var(--news-spacing-lg);
+    padding-bottom: var(--news-spacing-sm);
+  }
+  
   .news-header h2 {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
   }
-
-  .news-title {
-    font-size: 1.1rem;
-  }
-
-  .news-text {
+  
+  .news-header p {
     font-size: 0.95rem;
   }
+  
+  .news-list {
+    grid-template-columns: 1fr;
+    gap: var(--news-spacing-md);
+  }
+  
+  .news-item {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--news-spacing-sm);
+  }
+  
+  .news-icon {
+    margin-bottom: 0;
+    width: 45px;
+    height: 45px;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+  }
+  
+  .news-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 }
+
+/* MÓVIL GRANDE (425px - 575px) */
+@media (max-width: 575px) {
+  .news-component {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .news-header h2 {
+    font-size: 1.4rem;
+  }
+  
+  .news-header p {
+    font-size: 0.9rem;
+  }
+  
+  .news-item {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .news-icon {
+    margin-bottom: var(--news-spacing-sm);
+  }
+  
+  .news-meta {
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .news-title {
+    font-size: 1.1rem;
+    text-align: center;
+  }
+  
+  .news-text {
+    text-align: center;
+  }
+  
+  .news-date,
+  .news-type {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.6rem;
+  }
+}
+
+/* MÓVIL PEQUEÑO (< 425px) */
+@media (max-width: 424px) {
+  .news-component {
+    padding: 0.75rem;
+    margin: 0.25rem;
+    border-radius: 8px;
+  }
+  
+  .news-header {
+    margin-bottom: 1.25rem;
+  }
+  
+  .news-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .news-header p {
+    font-size: 0.85rem;
+  }
+  
+  .news-list {
+    gap: 1rem;
+  }
+  
+  .news-item {
+    padding: 0.75rem;
+  }
+  
+  .news-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+  }
+  
+  .news-title {
+    font-size: 1rem;
+  }
+  
+  .news-text {
+    font-size: 0.85rem;
+  }
+  
+  .news-date,
+  .news-type {
+    font-size: 0.75rem;
+  }
+  
+  .empty-icon {
+    font-size: 3rem;
+  }
+  
+  .news-empty h3 {
+    font-size: 1.2rem;
+  }
+  
+  .news-empty p {
+    font-size: 0.9rem;
+  }
+}
+
+/* ========== EFECTOS ESPECIALES ========== */
+@media (prefers-reduced-motion: reduce) {
+  .news-item,
+  .news-icon,
+  .news-footer a::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ========== DARK MODE SUPPORT ========== */
+/* ========== DARK MODE SUPPORT ========== */
+@media (prefers-color-scheme: dark) {
+  .news-component {
+    background: linear-gradient(135deg, #2d3436 0%, #1e272e 100%);
+    color: #f8f9fa;
+  }
+  
+  .news-header h2 {
+    background: linear-gradient(135deg, #f8f9fa, #3498db);
+    /* Compatibilidad completa con todos los navegadores */
+    -webkit-background-clip: text;
+    background-clip: text; /* <- ESTA ES LA LÍNEA QUE FALTABA */
+    -webkit-text-fill-color: transparent;
+    color: transparent; /* Fallback para navegadores sin soporte */
+  }
+  
+  .news-header p {
+    color: #bdc3c7;
+  }
+  
+  .news-item {
+    background: #34495e;
+    border-color: #2c3e50;
+  }
+  
+  .news-title {
+    color: #ecf0f1;
+  }
+  
+  .news-text {
+    color: #bdc3c7;
+  }
+  
+  .news-date {
+    background: #2c3e50;
+    color: #95a5a6;
+  }
+  
+  .news-footer {
+    color: #95a5a6;
+    border-color: #2c3e50;
+  }
+  
+  /* Añadir estos estilos adicionales para mejor compatibilidad */
+  .news-empty {
+    color: #bdc3c7;
+  }
+  
+  .news-empty h3 {
+    color: #ecf0f1;
+  }
+  
+  .news-type {
+    color: white; /* Mantener texto blanco sobre fondo degradado */
+  }
+  
+  .news-icon {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* ========== ANIMACIONES DE ENTRADA ========== */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.news-item {
+  animation: slideUp 0.4s ease-out;
+  animation-fill-mode: both;
+}
+
+.news-item:nth-child(1) { animation-delay: 0.1s; }
+.news-item:nth-child(2) { animation-delay: 0.2s; }
+.news-item:nth-child(3) { animation-delay: 0.3s; }
+.news-item:nth-child(4) { animation-delay: 0.4s; }
+.news-item:nth-child(5) { animation-delay: 0.5s; }
