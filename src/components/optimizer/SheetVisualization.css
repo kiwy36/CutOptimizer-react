@@ -1,4 +1,4 @@
-/* SHEET VISUALIZATION - MEJORADO para ambos modos */
+/* SHEET VISUALIZATION - Versión sin animaciones ni hover */
 .sheet-visualization {
   display: flex;
   justify-content: center;
@@ -13,7 +13,7 @@
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  transition: all 0.3s ease;
+  /* Removida: transition: all 0.3s ease; */
 }
 
 /* Modo configuración - Plancha vacía */
@@ -21,13 +21,10 @@
   border: 2px dashed #cbd5e1;
   background: linear-gradient(45deg, #f8fafc 25%, #f1f5f9 25%, #f1f5f9 50%, #f8fafc 50%, #f8fafc 75%, #f1f5f9 75%);
   background-size: 20px 20px;
-  animation: slide 2s linear infinite;
+  /* Removida: animation: slide 2s linear infinite; */
 }
 
-@keyframes slide {
-  0% { background-position: 0 0; }
-  100% { background-position: 20px 20px; }
-}
+/* Removido: @keyframes slide */
 
 .configuring-state {
   position: absolute;
@@ -78,17 +75,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  /* Removida: transition: all 0.3s ease; */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   overflow: hidden;
 }
 
-.piece:hover {
-  transform: scale(1.02);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  z-index: 10;
-}
+/* Removido: .piece:hover */
 
 .piece-label {
   font-weight: 600;
@@ -150,21 +143,8 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Estados de animación para nuevas piezas */
-@keyframes pieceAppear {
-  0% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.piece {
-  animation: pieceAppear 0.3s ease-out;
-}
+/* Removido: @keyframes pieceAppear */
+/* Removida: animation: pieceAppear 0.3s ease-out; */
 
 /* Efectos para diferentes estados de eficiencia */
 .sheet-container.high-efficiency {
@@ -182,11 +162,7 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
-/* Efectos hover para mejor UX */
-.sheet-container:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
+/* Removido: .sheet-container:hover */
 
 /* Responsive */
 @media (max-width: 768px) {

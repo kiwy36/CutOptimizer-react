@@ -258,19 +258,6 @@ const AuthForm = ({ type, onSubmit, loading, error }) => {
       >
         {loading ? currentConfig.submitLoadingText : currentConfig.submitText}
       </button>
-
-      {/* Información adicional */}
-      <div className="form-info">
-        {type === 'login' ? (
-          <p>
-            ¿No tienes cuenta? <a href="#register" className="form-link">Regístrate aquí</a>
-          </p>
-        ) : (
-          <p>
-            ¿Ya tienes cuenta? <a href="#login" className="form-link">Inicia sesión aquí</a>
-          </p>
-        )}
-      </div>
     </form>
   )
 }

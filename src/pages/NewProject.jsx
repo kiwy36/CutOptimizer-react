@@ -170,18 +170,6 @@ const NewProject = () => {
           <h1>Nuevo Proyecto</h1>
           <p>Crea y optimiza un nuevo proyecto de cortes</p>
         </div>
-        
-        {/* ✏️ Nombre del proyecto */}
-        <div className="project-name-section">
-          <input
-            type="text"
-            placeholder="Nombre del proyecto..."
-            value={projectName}
-            onChange={(e) => setProjectName(e.target.value)}
-            className="project-name-input"
-            disabled={isSaving}
-          />
-        </div>
       </div>
 
       {/* ⚠️ Mensajes de error */}

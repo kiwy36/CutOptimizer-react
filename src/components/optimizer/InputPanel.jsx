@@ -73,9 +73,24 @@ const InputPanel = ({
 
   return (
     <div className="input-panel">
+      {/* ✅ NUEVA SECCIÓN: Nombre del Proyecto */}
+      <div className="project-name-section">
+        <h3>📝 Nombre del Proyecto</h3>
+        <input
+          type="text"
+          placeholder="Ingresa un nombre para tu proyecto..."
+          value={projectName}
+          onChange={(e) => onProjectNameChange(e.target.value)}
+          className="project-name-input"
+          disabled={isSaving}
+        />
+        {!projectName.trim() && (
+          <small className="name-required">* Requerido para guardar</small>
+        )}
+      </div>
       {/* Configuración de la Placa */}
       <div className="sheet-config-section">
-        <h3>📐 Configuración de la Placa</h3>
+        <h3> Configuración de la Placa</h3>
         <div className="sheet-config">
           <div className="config-group">
             <label>Ancho (mm)</label>
@@ -127,7 +142,7 @@ const InputPanel = ({
 
       {/* Configuración del Algoritmo */}
       <div className="algorithm-config-section">
-        <h3>⚙️ Configuración del Algoritmo</h3>
+        <h3> Configuración del Algoritmo</h3>
         <div className="algorithm-config">
           <div className="config-group">
             <label>
@@ -169,7 +184,7 @@ const InputPanel = ({
 
       {/* Agregar Nueva Pieza */}
       <div className="add-piece-section">
-        <h3>✂️ Agregar Nueva Pieza</h3>
+        <h3> Agregar Nueva Pieza</h3>
         <div className="add-piece-form">
           <div className="form-group">
             <label>Ancho (mm)</label>
@@ -223,7 +238,7 @@ const InputPanel = ({
 
       {/* Lista de Piezas Actuales */}
       <div className="pieces-list-section">
-        <h3>📦 Piezas a Optimizar ({pieces.length})</h3>
+        <h3> Piezas a Optimizar ({pieces.length})</h3>
         {pieces.length === 0 ? (
           <div className="empty-state">
             <p>No hay piezas agregadas</p>
@@ -256,21 +271,6 @@ const InputPanel = ({
               </div>
             ))}
           </div>
-        )}
-      </div>
-      {/* ✅ NUEVA SECCIÓN: Nombre del Proyecto */}
-      <div className="project-name-section">
-        <h3>📝 Nombre del Proyecto</h3>
-        <input
-          type="text"
-          placeholder="Ingresa un nombre para tu proyecto..."
-          value={projectName}
-          onChange={(e) => onProjectNameChange(e.target.value)}
-          className="project-name-input"
-          disabled={isSaving}
-        />
-        {!projectName.trim() && (
-          <small className="name-required">* Requerido para guardar</small>
         )}
       </div>
       {/* BOTONES DE ACCIÓN PRINCIPALES */}
@@ -307,13 +307,13 @@ const InputPanel = ({
         {/* Información de estado */}
         <div className="action-status">
           {pieces.length > 0 && (
-            <p>✅ {pieces.length} piezas listas para optimizar</p>
+            <p> {pieces.length} piezas listas para optimizar</p>
           )}
           {sheetConfig.width > 0 && sheetConfig.height > 0 && (
-            <p>📐 Placa configurada: {sheetConfig.width} × {sheetConfig.height} mm</p>
+            <p> Placa configurada: {sheetConfig.width} × {sheetConfig.height} mm</p>
           )}
           {projectName.trim() && (
-            <p>📝 Proyecto: {projectName}</p>
+            <p> Proyecto: {projectName}</p>
           )}
         </div>
       </div>

@@ -1,9 +1,15 @@
 /**
- * 🧭 NAVBAR - Barra de navegación principal
+ * 🧭 NAVBAR - Barra de navegación simplificada con íconos responsivos
  * 📍 SIEMPRE VISIBLE en todas las páginas
+ * 🎯 CARACTERÍSTICAS:
+ * - Muestra íconos en pantallas pequeñas
+ * - Texto completo en pantallas grandes
+ * - Botón de logout con apariencia de enlace
+ * - Sin información redundante del usuario
+ * - Totalmente responsivo sin menú hamburguesa
  */
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import useAuth from '../../hooks/useAuth'
 import './Navbar.css'
@@ -11,6 +17,19 @@ import './Navbar.css'
 const Navbar = () => {
   const { user, logout } = useAuth()
   const location = useLocation()
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detectar tamaño de pantalla
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const handleLogout = async () => {
     try {
@@ -27,48 +46,63 @@ const Navbar = () => {
         <div className="navbar-brand">
           <Link to="/" className="brand-link">
             <span className="brand-icon">🔧</span>
-            <span className="brand-text">Cut Optimizer</span>
+            {(!isMobile || location.pathname === '/') && (
+              <span className="brand-text">Cut Optimizer</span>
+            )}
           </Link>
         </div>
 
         {/* Navigation Links */}
         <div className="navbar-menu">
           {user ? (
-            // Usuario autenticado
+            // Usuario autenticado - Navegación completa
             <>
               <Link 
                 to="/projects" 
                 className={`nav-link ${location.pathname === '/projects' ? 'active' : ''}`}
+                title="Mis Proyectos"
               >
-                📁 Mis Proyectos
+                <span className="nav-icon">📁</span>
+                {!isMobile && <span className="nav-text">Mis Proyectos</span>}
               </Link>
+              
               <Link 
                 to="/projects/new" 
                 className={`nav-link ${location.pathname === '/projects/new' ? 'active' : ''}`}
+                title="Nuevo Proyecto"
               >
-                ➕ Nuevo Proyecto
+                <span className="nav-icon">➕</span>
+                {!isMobile && <span className="nav-text">Nuevo Proyecto</span>}
               </Link>
-              <div className="user-section">
-                <span className="user-greeting">Hola, {user.email}</span>
-                <button 
-                  onClick={handleLogout}
-                  className="logout-btn"
-                  title="Cerrar sesión"
-                >
-                  🚪 Salir
-                </button>
-              </div>
+              
+              {/* Botón de logout con apariencia de enlace */}
+              <button 
+                onClick={handleLogout}
+                className="nav-link logout-link"
+                title="Cerrar sesión"
+              >
+                <span className="nav-icon">🚪</span>
+                {!isMobile && <span className="nav-text">Salir</span>}
+              </button>
             </>
           ) : (
-            // Usuario no autenticado
+            // Usuario no autenticado - Solo inicio
             <div className="auth-links">
               <Link 
                 to="/" 
                 className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+                title="Inicio"
               >
-                🏠 Inicio
+                <span className="nav-icon">🔧</span>
+                {!isMobile && <span className="nav-text">Inicio</span>}
               </Link>
-              <span className="login-hint">Inicia sesión para comenzar</span>
+              
+              {!isMobile && (
+                <div className="login-hint-container">
+                  <span className="login-hint">Inicia sesión para comenzar</span>
+                  <span className="hint-arrow">→</span>
+                </div>
+              )}
             </div>
           )}
         </div>

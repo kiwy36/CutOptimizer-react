@@ -51,6 +51,7 @@ const ProjectDetail = () => {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  // eslint-disable-next-line no-unused-vars
   const [hasChanges, setHasChanges] = useState(false)
 
   // ===========================================================================
@@ -483,12 +484,7 @@ const ProjectDetail = () => {
   /**
    * 🏠 VOLVER A LA LISTA
    */
-  const handleBackToList = () => {
-    if (hasChanges && !window.confirm('Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?')) {
-      return
-    }
-    navigate('/projects')
-  }
+
 
   // ===========================================================================
   // 🎨 RENDERIZADO (SIN CAMBIOS - MANTIENE FUNCIONALIDAD EXISTENTE)
@@ -526,59 +522,6 @@ const ProjectDetail = () => {
   return (
     <div className="project-detail-page">
       {/* Header */}
-      <div className="project-header">
-        <div className="header-content">
-          <button 
-            onClick={handleBackToList}
-            className="back-button"
-            title="Volver a proyectos"
-          >
-            ←
-          </button>
-          <div className="header-text">
-            <h1>Editando: {projectName}</h1>
-            <p>ID: {id}</p>
-          </div>
-        </div>
-        
-        {/* Controles principales */}
-        <div className="project-controls">
-          <input
-            type="text"
-            placeholder="Nombre del proyecto..."
-            value={projectName}
-            onChange={(e) => {
-              setProjectName(e.target.value)
-              setHasChanges(true)
-            }}
-            className="project-name-input"
-            disabled={isSaving}
-          />
-          
-          <div className="control-buttons">
-            <button
-              onClick={handleReoptimize}
-              disabled={isOptimizing || pieces.length === 0}
-              className="optimize-btn"
-            >
-              {isOptimizing ? '🔄 Re-optimizando...' : '🔄 Re-optimizar'}
-            </button>
-            
-            <button
-              onClick={handleSaveChanges}
-              disabled={isSaving || !hasChanges}
-              className="save-btn"
-            >
-              {isSaving ? '💾 Guardando...' : '💾 Guardar Cambios'}
-            </button>
-
-            {hasChanges && (
-              <span className="changes-indicator">* Cambios sin guardar</span>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Mensajes de estado */}
       {error && (
         <ErrorMessage 

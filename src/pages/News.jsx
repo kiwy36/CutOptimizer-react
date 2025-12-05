@@ -23,7 +23,7 @@ const Noticias = () => {
       id: 1,
       title: '🎉 Cut Optimizer ya está en línea',
       date: '2024-01-15',
-      content: 'La primera vrsión de Cut Optimizer está disponible. Comienza a optimizar tus proyectos de corte hoy mismo.',
+      content: 'La primera versión de Cut Optimizer está disponible. Comienza a optimizar tus proyectos de corte hoy mismo.',
       type: 'announcement'
     },
     {
@@ -74,7 +74,7 @@ const Noticias = () => {
     <div className="news-component">
       {/* Header de noticias */}
       <div className="news-header">
-        <h2>Últimas Noticias</h2>
+        <h2>Novedades</h2>
         <p>Mantente informado sobre las actualizaciones de Cut Optimizer</p>
       </div>
 

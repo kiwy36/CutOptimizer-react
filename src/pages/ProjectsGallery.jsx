@@ -304,34 +304,30 @@ const ProjectsGallery = () => {
     <div className="projects-page">
       {/* Header */}
       <div className="page-header">
-        <div className="header-content">
+        <div className="header-content-galery">
           <h1>Mis Proyectos</h1>
           <p>Gestiona y revisa todos tus proyectos de optimización guardados</p>
         </div>
-        
-        <Link to="/projects/new" className="new-project-btn">
-          ➕ Nuevo Proyecto
-        </Link>
       </div>
 
       {/* Estadísticas */}
       <div className="projects-stats">
         <Card className="stat-card">
           <div className="stat-item">
-            <span className="stat-number">{projectStats.totalProjects}</span>
-            <span className="stat-label">Proyectos Totales</span>
+            <span className="stat-number-galery">{projectStats.totalProjects}</span>
+            <span className="stat-label-galery">Proyectos Totales</span>
           </div>
         </Card>
         <Card className="stat-card">
           <div className="stat-item">
-            <span className="stat-number">{projectStats.totalSheets}</span>
-            <span className="stat-label">Placas Optimizadas</span>
+            <span className="stat-number-galery">{projectStats.totalSheets}</span>
+            <span className="stat-label-galery">Placas Optimizadas</span>
           </div>
         </Card>
         <Card className="stat-card">
           <div className="stat-item">
-            <span className="stat-number">{projectStats.totalPieces}</span>
-            <span className="stat-label">Piezas Totales</span>
+            <span className="stat-number-galery">{projectStats.totalPieces}</span>
+            <span className="stat-label-galery">Piezas Totales</span>
           </div>
         </Card>
       </div>

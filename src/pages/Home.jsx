@@ -1,6 +1,11 @@
 /**
- * 🏠 HOME - Página de inicio SIMPLIFICADA
+ * 🏠 HOME - Página de inicio optimizada
  * 📍 NUEVA ESTRUCTURA: Logo + Auth Forms + News
+ * 🎯 CARACTERÍSTICAS:
+ * - Logo prominente con saludo personalizado
+ * - Forms de auth solo para usuarios no autenticados
+ * - Sección de noticias siempre visible
+ * - Mensaje de bienvenida personalizado
  */
 
 import React from 'react'
@@ -15,16 +20,43 @@ const Home = () => {
 
   return (
     <div className="home">
-      {/* ✅ NUEVA SECCIÓN: Logo prominente */}
+      {/* ✅ SECCIÓN LOGO CON SALUDO PERSONALIZADO */}
       <div className="logo-section">
         <h1>Cut Optimizer</h1>
         <div className="logo-placeholder">
-          <span>🔧</span>
-          <p>Herramienta inteligente de optimización de cortes</p>
+          <span className="logo-icon">🔧</span>
+          <div className="logo-content">
+            <p className="logo-description">
+              Herramienta inteligente de optimización de cortes
+            </p>
+            
+            {/* ✅ SALUDO PERSONALIZADO PARA USUARIOS AUTENTICADOS */}
+            {user && (
+              <div className="user-welcome">
+                <span className="welcome-icon">👋</span>
+                <span className="user-greeting">
+                  ¡Hola, {user.email.split('@')[0]}!
+                </span>
+                <span className="welcome-text">
+                  Listo para optimizar tus proyectos
+                </span>
+              </div>
+            )}
+            
+            {/* ✅ MENSAJE PARA USUARIOS NO AUTENTICADOS */}
+            {!user && (
+              <div className="guest-message">
+                <span className="guest-icon">🚀</span>
+                <span className="guest-text">
+                  Inicia sesión para comenzar a optimizar
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
       
-      {/* ✅ SECCIÓN AUTH: Forms lado a lado */}
+      {/* ✅ SECCIÓN AUTH: Forms lado a lado SOLO para no autenticados */}
       {!user && (
         <div className="auth-section">
           <div className="auth-forms-container">
@@ -41,25 +73,10 @@ const Home = () => {
         </div>
       )}
       
-      {/* ✅ SECCIÓN NEWS: Mantener funcionalidad existente */}
+      {/* ✅ SECCIÓN NEWS: Siempre visible */}
       <div className="news-section">
         <Noticias />
       </div>
-
-      {/* 🧪 TEMPORAL: Mantener botones de prueba por ahora */}
-      {!user && (
-        <div className="test-section">
-          <h3>Pruebas de Desarrollo</h3>
-          <div className="test-buttons">
-            <button onClick={() => {/* mantener funcionalidad */}}>
-              Crear Usuario Prueba
-            </button>
-            <button onClick={() => {/* mantener funcionalidad */}}>
-              Login Demo
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

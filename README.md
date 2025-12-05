@@ -1,57 +1,20 @@
-src/
-├── components/                 # Componentes reutilizables
-│   ├── auth/                  # Componentes de autenticación
-│   │   ├── Login.jsx          # Formulario de login
-│   │   ├── Register.jsx       # Formulario de registro
-│   │   └── AuthForm.jsx       # Componente base para auth
-│   ├── layout/                # Componentes de layout ACTUALIZADO
-│   │   ├── Header.jsx         # ✅ CREADO (cabecera con navegación integrada)
-│   │   ├── Header.css         # 🔄 FALTANTE
-│   │   ├── Footer.jsx         # 🔄 FALTANTE  
-│   │   ├── Footer.css         # 🔄 FALTANTE
-│   │   ├── MainLayout.jsx     # ✅ CREADO (layout para usuarios autenticados)
-│   │   ├── MainLayout.css     # ✅ CREADO
-│   │   ├── AuthLayout.jsx     # ✅ CREADO (layout para login/register)
-│   │   └── AuthLayout.css     # ✅ CREADO
-│   ├── projects/              # Componentes de proyectos
-│   │   ├── ProjectCard.jsx    # Tarjeta de proyecto en grid
-│   │   ├── ProjectForm.jsx    # Formulario de proyecto
-│   │   └── ProjectList.jsx    # Lista/grid de proyectos
-│   ├── optimizer/             # Componentes del optimizador (de la versión anterior)
-│   │   ├── InputPanel.jsx     # Panel de entrada de datos
-│   │   ├── ResultsPanel.jsx   # Panel de resultados
-│   │   └── PieceManager.jsx   # Gestor de piezas
-│   └── ui/                    # Componentes UI básicos
-│       ├── Button.jsx
-│       ├── Card.jsx
-│       └── Modal.jsx
-├── pages/                     # Páginas principales
-│   ├── Home.jsx              # Página de inicio (con auth)
-│   ├── Projects.jsx          # Lista de proyectos del usuario
-│   ├── ProjectDetail.jsx     # Edición de proyecto específico
-│   ├── NewProject.jsx        # Crear nuevo proyecto
-│   └── News.jsx              # Noticias de la app
-├── hooks/                     # Custom hooks
-│   ├── useAuth.js            # Manejo de autenticación
-│   ├── useProjects.js        # CRUD de proyectos
-│   └── useOptimizer.js       # Lógica del optimizador
-├── services/                  # Servicios y conexiones
-│   ├── firebase/             # Configuración Firebase
-│   │   ├── config.js         # Tu configuración
-│   │   ├── auth.js           # Servicios de auth
-│   │   └── firestore.js      # Servicios de base de datos
-│   └── optimizer/            # Servicios del optimizador
-│       ├── algorithms.js     # Algoritmos de optimización
-│       └── calculations.js   # Cálculos y utilidades
-├── context/                  # Contexts de React
-│   ├── AuthContext.jsx       # Context de autenticación
-│   └── ProjectContext.jsx    # Context de proyectos
-├── utils/                    # Utilidades
-│   ├── constants.js          # Constantes de la app
-│   └── helpers.js            # Funciones helper
-├── styles/                   # Estilos (puedes migrar los CSS existentes)
-│   ├── globals.css
-│   ├── components/
-│   └── pages/
-├── App.jsx                   # Componente principal
-└── main.jsx                  # Punto de entrada
+# Cut Optimizer - Optimizador de Cortes Inteligente
+
+## 🚀 Características
+- ✅ Autenticación de usuarios con Firebase Auth
+- ✅ CRUD completo de proyectos en Firestore
+- ✅ Algoritmos de optimización (Shelf y Guillotine)
+- ✅ Visualización interactiva de cortes
+- ✅ Responsive design (mobile, tablet, desktop)
+
+## 🛠️ Instalación
+1. Clonar repositorio
+2. `npm install`
+3. Configurar variables de entorno
+4. `npm start`
+
+## 🔧 Configuración Firebase
+1. Crear proyecto en Firebase Console
+2. Habilitar Authentication y Firestore
+3. Configurar reglas de seguridad
+4. Copiar credenciales a .env
