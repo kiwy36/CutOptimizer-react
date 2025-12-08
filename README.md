@@ -18,3 +18,6 @@
 2. Habilitar Authentication y Firestore
 3. Configurar reglas de seguridad
 4. Copiar credenciales a .env
+
+
+comenzando periodo de testeo
